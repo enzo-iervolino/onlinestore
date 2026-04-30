@@ -1,0 +1,302 @@
+/* =========================================================
+   SHOP PAGE
+   ========================================================= */
+
+.shop-page .shop-main {
+  background: linear-gradient(180deg, #0b0b10 0%, #111117 100%);
+}
+
+/* HERO SHOP */
+.shop-hero {
+  min-height: 110px;
+  display: flex;
+  align-items: center;
+  padding: 1rem 0 0.7rem;
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0.58)),
+    var(--hero-image, url('../assets/img/hero-home.jpg')) center 28% / cover no-repeat;
+}
+
+.shop-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.04)),
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.08), transparent 42%);
+}
+
+.shop-hero-inner {
+  position: relative;
+  z-index: 2;
+}
+
+.shop-hero-content {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
+  transform: translateY(-8px);
+}
+
+.shop-hero .hero-badge {
+  margin-bottom: 0.rem;
+}
+
+.shop-hero .hero-title {
+  margin-top: 0;
+  margin-bottom: 0.25rem;
+  font-size: clamp(2rem, 4vw, 3.6rem);
+  line-height: 1.05;
+  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+.shop-hero .hero-sub {
+  max-width: 640px;
+  margin: 0 auto;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+}
+
+/* CATEGORY BAR */
+.shop-category-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  background: linear-gradient(180deg, #121219 0%, #111117 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.shop-categories-wrap {
+  padding: 0.55rem 0 0.45rem;
+}
+
+.shop-chip-group {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.55rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  justify-content: center;
+  padding: 0.05rem 0 0.2rem;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.shop-chip-group::-webkit-scrollbar {
+  height: 6px;
+}
+
+.shop-chip-group::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+}
+
+.shop-chip-group .chip-btn {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  text-decoration: none;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.92);
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+}
+
+.shop-chip-group .chip-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+.shop-chip-group .chip-btn.active {
+  background: #ffffff;
+  color: #111111;
+  border-color: #ffffff;
+  font-weight: 700;
+}
+
+/* SELECTED CATEGORY */
+.shop-selected-category {
+  margin-bottom: 1rem !important;
+}
+
+.shop-selected-category h5 {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.shop-selected-category span {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* PRODUCT CARD SHOP */
+.product-card {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.product-thumb {
+  display: block;
+  width: 100%;
+  background: #f8f9fa;
+  overflow: hidden;
+  height: clamp(170px, 18vw, 500px);
+}
+
+.product-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+.product-img-2 {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #f8f9fa;
+}
+
+.product-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  min-height: 2.4em;
+}
+
+.product-price {
+  white-space: nowrap;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.product-actions .btn {
+  padding: 0.4rem 0.6rem;
+  border-radius: 10px;
+}
+
+/* DESKTOP LARGO */
+@media (min-width: 1200px) {
+  .shop-hero {
+    min-height: 115px;
+    padding-top: 1rem;
+    padding-bottom: 0.6rem;
+  }
+
+  .shop-hero-content {
+    transform: translateY(-10px);
+  }
+}
+
+/* TABLET */
+@media (max-width: 991.98px) {
+  .shop-hero {
+    min-height: 100px;
+    padding: 0.9rem 0 0.65rem;
+    background-position: center 24%;
+  }
+
+  .shop-hero-content {
+    transform: translateY(-6px);
+  }
+
+  .shop-hero .hero-title {
+    font-size: clamp(1.9rem, 5vw, 2.9rem);
+  }
+
+  .shop-chip-group {
+    justify-content: flex-start;
+  }
+
+  .shop-category-bar {
+    top: 0;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 576px) {
+  .shop-hero {
+    min-height: 92px;
+    padding: 0.75rem 0 0.55rem;
+    background-position: center 22%;
+  }
+
+  .shop-hero-content {
+    transform: translateY(-4px);
+  }
+
+  .shop-hero .hero-badge {
+    font-size: 0.72rem;
+    padding: 0.38rem 0.75rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .shop-hero .hero-title {
+    font-size: 1.9rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .shop-hero .hero-sub {
+    font-size: 0.92rem;
+    line-height: 1.4;
+    padding: 0 0.35rem;
+  }
+
+  .shop-categories-wrap {
+    padding: 0.5rem 0 0.4rem;
+  }
+
+  .shop-chip-group {
+    gap: 0.5rem;
+    justify-content: flex-start;
+    padding-bottom: 0.25rem;
+  }
+
+  .shop-chip-group .chip-btn {
+    padding: 0.48rem 0.8rem;
+    font-size: 0.82rem;
+  }
+
+  .shop-selected-category {
+    margin-bottom: 0.85rem !important;
+  }
+
+  .shop-selected-category h5 {
+    font-size: 0.95rem;
+  }
+
+  .product-thumb {
+    height: 200px;
+  }
+
+  .product-title {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    min-height: 2.4em;
+  }
+
+  .card-body {
+    padding: 0.75rem !important;
+  }
+}

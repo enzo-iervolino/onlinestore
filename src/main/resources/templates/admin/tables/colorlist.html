@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <title>Colori</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body{
+            background-color: #f8f9fa;
+        }
+
+        .page-header-card,
+        .search-card,
+        .table-card,
+        .alert-card{
+            border: 0;
+            border-radius: 18px;
+            box-shadow: 0 0.35rem 1.2rem rgba(0,0,0,.06);
+        }
+
+        .swatch{
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,.15);
+            display: inline-block;
+            vertical-align: middle;
+            box-shadow: 0 1px 2px rgba(0,0,0,.06);
+        }
+
+        .swatch-multi{
+            background: repeating-linear-gradient(
+                    45deg,
+                    #ff4d4d 0 8px,
+                    #ffd24d 8px 16px,
+                    #4dff88 16px 24px,
+                    #4dd2ff 24px 32px,
+                    #b84dff 32px 40px
+            );
+        }
+
+        .code-badge{
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            letter-spacing: .3px;
+            font-size: .85rem;
+            padding: .45rem .6rem;
+            border-radius: 10px;
+        }
+
+        .table td,
+        .table th{
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .table td:nth-child(3),
+        .table th:nth-child(3){
+            white-space: normal;
+        }
+
+        .flash-alert{
+            border-radius: 16px;
+            border: 0;
+            box-shadow: 0 0.35rem 1rem rgba(0,0,0,.08);
+        }
+
+        .flash-alert-danger{
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe3e3 100%);
+            color: #842029;
+            border-left: 6px solid #dc3545;
+        }
+
+        .flash-alert-success{
+            background: linear-gradient(135deg, #f0fff4 0%, #dcfce7 100%);
+            color: #0f5132;
+            border-left: 6px solid #198754;
+        }
+
+        .flash-icon{
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+
+        .table thead th{
+            font-size: .9rem;
+            color: #495057;
+        }
+
+        .btn-action{
+            min-width: 38px;
+        }
+
+        .section-title{
+            font-weight: 700;
+            letter-spacing: -.2px;
+        }
+
+        .table-responsive{
+            border-radius: 0 0 18px 18px;
+        }
+
+        @media (max-width: 768px){
+            .top-actions{
+                width: 100%;
+            }
+
+            .top-actions .btn{
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container py-4">
+
+    <div class="card page-header-card mb-3">
+        <div class="card-body">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                <div>
+                    <h1 class="h3 mb-1 section-title">Gestione colori</h1>
+                    <div class="text-muted small">
+                        Tabella: <strong>color_options</strong>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column flex-md-row gap-2 top-actions">
+                    <a class="btn btn-primary" th:href="@{/admin/colors/new}">
+                        <i class="bi bi-plus-lg"></i>
+                        <span class="ms-1">Nuovo colore</span>
+                    </a>
+
+                    <a class="btn btn-outline-secondary" th:href="@{/admin/products}">
+                        <i class="bi bi-box-seam"></i>
+                        <span class="ms-1">Prodotti</span>
+                    </a>
+
+                    <a class="btn btn-outline-dark" th:href="@{/admin/dashboard}">
+                        <i class="bi bi-speedometer2"></i>
+                        <span class="ms-1">Dashboard</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash messages evidenziati -->
+    <div th:if="${success != null}" class="alert flash-alert flash-alert-success alert-dismissible fade show alert-card mb-3" role="alert">
+        <div class="d-flex align-items-start gap-3">
+            <div class="flash-icon">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div class="flex-grow-1">
+                <div class="fw-semibold mb-1">Operazione completata</div>
+                <div th:text="${success}">Operazione eseguita correttamente.</div>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Chiudi"></button>
+    </div>
+
+    <div th:if="${error != null}" class="alert flash-alert flash-alert-danger alert-dismissible fade show alert-card mb-3" role="alert">
+        <div class="d-flex align-items-start gap-3">
+            <div class="flash-icon">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div class="flex-grow-1">
+                <div class="fw-semibold mb-1">Eliminazione non consentita</div>
+                <div th:text="${error}">Impossibile eliminare il colore perché è associato a una o più varianti prodotto.</div>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Chiudi"></button>
+    </div>
+
+    <!-- Ricerca -->
+    <div class="card search-card mb-3">
+        <div class="card-body">
+            <form class="row g-2 align-items-center" method="get" th:action="@{/admin/colors}">
+                <div class="col-12 col-lg-5">
+                    <label class="form-label visually-hidden" for="q">Cerca colore</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input id="q"
+                               type="text"
+                               class="form-control"
+                               name="q"
+                               placeholder="Cerca per nome o codice…"
+                               th:value="${searchText}">
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-auto">
+                    <button class="btn btn-outline-primary w-100" type="submit">
+                        Cerca
+                    </button>
+                </div>
+
+                <div class="col-6 col-lg-auto">
+                    <a class="btn btn-outline-secondary w-100" th:href="@{/admin/colors}">
+                        Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card table-card">
+        <div class="card-header bg-white border-0 pt-3 pb-0">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 px-3">
+                <div class="fw-semibold">Elenco colori</div>
+                <div class="text-muted small" th:if="${colors != null}">
+                    Totale record:
+                    <strong th:text="${#lists.size(colors)}">0</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width:70px;">ID</th>
+                        <th style="width:120px;">Codice</th>
+                        <th>Nome (IT)</th>
+                        <th style="width:120px;">Colore</th>
+                        <th style="width:120px;">HEX</th>
+                        <th style="width:140px;">RGB</th>
+                        <th style="width:190px;" class="text-end">Azioni</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${colors == null or #lists.isEmpty(colors)}">
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <div class="mb-2"><i class="bi bi-inbox fs-3"></i></div>
+                            <div>Nessun colore trovato.</div>
+                        </td>
+                    </tr>
+
+                    <tr th:each="c : ${colors}">
+                        <td class="fw-semibold" th:text="${c.id}">1</td>
+
+                        <td>
+                            <span class="badge bg-dark-subtle text-dark code-badge"
+                                  th:text="${c.code}">BLK</span>
+                        </td>
+
+                        <td th:text="${c.nameIt}">NERO</td>
+
+                        <td>
+                            <span class="swatch"
+                                  th:if="${c.hex != null and !#strings.isEmpty(c.hex)}"
+                                  th:style="'background-color:' + ${c.hex} + ';'"
+                                  th:title="${c.hex}"></span>
+
+                            <span class="swatch"
+                                  th:if="${(c.hex == null or #strings.isEmpty(c.hex)) and (c.rgb != null and !#strings.isEmpty(c.rgb))}"
+                                  th:style="'background-color: rgb(' + ${c.rgb} + ');'"
+                                  th:title="'rgb(' + ${c.rgb} + ')'"></span>
+
+                            <span class="swatch swatch-multi"
+                                  th:if="${(c.hex == null or #strings.isEmpty(c.hex)) and (c.rgb == null or #strings.isEmpty(c.rgb))}"
+                                  title="Multicolore"></span>
+                        </td>
+
+                        <td>
+                            <span th:if="${c.hex != null and !#strings.isEmpty(c.hex)}"
+                                  th:text="${c.hex}">#000000</span>
+                            <span class="text-muted" th:if="${c.hex == null or #strings.isEmpty(c.hex)}">-</span>
+                        </td>
+
+                        <td>
+                            <span th:if="${c.rgb != null and !#strings.isEmpty(c.rgb)}"
+                                  th:text="${c.rgb}">0,0,0</span>
+                            <span class="text-muted" th:if="${c.rgb == null or #strings.isEmpty(c.rgb)}">-</span>
+                        </td>
+
+                        <td class="text-end">
+                            <div class="d-inline-flex gap-1">
+                                <a class="btn btn-sm btn-outline-primary btn-action"
+                                   th:href="@{/admin/colors/edit/{id}(id=${c.id})}"
+                                   title="Modifica">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+
+								<form th:action="@{/admin/colors/delete}"
+								      method="post"
+								      class="d-inline">
+								    <input type="hidden" name="id" th:value="${c.id}">
+								    <button type="submit"
+								            class="btn btn-sm btn-outline-danger btn-action"
+								            title="Elimina"
+								            th:onclick="|return confirm(&quot;Confermi l'eliminazione di questo colore? Se il colore è associato a una o più varianti prodotto, l'operazione verrà bloccata.&quot;);|">
+								        <i class="bi bi-trash"></i>
+								    </button>
+								</form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

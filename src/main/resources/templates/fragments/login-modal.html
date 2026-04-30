@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+  <body th:fragment="loginModal">
+
+    <!-- toggle (auto-open se ?login o ?error) -->
+    <input
+      type="checkbox"
+      id="login-modal-toggle"
+      class="modal-toggle"
+      th:checked="${param.login != null or param.error != null}"
+    />
+
+    <!-- backdrop -->
+    <label for="login-modal-toggle" class="modal-backdrop"></label>
+
+    <!-- modal -->
+    <div class="modal-box">
+      <div class="auth-card">
+        <div class="modal-header">
+          <h3><i class="bi bi-shield-lock"></i> Accedi</h3>
+
+          <label for="login-modal-toggle" class="modal-close" aria-label="Close">
+            <i class="bi bi-x-lg"></i>
+          </label>
+        </div>
+
+        <div class="modal-body">
+          <!-- errore login -->
+          <div class="auth-alert" th:if="${param.error}">
+            Credenziali non valide.
+          </div>
+
+          <!-- logout ok -->
+          <div class="auth-alert ok" th:if="${param.logout}">
+            Logout effettuato con successo.
+          </div>
+
+
+          <!-- login con Google -->
+          <a th:href="@{/oauth2/authorization/google}"
+             class="auth-btn"
+             style="display:flex;align-items:center;justify-content:center;gap:.5rem;text-decoration:none;background:#fff;color:#222;border:1px solid #ddd;margin-bottom:1rem;">
+            <i class="bi bi-google"></i>
+            Accedi con Google
+          </a>
+
+          <div style="display:flex;align-items:center;gap:.75rem;margin:0 0 1rem;color:#777;font-size:.85rem;">
+            <span style="height:1px;background:#ddd;flex:1;"></span>
+            <span>oppure</span>
+            <span style="height:1px;background:#ddd;flex:1;"></span>
+          </div>
+
+          <form th:action="@{/login}" method="post">
+            <input
+              type="hidden"
+              th:name="${_csrf.parameterName}"
+              th:value="${_csrf.token}"
+            />
+
+            <!-- USERNAME -->
+            <div class="auth-field">
+              <label for="login-username">Email o Username</label>
+              <input
+                id="login-username"
+                class="auth-input"
+                name="username"
+                autocomplete="username"
+                required
+              />
+            </div>
+
+			<!-- PASSWORD + TOGGLE INLINE -->
+			<div class="auth-field password-field">
+			  <label for="login-password">Password</label>
+
+			  <div class="password-wrapper">
+			    <input
+			      id="login-password"
+			      class="auth-input"
+			      type="password"
+			      name="password"
+			      autocomplete="current-password"
+			      required
+			    />
+
+			    <button
+			      type="button"
+			      class="password-toggle"
+			      aria-label="Mostra password"
+			      onclick="toggleLoginPassword()"
+			    >
+			      <i class="bi bi-eye"></i>
+			    </button>
+			  </div>
+			</div>
+
+
+            <button class="auth-btn" type="submit">Login</button>
+          </form>
+
+          <div class="auth-actions">
+			<a href="#"
+			   class="auth-link"
+			   data-bs-toggle="modal"
+			   data-bs-target="#forgotPasswordModal">
+			  Password dimenticata?
+			</a>
+            <a th:href="@{/register}" class="auth-link">Registrati</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCRIPT INLINE (semplice e sicuro) -->
+    <script>
+      function toggleLoginPassword() {
+        const input = document.getElementById("login-password");
+        const icon = document.querySelector(".password-toggle i");
+
+        if (input.type === "password") {
+          input.type = "text";
+          icon.classList.remove("bi-eye");
+          icon.classList.add("bi-eye-slash");
+        } else {
+          input.type = "password";
+          icon.classList.remove("bi-eye-slash");
+          icon.classList.add("bi-eye");
+        }
+      }
+    </script>
+
+  </body>
+</html>

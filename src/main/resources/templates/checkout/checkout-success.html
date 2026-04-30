@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+	
+<head th:replace="~{fragments/head :: head('checkout-success')}"></head>
+
+<body>
+
+    <!-- ================= NAV ================= -->
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+<div>
+    
+	<div class="row justify-content-center  py-5">
+	    <div class="col-12 col-md-7 col-lg-5">
+	      <div class="card shadow-sm">
+	        <div class="card-body text-center p-4">
+				<h2>Ordine completato con successo 🎉</h2>
+				<a th:href="@{/shop}">Torna a shopping</a>
+	        </div> 
+		  </div>
+	  </div>
+	</div>
+	
+	 
+</body>
+</html>

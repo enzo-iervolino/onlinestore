@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Nuova Variante</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f8f9fa;
+        }
+
+        .page-wrap {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .card-soft {
+            border: 0;
+            border-radius: 16px;
+            box-shadow: 0 0.5rem 1.2rem rgba(0, 0, 0, 0.08);
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #0d3b66;
+            margin-bottom: 1rem;
+        }
+
+        .thumb-preview,
+        .video-preview {
+            width: 130px;
+            height: 130px;
+            object-fit: cover;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            background: #fff;
+            display: none;
+        }
+
+        .gallery-preview-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .gallery-thumb {
+            width: 110px;
+            height: 110px;
+            object-fit: cover;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            background: #fff;
+        }
+
+        .gallery-preview-card {
+            position: relative;
+        }
+
+        .media-badge {
+            position: absolute;
+            left: 8px;
+            bottom: 8px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, .72);
+            color: #fff;
+            font-size: .72rem;
+            font-weight: 700;
+        }
+
+        .helper-text {
+            font-size: .875rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container py-4">
+    <div class="page-wrap">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="mb-1">Nuova Variante</h2>
+                <div class="text-muted small">
+                    Creazione nuova variante prodotto
+                </div>
+            </div>
+
+            <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                Indietro
+            </a>
+        </div>
+
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+        <div class="card card-soft">
+            <div class="card-body p-4">
+
+                <form th:action="@{/admin/variants/create}"
+                      method="post"
+                      enctype="multipart/form-data">
+
+                    <input type="hidden" name="productId" th:value="${productId}"/>
+
+                    <div class="section-title">Dati principali</div>
+
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Product ID</label>
+                            <input type="text"
+                                   class="form-control"
+                                   th:value="${productId}"
+                                   readonly>
+                        </div>
+
+                        <div class="col-md-5">
+                            <label for="variantCode" class="form-label">Codice variante</label>
+                            <input type="text"
+                                   id="variantCode"
+                                   name="variantCode"
+                                   class="form-control"
+                                   placeholder="Es. TSHIRT-NERO-M"
+                                   required>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label for="price" class="form-label">Prezzo</label>
+                            <input type="number"
+                                   id="price"
+                                   name="price"
+                                   class="form-control"
+                                   step="0.01"
+                                   min="0"
+                                   placeholder="0.00">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label for="stockQty" class="form-label">Stock</label>
+                            <input type="number"
+                                   id="stockQty"
+                                   name="stockQty"
+                                   class="form-control"
+                                   min="0"
+                                   value="0">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="colorId" class="form-label">Colore</label>
+                            <select id="colorId" name="colorId" class="form-select" required>
+                                <option value="">Seleziona colore</option>
+                                <option th:each="color : ${colors}"
+                                        th:value="${color.id}"
+                                        th:text="${color.code + ' - ' + color.nameIt}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="sizeId" class="form-label">Taglia</label>
+                            <select id="sizeId" name="sizeId" class="form-select" required>
+                                <option value="">Seleziona taglia</option>
+                                <option th:each="size : ${sizes}"
+                                        th:value="${size.id}"
+                                        th:text="${size.code + ' - ' + size.nameIt}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check mt-1">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="enabled"
+                                       id="enabled"
+                                       value="true"
+                                       checked>
+                                <label class="form-check-label" for="enabled">
+                                    Variante attiva
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="section-title">Media variante</div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label for="mainImageFile" class="form-label">Media principale</label>
+                            <input type="file"
+                                   id="mainImageFile"
+                                   name="mainImageFile"
+                                   class="form-control"
+                                   accept="image/*,video/mp4,video/webm,video/ogg,video/quicktime">
+
+                            <div class="helper-text mt-2">
+                                Puoi caricare un'immagine o un video. Il file verrà salvato in
+                                <strong>uploads/variants</strong>.
+                            </div>
+
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" id="generateMainWebmFromImage" name="generateMainWebmFromImage" value="true">
+                                <label class="form-check-label" for="generateMainWebmFromImage">
+                                    Genera automaticamente un video WEBM da questa foto
+                                </label>
+                                <div class="form-text">Valido solo se il file principale caricato è un’immagine. La foto resterà come poster del video.</div>
+                            </div>
+
+                            <div class="mt-3">
+                                <img id="mainImagePreview" class="thumb-preview" alt="Preview media principale">
+                                <video id="mainVideoPreview" class="video-preview" controls muted playsinline></video>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="galleryFiles" class="form-label">Galleria media</label>
+                            <input type="file"
+                                   id="galleryFiles"
+                                   name="galleryFiles"
+                                   class="form-control"
+                                   accept="image/*,video/mp4,video/webm,video/ogg,video/quicktime"
+                                   multiple>
+
+                            <div class="helper-text mt-2">
+                                Puoi selezionare più immagini o video contemporaneamente.
+                            </div>
+
+                            <div id="galleryPreview" class="gallery-preview-wrap mt-3"></div>
+
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            Salva variante
+                        </button>
+
+                        <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                            Annulla
+                        </a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const mainImageInput = document.getElementById('mainImageFile');
+    const mainImagePreview = document.getElementById('mainImagePreview');
+    const mainVideoPreview = document.getElementById('mainVideoPreview');
+    const galleryInput = document.getElementById('galleryFiles');
+    const galleryPreview = document.getElementById('galleryPreview');
+
+    function isVideoFile(file) {
+        return file && file.type && file.type.startsWith('video/');
+    }
+
+    function isImageFile(file) {
+        return file && file.type && file.type.startsWith('image/');
+    }
+
+    function clearMainPreview() {
+        mainImagePreview.src = '';
+        mainImagePreview.style.display = 'none';
+        mainVideoPreview.removeAttribute('src');
+        mainVideoPreview.load();
+        mainVideoPreview.style.display = 'none';
+    }
+
+    mainImageInput.addEventListener('change', function () {
+        const file = this.files && this.files.length ? this.files[0] : null;
+        clearMainPreview();
+
+        if (!file) {
+            return;
+        }
+
+        const url = URL.createObjectURL(file);
+
+        if (isVideoFile(file)) {
+            mainVideoPreview.src = url;
+            mainVideoPreview.style.display = 'block';
+            return;
+        }
+
+        if (isImageFile(file)) {
+            mainImagePreview.src = url;
+            mainImagePreview.style.display = 'block';
+        }
+    });
+
+    galleryInput.addEventListener('change', function () {
+        galleryPreview.innerHTML = '';
+
+        const files = Array.from(this.files || []);
+        if (!files.length) {
+            return;
+        }
+
+        files.forEach(file => {
+            if (!isImageFile(file) && !isVideoFile(file)) {
+                return;
+            }
+
+            const card = document.createElement('div');
+            card.className = 'gallery-preview-card';
+
+            const url = URL.createObjectURL(file);
+            let media;
+
+            if (isVideoFile(file)) {
+                media = document.createElement('video');
+                media.controls = true;
+                media.muted = true;
+                media.playsInline = true;
+                media.src = url;
+            } else {
+                media = document.createElement('img');
+                media.src = url;
+                media.alt = 'Preview galleria';
+            }
+
+            media.className = 'gallery-thumb';
+            card.appendChild(media);
+
+            const badge = document.createElement('span');
+            badge.className = 'media-badge';
+            badge.textContent = isVideoFile(file) ? 'VIDEO' : 'IMG';
+            card.appendChild(badge);
+
+            galleryPreview.appendChild(card);
+        });
+    });
+</script>
+
+</body>
+</html>

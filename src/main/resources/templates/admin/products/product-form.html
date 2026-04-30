@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <title th:text="${pageTitle != null} ? pageTitle : 'Prodotto'">Prodotto</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        .thumb{width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #eee;}
+        .main-img,.main-video{max-width:100%;max-height:220px;object-fit:cover;border-radius:6px;border:1px solid #eee;}
+        .preview-strip{display:flex;flex-wrap:wrap;gap:.5rem;}
+        .preview-item img{width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #eee;}
+
+        .pending{opacity:.55;}
+        .undo-btn{display:none;}
+        .pending .undo-btn{display:inline-block;}
+
+        .img-box{position:relative;display:inline-block;}
+        .status-overlay{
+            position:absolute; inset:0;
+            display:none; align-items:center; justify-content:center;
+            font-size:28px; border-radius:6px;
+            background:rgba(255,255,255,.55);
+            user-select:none; pointer-events:none;
+        }
+        .marked-delete .status-overlay{display:flex;}
+        .marked-replace .status-overlay{display:flex;}
+
+        .header-icon-btn{
+            border:1px solid rgba(0,0,0,.15);
+            background:transparent;
+            width:34px;height:34px;
+            display:inline-flex;align-items:center;justify-content:center;
+            border-radius:8px;
+        }
+        .header-icon-btn:hover{background:rgba(0,0,0,.03);}
+        .header-actions{display:flex;align-items:center;gap:.35rem;}
+
+        .main-actions{
+            display:flex;
+            justify-content:center;
+            gap:.5rem;margin-top:.5rem;}
+        .main-actions .btn{min-width:38px;}
+        .desc-area{resize:vertical;}
+
+        /* --- Varianti --- */
+        .variant-box{max-height:190px; overflow:auto; border:1px solid rgba(0,0,0,.12); border-radius:10px; padding:.6rem; background:#fff;}
+        .variant-swatch{display:inline-block; width:14px; height:14px; border-radius:999px; border:1px solid rgba(0,0,0,.15); vertical-align:middle; margin-right:.35rem;}
+    </style>
+</head>
+<body>
+
+<div class="container my-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h3 mb-0" th:text="${pageTitle != null} ? pageTitle : 'Prodotto'">Prodotto</h1>
+
+            <div class="text-muted small">
+                <span th:if="${product != null and product.id != null}">
+                    Modifica prodotto ID <strong th:text="${product.id}">1</strong>
+                </span>
+                <span th:if="${product == null or product.id == null}">
+                    Crea un nuovo prodotto
+                </span>
+            </div>
+        </div>
+
+        <a class="btn btn-secondary" th:href="@{/admin/products}">
+            &larr; Torna alla lista
+        </a>
+    </div>
+
+    <div th:if="${successMessage != null}" class="alert alert-success" th:text="${successMessage}">OK</div>
+    <div th:if="${errorMessage != null}" class="alert alert-danger" th:text="${errorMessage}">Errore</div>
+    <div th:if="${success != null}" class="alert alert-success" th:text="${success}">OK</div>
+    <div th:if="${error != null}" class="alert alert-danger" th:text="${error}">Errore</div>
+
+    <form id="productForm"
+          th:action="@{/admin/products/save}"
+          th:object="${product}"
+          method="post"
+          enctype="multipart/form-data"
+          class="needs-validation"
+          novalidate>
+
+        <input type="hidden" th:if="*{id != null}" th:field="*{id}"/>
+        <input type="hidden" th:field="*{publicId}"/>
+        <input type="hidden" th:field="*{mainMediaType}"/>
+        <input type="hidden" th:field="*{mainVideoPoster}"/>
+
+        <div class="row g-3">
+
+            <!-- SINISTRA -->
+            <div class="col-lg-8">
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Codice prodotto</label>
+                        <input type="text" class="form-control" th:field="*{codpro}" placeholder="Es. ART-001" required>
+                        <div class="invalid-feedback">Inserisci il codice prodotto.</div>
+                    </div>
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label">Nome prodotto</label>
+                        <input type="text" class="form-control" th:field="*{name}" placeholder="Inserisci il nome" required>
+                        <div class="invalid-feedback">Inserisci il nome del prodotto.</div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col md-4 mb-3">
+                        <label class="form-label">Categoria</label>
+                        <select class="form-select" name="categoryId" required>
+                            <option value="" th:selected="${product == null or product.category == null}">
+                                Seleziona categoria...
+                            </option>
+                            <option th:each="cat : ${categories}"
+                                    th:value="${cat.id}"
+                                    th:selected="${product != null and product.category != null and product.category.id == cat.id}"
+                                    th:text="${cat.name}">
+                                Categoria
+                            </option>
+                        </select>
+                        <div class="invalid-feedback">Seleziona una categoria.</div>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Prezzo (€)</label>
+                        <input type="number" step="0.01" min="0" class="form-control" th:field="*{price}" required>
+                        <div class="invalid-feedback">Inserisci un prezzo valido.</div>
+                    </div>
+                
+					
+					<div class="col-md-4 mb-3">
+                        <label class="form-label">Stock </label>
+                        <input type="number" step="0.01" min="0" class="form-control" th:field="*{stockQty}" required>
+                        <div class="invalid-feedback">Inserisci una quantità valida.</div>
+                    </div>
+                </div>
+
+				
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Group ID (opz.)</label>
+                        <input type="number" class="form-control" th:field="*{groupId}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Subgroup ID (opz.)</label>
+                        <input type="number" class="form-control" th:field="*{subgroupId}">
+                    </div>
+                </div>
+
+                <!-- ✅ VARIANTI (COLORI / TAGLIE) -->
+                <div class="card mb-3">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <span class="d-flex align-items-center gap-2">
+                            <i class="bi bi-grid-3x3-gap"></i>
+                            <span>Varianti (colori e taglie)</span>
+                        </span>
+
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="toggleVariantsBtn">
+                            <i class="bi bi-plus-square"></i> Crea varianti
+                        </button>
+                    </div>
+
+                    <div class="card-body d-none" id="variantsPanel">
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <label class="form-label mb-0">Colori</label>
+                                    <a class="small" th:href="@{/admin/colors}">Gestisci</a>
+                                </div>
+
+                                <div class="variant-box" th:if="${colors != null and !#lists.isEmpty(colors)}">
+                                    <div class="form-check" th:each="c : ${colors}">
+                                        <input class="form-check-input js-variant-color"
+                                               type="checkbox"
+                                               th:value="${c.id}"
+                                               th:attr="data-code=${c.code},data-name=${c.nameIt}"/>
+                                        <label class="form-check-label">
+                                            <span class="variant-swatch" th:if="${c.hex != null}" th:style="'background:' + ${c.hex}"></span>
+                                            <span th:text="${c.code} + ' - ' + ${c.nameIt}">BLK - NERO</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="text-muted small" th:if="${colors == null or #lists.isEmpty(colors)}">
+                                    Nessun colore configurato. <a th:href="@{/admin/colors/new}">Crea un colore</a>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <label class="form-label mb-0">Taglie</label>
+                                    <a class="small" th:href="@{/admin/sizes}">Gestisci</a>
+                                </div>
+
+                                <div class="variant-box" th:if="${sizes != null and !#lists.isEmpty(sizes)}">
+                                    <div class="form-check" th:each="s : ${sizes}">
+                                        <input class="form-check-input js-variant-size"
+                                               type="checkbox"
+                                               th:value="${s.id}"
+                                               th:attr="data-code=${s.code},data-name=${s.nameIt}"/>
+                                        <label class="form-check-label" th:text="${s.code} + ' - ' + ${s.nameIt}">M - MEDIUM</label>
+                                    </div>
+                                </div>
+
+                                <div class="text-muted small" th:if="${sizes == null or #lists.isEmpty(sizes)}">
+                                    Nessuna taglia configurata. <a th:href="@{/admin/sizes/new}">Crea una taglia</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-3"/>
+
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="fw-semibold">Varianti da creare</div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="regenVariantsBtn">
+                                <i class="bi bi-arrow-repeat"></i> Rigenera
+                            </button>
+                        </div>
+
+                        <div class="table-responsive mt-2">
+                            <table class="table table-sm align-middle mb-0">
+                                <thead>
+                                <tr>
+                                    <th style="width:40%">Codice variante</th>
+                                    <th>Colore</th>
+                                    <th>Taglia</th>
+                                </tr>
+                                </thead>
+                                <tbody id="variantsTbody">
+                                <tr class="text-muted">
+                                    <td colspan="3">Seleziona almeno un colore e una taglia.</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div id="variantHiddenContainer"></div>
+
+                        <div class="form-text small text-muted mt-2">
+                            Il codice variante sarà: <code>CODPROD-CODCOLORE-CODTAGLIA</code> (univoco).
+                        </div>
+
+                        <!-- (opzionale) mostra varianti esistenti in edit -->
+                        <div class="mt-3" th:if="${variants != null and !#lists.isEmpty(variants)}">
+                            <div class="fw-semibold mb-1">Varianti già presenti</div>
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle mb-0">
+                                    <thead>
+                                    <tr>
+                                        <th>Codice</th>
+                                        <th>Colore</th>
+                                        <th>Taglia</th>
+                                        <th class="text-end">Stock</th>
+                                        <th>Attiva</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="v : ${variants}">
+                                        <td><code th:text="${v.variantCode}">ART-001-BLK-M</code></td>
+                                        <td th:text="${v.color != null ? v.color.code : '-'}">BLK</td>
+                                        <td th:text="${v.size != null ? v.size.code : '-'}">M</td>
+                                        <td class="text-end" th:text="${v.stockQty != null ? v.stockQty : 0}">0</td>
+                                        <td>
+                                            <span class="badge bg-success" th:if="${v.enabled}">SI</span>
+                                            <span class="badge bg-secondary" th:if="${!v.enabled}">NO</span>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label d-flex align-items-center gap-2">
+                        <i class="bi bi-card-text"></i><span>Descrizione</span>
+                    </label>
+                    <textarea class="form-control desc-area"
+                              th:field="*{description}"
+                              rows="4"
+                              placeholder="Inserisci una descrizione del prodotto..."></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label d-flex align-items-center gap-2">
+                        <i class="bi bi-box-seam"></i><span>Materiali</span>
+                    </label>
+                    <textarea class="form-control" th:field="*{materials}" rows="3"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label d-flex align-items-center gap-2">
+                        <i class="bi bi-truck"></i><span>Info spedizione</span>
+                    </label>
+                    <textarea class="form-control" th:field="*{shippingInfo}" rows="3"></textarea>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <a class="btn btn-outline-secondary" th:href="@{/admin/products}">Annulla</a>
+                    <button type="submit" class="btn btn-primary">Salva prodotto</button>
+
+                    <button type="button"
+                            class="btn btn-outline-danger ms-auto"
+                            th:if="*{id != null}"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteModal">
+                        Elimina
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- DESTRA -->
+            <div class="col-lg-4">
+
+                <!-- MEDIA PRINCIPALE -->
+                <div class="card mb-3">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <span>Media principale</span>
+
+                        <div class="header-actions">
+                            <button type="button"
+                                    class="header-icon-btn"
+                                    title="Aggiungi media"
+                                    th:if="*{image == null}"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#mainImageModal">
+                                <i class="bi bi-images"></i>
+                            </button>
+
+                            <button type="button"
+                                    class="header-icon-btn"
+                                    title="Rimuovi"
+                                    th:if="*{image != null}"
+                                    onclick="confirmDeleteMainImage()">
+                                <i class="bi bi-trash"></i>
+                            </button>
+
+                            <button type="button"
+                                    class="header-icon-btn"
+                                    title="Sostituisci"
+                                    th:if="*{image != null}"
+                                    onclick="triggerReplaceMainImage()">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+
+                            <button type="button"
+                                    class="header-icon-btn undo-btn"
+                                    id="mainUndoBtn"
+                                    title="Annulla modifica"
+                                    th:if="*{image != null}"
+                                    onclick="undoMainImageChange()">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card-body text-center">
+                        <div id="mainWrapper"
+                             class="img-box"
+                             th:attr="data-current-type=*{mainMediaType != null ? mainMediaType : 'IMAGE'}">
+
+                            <img th:if="*{image != null and (mainMediaType == null or mainMediaType == 'IMAGE')}"
+                                 th:src="*{image}"
+                                 class="main-img"
+                                 alt="main"
+                                 id="mainImagePreview">
+
+                            <video th:if="*{image != null and mainMediaType == 'VIDEO'}"
+                                   class="main-video"
+                                   id="mainVideoPreview"
+                                   controls
+                                   muted
+                                   playsinline
+                                   preload="metadata"
+                                   th:poster="*{mainVideoPoster}">
+                                <source th:src="*{image}" type="video/mp4">
+                            </video>
+
+                            <img class="main-img d-none"
+                                 alt="preview"
+                                 id="mainImagePreviewEmpty">
+
+                            <video th:if="*{mainMediaType == null or mainMediaType != 'VIDEO'}"
+                                   class="main-video d-none"
+                                   id="mainVideoPreviewEmpty"
+                                   controls
+                                   muted
+                                   playsinline
+                                   preload="metadata"></video>
+
+                            <div th:if="*{image == null}" class="text-muted" id="mainImageNoImage">
+                                Nessun media principale
+                            </div>
+
+                            <div class="status-overlay" id="mainStatusOverlay"></div>
+                        </div>
+
+                        <!-- checkbox usata dal controller -->
+                        <input type="checkbox" class="d-none" id="deleteMainImage" name="deleteMainImage">
+
+                        <div class="mt-2 small text-muted d-none" id="mainHintApply">
+                            Le modifiche al media principale verranno applicate quando salvi il prodotto.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IMMAGINI EXTRA -->
+                <div class="card">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <span>Media extra (immagini e video)</span>
+
+                        <div class="header-actions">
+                            <button type="button" class="header-icon-btn"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#extraImagesModal"
+                                    title="Aggiungi immagini extra">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div th:if="${images != null and !#lists.isEmpty(images)}" class="preview-strip">
+                            <div th:each="img : ${images}"
+                                 class="preview-item"
+                                 th:attr="data-img-id=${img.id}">
+
+                                <div class="img-box">
+                                    <img th:if="${img.mediaType == null or img.mediaType == 'IMAGE'}"
+                                         th:id="'thumb_' + ${img.id}"
+                                         th:src="${img.imageUrl}"
+                                         alt="extra"
+                                         class="thumb">
+
+                                    <video th:if="${img.mediaType == 'VIDEO'}"
+                                           th:id="'thumb_' + ${img.id}"
+                                           class="thumb"
+                                           muted
+                                           playsinline
+                                           preload="metadata"
+                                           th:poster="${img.posterUrl != null ? img.posterUrl : product.image}">
+                                        <source th:src="${img.imageUrl}" type="video/mp4">
+                                    </video>
+                                    <div class="status-overlay" th:id="'status_' + ${img.id}"></div>
+                                </div>
+
+                                <div class="mt-1 d-flex justify-content-center gap-1">
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger"
+                                            th:attr="data-img-id=${img.id}"
+                                            onclick="confirmDeleteImage(this)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-primary"
+                                            th:attr="data-img-id=${img.id}"
+                                            onclick="triggerReplaceImage(this)">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-secondary undo-btn"
+                                            th:attr="data-img-id=${img.id}"
+                                            onclick="undoImageChange(this)">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                    </button>
+                                </div>
+
+                                <!-- ✅ nomi ALLINEATI al controller -->
+                                <input type="checkbox"
+                                       class="d-none"
+                                       th:id="'del_img_' + ${img.id}"
+                                       name="imagesToDelete"
+                                       th:value="${img.id}"/>
+
+                                <input type="file"
+                                       class="d-none"
+                                       th:id="'replace_img_' + ${img.id}"
+                                       name="replaceImages"
+                                       accept="image/*,video/mp4,video/webm,video/ogg,video/quicktime"/>
+
+                                <input type="hidden"
+                                       name="replaceImageIds"
+                                       th:value="${img.id}"/>
+                            </div>
+                        </div>
+
+                        <div th:if="${images == null or #lists.isEmpty(images)}" class="text-muted">
+                            Nessun media extra.
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </form>
+
+    <!-- MODALE ELIMINAZIONE -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Conferma eliminazione</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">Vuoi eliminare definitivamente questo prodotto?</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <form th:action="@{/admin/products/delete}" method="post">
+                        <input type="hidden" name="id" th:value="*{id}">
+                        <button class="btn btn-danger" type="submit">Elimina</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE MEDIA PRINCIPALE -->
+    <div class="modal fade" id="mainImageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Media principale</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="file"
+                           id="mainImageFileModal"
+                           name="mainImageFile"
+                           form="productForm"
+                           class="form-control"
+                           accept="image/*,video/mp4,video/webm,video/ogg,video/quicktime">
+                    <div class="form-text small text-muted mt-2">
+                        Il media principale verrà applicato quando salvi il prodotto. Sono supportati immagini e video MP4/WebM/Ogg/MOV.
+                    </div>
+
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" id="generateMainWebmFromImageProduct" name="generateMainWebmFromImage" value="true" form="productForm">
+                        <label class="form-check-label" for="generateMainWebmFromImageProduct">
+                            Genera automaticamente un video WEBM da questa foto
+                        </label>
+                        <div class="form-text">Valido solo se il file selezionato è un’immagine. La foto resterà come poster del video.</div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE IMMAGINI EXTRA -->
+    <div class="modal fade" id="extraImagesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Aggiungi media extra</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="file"
+                           id="extraImageFiles"
+                           name="extraImageFiles"
+                           form="productForm"
+                           class="form-control"
+                           accept="image/*,video/mp4,video/webm,video/ogg,video/quicktime"
+                           multiple>
+
+                    <div id="extraPreviewContainer" class="mt-3 d-none">
+                        <div class="small text-muted mb-2">Anteprima</div>
+                        <div id="extraPreviewStrip" class="preview-strip"></div>
+                    </div>
+
+                    <div class="form-text small text-muted mt-2">
+                        I media extra verranno caricati quando salvi il prodotto. Sono supportati immagini e video MP4/WebM/Ogg/MOV.
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+(() => {
+  'use strict'
+  const forms = document.querySelectorAll('.needs-validation')
+  Array.from(forms).forEach(form => {
+    form.addEventListener('submit', event => {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  });
+})();
+
+(function initExtraPreview(){
+    const input = document.getElementById("extraImageFiles");
+    const container = document.getElementById("extraPreviewContainer");
+    const strip = document.getElementById("extraPreviewStrip");
+    if (!input || !container || !strip) return;
+
+    input.addEventListener("change", function(){
+        strip.innerHTML = "";
+        if (!input.files || input.files.length === 0) {
+            container.classList.add("d-none");
+            return;
+        }
+        container.classList.remove("d-none");
+        Array.from(input.files).forEach(file => {
+            const url = URL.createObjectURL(file);
+            const div = document.createElement("div");
+            div.className = "preview-item";
+
+            if ((file.type || "").startsWith("video/")) {
+                div.innerHTML = '<video class="thumb" muted playsinline preload="metadata"></video>';
+                const video = div.querySelector("video");
+                video.src = url;
+            } else {
+                div.innerHTML = '<img class="thumb" alt="preview">';
+                div.querySelector("img").src = url;
+            }
+
+            strip.appendChild(div);
+        });
+    });
+})();
+
+// --- extra delete/replace/undo ---
+function setOverlay(id, symbol) {
+    const el = document.getElementById("status_" + id);
+    if (!el) return;
+    el.textContent = symbol || "";
+}
+function setPending(id, isPending) {
+    const wrapper = document.querySelector('[data-img-id="' + id + '"]');
+    if (!wrapper) return;
+    if (isPending) wrapper.classList.add("pending");
+    else wrapper.classList.remove("pending");
+}
+function setMarkedDelete(id, isMarked) {
+    const wrapper = document.querySelector('[data-img-id="' + id + '"]');
+    if (!wrapper) return;
+    if (isMarked) wrapper.classList.add("marked-delete");
+    else wrapper.classList.remove("marked-delete");
+}
+function setMarkedReplace(id, isMarked) {
+    const wrapper = document.querySelector('[data-img-id="' + id + '"]');
+    if (!wrapper) return;
+    if (isMarked) wrapper.classList.add("marked-replace");
+    else wrapper.classList.remove("marked-replace");
+}
+
+function confirmDeleteImage(btn) {
+    const id = btn.dataset.imgId;
+    if (!id) return;
+
+    if (!window.confirm("Vuoi eliminare questa immagine?\n\nVerrà applicato al salvataggio.")) return;
+
+    const checkbox = document.getElementById("del_img_" + id);
+    if (checkbox) checkbox.checked = true;
+
+    const input = document.getElementById("replace_img_" + id);
+    if (input) input.value = "";
+
+    setPending(id, true);
+    setMarkedReplace(id, false);
+    setMarkedDelete(id, true);
+    setOverlay(id, "🚫");
+}
+
+function triggerReplaceImage(btn) {
+    const id = btn.dataset.imgId;
+    if (!id) return;
+
+    const input = document.getElementById("replace_img_" + id);
+    if (!input) return;
+
+    input.click();
+    input.onchange = function () {
+        if (input.files && input.files.length > 0) {
+            const checkbox = document.getElementById("del_img_" + id);
+            if (checkbox) checkbox.checked = false;
+
+            const thumb = document.getElementById("thumb_" + id);
+            if (thumb) {
+                const fileUrl = URL.createObjectURL(input.files[0]);
+                if (thumb.tagName === "VIDEO") {
+                    thumb.src = fileUrl;
+                } else {
+                    thumb.src = fileUrl;
+                }
+            }
+
+            setPending(id, true);
+            setMarkedDelete(id, false);
+            setMarkedReplace(id, true);
+            setOverlay(id, "✅");
+        }
+    };
+}
+
+function undoImageChange(btn) {
+    const id = btn.dataset.imgId;
+    if (!id) return;
+
+    const checkbox = document.getElementById("del_img_" + id);
+    if (checkbox) checkbox.checked = false;
+
+    const input = document.getElementById("replace_img_" + id);
+    if (input) input.value = "";
+
+    window.location.reload();
+}
+
+// -------------------------------
+// ✅ MAIN IMAGE (fix completo)
+// -------------------------------
+let __mainOriginalSrc = null;
+let __mainOriginalType = "IMAGE";
+let __mainHadImage = false;
+
+function __getMainEls(){
+    return {
+        wrapper: document.getElementById("mainWrapper"),
+        overlay: document.getElementById("mainStatusOverlay"),
+        preview: document.getElementById("mainImagePreview"),
+        previewEmpty: document.getElementById("mainImagePreviewEmpty"),
+        videoPreview: document.getElementById("mainVideoPreview"),
+        videoPreviewEmpty: document.getElementById("mainVideoPreviewEmpty"),
+        noImageText: document.getElementById("mainImageNoImage"),
+        deleteChk: document.getElementById("deleteMainImage"),
+        hint: document.getElementById("mainHintApply"),
+        undoBtn: document.getElementById("mainUndoBtn"),
+        fileInput: document.getElementById("mainImageFileModal"),
+        modalEl: document.getElementById("mainImageModal")
+    };
+}
+
+function __mainShowHint(show){
+    const {hint} = __getMainEls();
+    if (!hint) return;
+    hint.classList.toggle("d-none", !show);
+}
+
+function __mainSetOverlay(symbol){
+    const {overlay} = __getMainEls();
+    if (!overlay) return;
+    overlay.textContent = symbol || "";
+}
+
+function __mainSetMode(mode){
+    const {wrapper} = __getMainEls();
+    if (!wrapper) return;
+    wrapper.classList.remove("marked-delete", "marked-replace");
+    if (mode === "delete") wrapper.classList.add("marked-delete");
+    if (mode === "replace") wrapper.classList.add("marked-replace");
+}
+
+function __mainShowUndo(show){
+    const {undoBtn} = __getMainEls();
+    if (!undoBtn) return;
+    if (show) undoBtn.style.display = "inline-flex";
+    else undoBtn.style.display = "";
+}
+
+function __mainRenderSrc(src, mediaType){
+    const {wrapper, preview, previewEmpty, videoPreview, videoPreviewEmpty, noImageText} = __getMainEls();
+    const isVideo = String(mediaType || "").toLowerCase().startsWith("video") || String(mediaType || "").toUpperCase() === "VIDEO";
+
+    const imgEl = preview || previewEmpty;
+    const vidEl = videoPreview || videoPreviewEmpty;
+
+    if (src && src.trim().length > 0) {
+        if (isVideo) {
+            if (imgEl) imgEl.classList.add("d-none");
+            if (vidEl) {
+                vidEl.src = src;
+                const source = vidEl.querySelector("source");
+                if (source) source.src = src;
+                vidEl.load?.();
+                vidEl.classList.remove("d-none");
+            }
+        } else {
+            if (vidEl) {
+                vidEl.pause?.();
+                vidEl.classList.add("d-none");
+            }
+            if (imgEl) {
+                imgEl.src = src;
+                imgEl.classList.remove("d-none");
+            }
+        }
+
+        if (wrapper) wrapper.dataset.currentType = isVideo ? "VIDEO" : "IMAGE";
+        if (noImageText) noImageText.classList.add("d-none");
+    } else {
+        if (preview) preview.classList.add("d-none");
+        if (previewEmpty) previewEmpty.classList.add("d-none");
+        if (videoPreview) videoPreview.classList.add("d-none");
+        if (videoPreviewEmpty) videoPreviewEmpty.classList.add("d-none");
+        if (noImageText) noImageText.classList.remove("d-none");
+    }
+}
+
+function confirmDeleteMainImage(){
+    const els = __getMainEls();
+    if (!els.deleteChk) return;
+
+    if (!window.confirm("Vuoi rimuovere il media principale?\n\nLa modifica verrà applicata al salvataggio.")) return;
+
+    els.deleteChk.checked = true;
+
+    if (els.fileInput) els.fileInput.value = "";
+
+    __mainSetMode("delete");
+    __mainSetOverlay("🚫");
+    __mainShowHint(true);
+    __mainShowUndo(true);
+}
+
+function triggerReplaceMainImage(){
+    const els = __getMainEls();
+    if (!els.modalEl) return;
+
+    const modal = bootstrap.Modal.getOrCreateInstance(els.modalEl);
+    modal.show();
+
+    window.setTimeout(() => {
+        if (els.fileInput) els.fileInput.click();
+    }, 200);
+}
+
+function undoMainImageChange(){
+    const els = __getMainEls();
+    if (els.deleteChk) els.deleteChk.checked = false;
+    if (els.fileInput) els.fileInput.value = "";
+
+    __mainSetMode(null);
+    __mainSetOverlay("");
+    __mainShowHint(false);
+    __mainShowUndo(false);
+
+    if (__mainHadImage) __mainRenderSrc(__mainOriginalSrc, __mainOriginalType);
+    else __mainRenderSrc(null);
+}
+
+(function initMainImage(){
+    const els = __getMainEls();
+    const currentVideo = els.videoPreview && !els.videoPreview.classList.contains("d-none");
+    const currentImage = els.preview && els.preview.getAttribute("src");
+
+    if (currentVideo) {
+        __mainOriginalSrc = els.videoPreview.getAttribute("src") || els.videoPreview.querySelector("source")?.getAttribute("src") || "";
+        __mainOriginalType = "VIDEO";
+        __mainHadImage = true;
+    } else if (currentImage) {
+        __mainOriginalSrc = els.preview.getAttribute("src");
+        __mainOriginalType = "IMAGE";
+        __mainHadImage = true;
+    } else {
+        __mainOriginalSrc = null;
+        __mainOriginalType = "IMAGE";
+        __mainHadImage = false;
+    }
+
+    if (els.fileInput) {
+        els.fileInput.addEventListener("change", function(){
+            if (els.deleteChk) els.deleteChk.checked = false;
+
+            if (els.fileInput.files && els.fileInput.files.length > 0) {
+                const file = els.fileInput.files[0];
+                const url = URL.createObjectURL(file);
+                __mainRenderSrc(url, file.type);
+                __mainSetMode("replace");
+                __mainSetOverlay("✅");
+                __mainShowHint(true);
+                __mainShowUndo(true);
+            }
+        });
+    }
+})();
+
+// -------------------------------
+// ✅ Varianti (Colori/Taglie) - UI + hidden inputs
+// -------------------------------
+(function initVariantsUI(){
+    const btn = document.getElementById("toggleVariantsBtn");
+    const panel = document.getElementById("variantsPanel");
+    const regen = document.getElementById("regenVariantsBtn");
+    const tbody = document.getElementById("variantsTbody");
+    const hidden = document.getElementById("variantHiddenContainer");
+    const codproInput = document.getElementById("codpro");
+
+    if (!btn || !panel || !tbody || !hidden) return;
+
+    function escapeHtml(str){
+        if (str === null || str === undefined) return "";
+        return String(str)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    function getBaseCode(){
+        return codproInput && codproInput.value ? codproInput.value.trim() : "";
+    }
+
+    function getSelected(selector){
+        return Array.from(document.querySelectorAll(selector + ":checked"))
+            .map(cb => ({
+                id: cb.value,
+                code: (cb.dataset.code || "").trim(),
+                name: (cb.dataset.name || "").trim()
+            }))
+            .filter(x => x.id && x.code);
+    }
+
+    function clearHidden(){
+        hidden.innerHTML = "";
+    }
+
+    function addHidden(name, value){
+        const inp = document.createElement("input");
+        inp.type = "hidden";
+        inp.name = name;
+        inp.value = value;
+        hidden.appendChild(inp);
+    }
+
+    function render(){
+        const base = getBaseCode();
+        const colors = getSelected(".js-variant-color");
+        const sizes = getSelected(".js-variant-size");
+
+        clearHidden();
+        tbody.innerHTML = "";
+
+        if (!base) {
+            tbody.innerHTML = '<tr class="text-muted"><td colspan="3">Inserisci prima il <strong>Codice prodotto</strong> per generare le varianti.</td></tr>';
+            return;
+        }
+
+        if (colors.length === 0 || sizes.length === 0) {
+            tbody.innerHTML = '<tr class="text-muted"><td colspan="3">Seleziona almeno un colore e una taglia.</td></tr>';
+            return;
+        }
+
+        colors.forEach(c => {
+            sizes.forEach(s => {
+                const code = `${base}-${c.code}-${s.code}`;
+
+                const tr = document.createElement("tr");
+                tr.innerHTML =
+                    `<td><code>${escapeHtml(code)}</code></td>` +
+                    `<td>${escapeHtml(c.code + " - " + c.name)}</td>` +
+                    `<td>${escapeHtml(s.code + " - " + s.name)}</td>`;
+                tbody.appendChild(tr);
+
+                addHidden("variantCodes", code);
+                addHidden("variantColorIds", c.id);
+                addHidden("variantSizeIds", s.id);
+            });
+        });
+
+        addHidden("variantsRequested", "true");
+    }
+
+    function openPanel(){
+        panel.classList.remove("d-none");
+        render();
+    }
+
+    btn.addEventListener("click", function(){
+        if (panel.classList.contains("d-none")) openPanel();
+        else panel.classList.add("d-none");
+    });
+
+    if (regen) regen.addEventListener("click", render);
+
+    document.querySelectorAll(".js-variant-color, .js-variant-size").forEach(cb => {
+        cb.addEventListener("change", function(){
+            if (!panel.classList.contains("d-none")) render();
+        });
+    });
+
+    if (codproInput) codproInput.addEventListener("input", function(){
+        if (!panel.classList.contains("d-none")) render();
+    });
+})();
+</script>
+
+</body>
+</html>

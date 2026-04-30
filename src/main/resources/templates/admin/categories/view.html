@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dettaglio categoria</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+</head>
+<body>
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Dettaglio categoria</h1>
+            <p class="text-muted mb-0">Visualizzazione dati categoria</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/admin/categories/{id}/edit(id=${category.id})}" class="btn btn-warning">
+                Modifica
+            </a>
+            <a th:href="@{/admin/categories}" class="btn btn-outline-secondary">
+                Lista
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="row g-4">
+
+                <div class="col-lg-4">
+                    <label class="form-label text-muted">Immagine categoria</label>
+
+                    <div th:if="${category.imageUrl != null and !#strings.isEmpty(category.imageUrl)}"
+                         class="border rounded p-2 bg-light text-center">
+                        <img th:src="${category.imageUrl}"
+                             alt="Immagine categoria"
+                             class="img-fluid rounded"
+                             style="max-width: 100%; max-height: 320px; object-fit: contain;">
+                    </div>
+
+                    <div th:unless="${category.imageUrl != null and !#strings.isEmpty(category.imageUrl)}"
+                         class="border rounded p-4 bg-light text-center text-muted">
+                        Nessuna immagine disponibile
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label text-muted">ID</label>
+                            <div class="fw-semibold" th:text="${category.id}">1</div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label text-muted">Codice</label>
+                            <div class="fw-semibold" th:text="${category.code}">CAT001</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Nome</label>
+                            <div class="fw-semibold" th:text="${category.name}">Categoria demo</div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label text-muted">Stato</label>
+                            <div>
+                                <span th:if="${category.enabled}" class="badge text-bg-success">Abilitata</span>
+                                <span th:unless="${category.enabled}" class="badge text-bg-secondary">Disabilitata</span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label text-muted">Ordinamento</label>
+                            <div th:text="${category.sortOrder != null ? category.sortOrder : '-'}">0</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Image URL</label>
+                            <div class="text-break"
+                                 th:text="${category.imageUrl != null and !#strings.isEmpty(category.imageUrl) ? category.imageUrl : '-'}">
+                                -
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label text-muted">Descrizione</label>
+                            <div class="border rounded p-3 bg-light"
+                                 th:text="${category.description != null and !#strings.isEmpty(category.description) ? category.description : 'Nessuna descrizione'}">
+                                Nessuna descrizione
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Creato il</label>
+                            <div th:text="${category.createdAt != null ? #temporals.format(category.createdAt, 'dd/MM/yyyy HH:mm') : '-'}">-</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Ultimo aggiornamento</label>
+                            <div th:text="${category.updatedAt != null ? #temporals.format(category.updatedAt, 'dd/MM/yyyy HH:mm') : '-'}">-</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

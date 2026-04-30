@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin - Lista Prodotti</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
+
+  <style>
+    body { font-size: 0.85rem; }
+
+    .product-img{
+      width:36px;
+      height:36px;
+      object-fit:cover;
+      border-radius:6px;
+      border:1px solid #ddd;
+      display:block;
+      margin:auto;
+      background:#fff;
+    }
+
+    .product-video-thumb{
+      position:relative;
+      display:block;
+      width:36px;
+      height:36px;
+      margin:auto;
+      border-radius:6px;
+      overflow:hidden;
+      border:1px solid #ddd;
+      background:#111;
+    }
+
+    .product-video-thumb .product-img{
+      width:100%;
+      height:100%;
+      border:0;
+      border-radius:0;
+      margin:0;
+      background:#111;
+    }
+
+    .product-video-thumb::after{
+      content:"\F4F4";
+      font-family:"bootstrap-icons";
+      position:absolute;
+      inset:auto 2px 2px auto;
+      width:15px;
+      height:15px;
+      border-radius:999px;
+      background:rgba(0,0,0,.62);
+      color:#fff;
+      font-size:9px;
+      line-height:15px;
+      text-align:center;
+      pointer-events:none;
+    }
+
+    .cursor-pointer { cursor:pointer; }
+
+    .table-compact{
+      --bs-table-cell-padding-y:.25rem;
+      --bs-table-cell-padding-x:.45rem;
+    }
+
+    .truncate{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      display:block;
+      width:100%;
+    }
+
+    tr.clickable-row{ cursor:pointer; }
+    tr.clickable-row:hover td{ background:rgba(0,0,0,.03); }
+
+    tr.main-row.row-even td{ background:#fafafa; }
+    tr.main-row.row-odd td{ background:#ffffff; }
+
+    tr.subrow td{
+      background: rgba(13,110,253,.04);
+      border-top: 0;
+      padding-top:.35rem;
+      padding-bottom:.35rem;
+    }
+
+    .col-actions{ width:60px; }
+    .col-info{ width:60px; }
+
+    .actions-indicator{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:24px;
+      height:24px;
+      border-radius:6px;
+      border:1px solid rgba(0,0,0,.18);
+      background:#fff;
+      font-weight:700;
+      line-height:1;
+      user-select:none;
+    }
+
+    .sub-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:1rem;
+      align-items:center;
+    }
+
+    .sub-action{
+      display:inline-flex;
+      align-items:center;
+      gap:.4rem;
+      text-decoration:none;
+      font-weight:600;
+      color:#0b2e5c;
+      cursor:pointer;
+      user-select:none;
+    }
+
+    .sub-action:hover{ text-decoration:underline; }
+    .sub-action i{ font-size:1.05rem; opacity:.9; }
+
+    .sub-action.edit{ color:#0d6efd; }
+    .sub-action.view{ color:#495057; }
+    .sub-action.print{ color:#212529; }
+    .sub-action.delete{ color:#dc3545; }
+    .sub-action.variants{ color:#0b7285; }
+
+    .sub-action.disabled{
+      color:#adb5bd !important;
+      cursor:not-allowed;
+      text-decoration:none !important;
+      pointer-events:none;
+    }
+
+    .sub-action.disabled i{ opacity:.45; }
+
+    .hint-close{
+      margin-left:auto;
+      font-size:.8rem;
+      color:#6c757d;
+      font-weight:500;
+    }
+
+    .sort-head{
+      display:inline-flex;
+      align-items:center;
+      gap:.35rem;
+      user-select:none;
+    }
+
+    .sort-icon{ opacity:.75; }
+    th.cursor-pointer:hover .sort-icon{ opacity:1; }
+
+    .info-icon{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:26px;
+      height:26px;
+      border-radius:8px;
+      border:1px solid rgba(0,0,0,.12);
+      background:#fff;
+      cursor:pointer;
+      user-select:none;
+    }
+
+    .info-icon i{ font-size:1.05rem; }
+
+    .kv-label{ font-weight:600; }
+    .kv-value{ word-break:break-word; }
+
+    .kv-box{
+      border:1px solid rgba(0,0,0,.08);
+      border-radius:10px;
+      padding:.55rem .65rem;
+      background:#fff;
+    }
+
+    .variants-box{
+      margin-top:.6rem;
+      background:#fff;
+      border:1px solid rgba(0,0,0,.08);
+      border-radius:12px;
+      padding:.6rem .6rem .2rem .6rem;
+    }
+
+    .variants-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.75rem;
+      margin-bottom:.4rem;
+      flex-wrap:wrap;
+    }
+
+    .variants-title{
+      font-weight:700;
+      color:#0b2e5c;
+      font-size:.9rem;
+      display:flex;
+      align-items:center;
+      gap:.4rem;
+    }
+
+    .variants-table th{
+      font-size:.78rem;
+      text-transform:uppercase;
+      letter-spacing:.02em;
+      color:#6c757d;
+      border-bottom:1px solid rgba(0,0,0,.08);
+      background:#f8f9fa;
+    }
+
+    .badge-soft{
+      border:1px solid rgba(0,0,0,.12);
+      background:#fff;
+      color:#212529;
+      font-weight:600;
+    }
+
+    .variant-thumb{
+      width:40px;
+      height:40px;
+      object-fit:cover;
+      border-radius:8px;
+      border:1px solid #ddd;
+      background:#fff;
+      display:block;
+    }
+
+    .variant-video-thumb{
+      position:relative;
+      display:inline-block;
+      width:40px;
+      height:40px;
+      border-radius:8px;
+      overflow:hidden;
+      border:1px solid #ddd;
+      background:#111;
+      vertical-align:middle;
+    }
+
+    .variant-video-thumb .variant-thumb{
+      width:100%;
+      height:100%;
+      border:0;
+      border-radius:0;
+      background:#111;
+    }
+
+    .variant-video-thumb::after{
+      content:"▶";
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%, -50%);
+      width:20px;
+      height:20px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,.62);
+      color:#fff;
+      font-size:10px;
+      line-height:1;
+      padding-left:1px;
+      pointer-events:none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container my-3 ">
+
+  <div class="d-flex justify-content-between align-items-center mb-2 ">
+    <h1 class="h5 mb-0">Gestione Prodotti</h1>
+
+    <div class="d-flex gap-2">
+      <a class="btn btn-sm btn-primary" href="/admin/products/new">+ Nuovo prodotto</a>
+	  <a class="btn btn-sm btn-primary" href="#">Stampa</a>
+	  <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/dashboard}">Dashboard</a>
+    </div>
+  </div>
+
+  <div id="alertBox" class="alert d-none" role="alert"></div>
+
+  <form id="filtersForm" class="row g-2 mb-2">
+    <div class="col-md-4">
+      <input id="searchInput" class="form-control form-control-sm" type="text" placeholder="Cerca per codice o nome">
+    </div>
+
+    <div class="col-md-3">
+      <select id="categorySelect" class="form-select form-select-sm">
+        <option value="">Tutte</option>
+      </select>
+    </div>
+
+    <div class="col-md-3 d-flex align-items-end">
+      <button class="btn btn-sm btn-outline-primary me-2" type="submit">Filtra</button>
+      <button id="resetBtn" class="btn btn-sm btn-outline-secondary" type="button">Reset</button>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table align-middle table-compact" id="productsTable">
+      <colgroup>
+        <col style="width:50px;">
+        <col style="width:120px;">
+        <col style="width:35%;">
+        <col style="width:22%;">
+        <col style="width:110px;">
+        <col class="col-actions">
+        <col class="col-info">
+      </colgroup>
+
+      <thead class="table-light">
+      <tr>
+        <th>Img</th>
+
+        <th class="cursor-pointer" id="sortCode" title="Ordina per codice">
+          <span class="sort-head">
+            Codice
+            <i id="sortCodeIcon" class="bi bi-arrow-down-up sort-icon" aria-hidden="true"></i>
+          </span>
+        </th>
+
+        <th class="cursor-pointer" id="sortName" title="Ordina per nome">
+          <span class="sort-head">
+            Nome
+            <i id="sortNameIcon" class="bi bi-arrow-down-up sort-icon" aria-hidden="true"></i>
+          </span>
+        </th>
+
+        <th>Categoria</th>
+
+        <th class="text-end cursor-pointer" id="sortPrice" title="Ordina per prezzo">
+          <span class="sort-head justify-content-end w-100">
+            Prezzo
+            <i id="sortPriceIcon" class="bi bi-arrow-down-up sort-icon" aria-hidden="true"></i>
+          </span>
+        </th>
+
+        <th class="text-center">Az.</th>
+        <th class="text-center">Info</th>
+      </tr>
+      </thead>
+
+      <tbody id="productsTbody">
+        <tr>
+          <td colspan="7" class="text-center text-muted">Caricamento…</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header py-2">
+        <h5 class="modal-title">Conferma eliminazione</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2">Vuoi eliminare questo prodotto?</div>
+        <div class="small text-muted" id="deleteModalHint"></div>
+      </div>
+      <div class="modal-footer py-2">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
+        <button type="button" class="btn btn-sm btn-danger" id="confirmDeleteBtn">
+          <i class="bi bi-trash me-1"></i>Elimina
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="infoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header py-2">
+        <h5 class="modal-title">Info prodotto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="small text-muted mb-2" id="infoModalTitle"></div>
+
+        <div class="kv-box mb-3">
+          <div class="kv-label">Id</div>
+          <div class="kv-value" id="info_id">—</div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="kv-box">
+              <div class="kv-label">Codice</div>
+              <div class="kv-value" id="info_codpro">—</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="kv-box">
+              <div class="kv-label">Categoria ID</div>
+              <div class="kv-value" id="info_categoryId">—</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="kv-box">
+              <div class="kv-label">Categoria</div>
+              <div class="kv-value" id="info_categoryName">—</div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="kv-box">
+              <div class="kv-label">Immagine URL</div>
+              <div class="kv-value" id="info_imageUrl">—</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="kv-box">
+              <div class="kv-label">Image (DB)</div>
+              <div class="kv-value" id="info_imageDb">—</div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="kv-box">
+              <div class="kv-label">Brand</div>
+              <div class="kv-value" id="info_brandId">—</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="kv-box">
+              <div class="kv-label">Gruppo</div>
+              <div class="kv-value" id="info_groupId">—</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="kv-box">
+              <div class="kv-label">Sottogruppo</div>
+              <div class="kv-value" id="info_subgroupId">—</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="kv-box">
+              <div class="kv-label">Public ID</div>
+              <div class="kv-value" id="info_publicId">—</div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="kv-box">
+              <div class="kv-label">Creato il</div>
+              <div class="kv-value" id="info_createdAt">—</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="kv-box">
+              <div class="kv-label">Aggiornato il</div>
+              <div class="kv-value" id="info_updatedAt">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="small text-muted mt-3">
+          Se un campo è “—” significa che l’API non lo sta ancora inviando.
+        </div>
+      </div>
+
+      <div class="modal-footer py-2">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Chiudi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_PRODUCTS = "/api/admin/products";
+  const API_CATEGORIES = "/api/admin/categories";
+
+  // Varianti: endpoint corretti
+  const API_VARIANTS = "/admin/variants";
+  const API_VARIANTS_DELETE = "/admin/variants";
+
+  const enableFallbackEndpoints = true;
+  const LOW_STOCK_THRESHOLD = 5;
+
+  let allProducts = [];
+  let allCategories = [];
+  let currentSort = { field: "name", dir: "asc" };
+
+  const variantsCache = new Map();
+
+  let pendingDeleteId = null;
+  let pendingDeleteLabel = "";
+  let deleteModalInstance = null;
+  let infoModalInstance = null;
+
+  function showAlert(type, message) {
+    const box = document.getElementById("alertBox");
+    box.className = "alert alert-" + type;
+    box.textContent = message;
+    box.classList.remove("d-none");
+    setTimeout(() => box.classList.add("d-none"), 2500);
+  }
+
+  function formatEuro(value) {
+    const num = Number(value ?? 0);
+    return num.toLocaleString("it-IT", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }) + " €";
+  }
+
+  function getCsrfHeaders() {
+    const token = document.querySelector('meta[name="_csrf"]')?.getAttribute("content");
+    const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute("content");
+
+    if (token && header) {
+      return { [header]: token };
+    }
+    return {};
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
+  function safeText(v) {
+    const s = (v === null || v === undefined) ? "" : String(v);
+    return s.trim() ? s : "—";
+  }
+
+  function formatDateTime(v) {
+    if (!v) return "—";
+    const s = String(v);
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) return d.toLocaleString("it-IT");
+    return s;
+  }
+
+  const PLACEHOLDER_IMG =
+    "data:image/svg+xml;charset=utf-8," +
+    encodeURIComponent(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60">
+        <rect width="100%" height="100%" fill="#f1f1f1"/>
+        <path d="M12 42 L24 30 L32 38 L40 30 L48 38" stroke="#c9c9c9" stroke-width="3" fill="none"/>
+        <circle cx="22" cy="22" r="5" fill="#c9c9c9"/>
+      </svg>`
+    );
+
+  function pickImageUrl(p) {
+    return (p?.imageUrl ?? p?.image ?? "").toString();
+  }
+
+  function pickProductPosterUrl(p) {
+    return (p?.mainVideoPoster ?? p?.main_video_poster ?? p?.posterUrl ?? p?.poster_url ?? "").toString();
+  }
+
+  function pickProductMediaType(p) {
+    return (p?.mainMediaType ?? p?.main_media_type ?? "").toString().trim().toUpperCase();
+  }
+
+  function normalizeImageUrl(url) {
+    let u = (url ?? "").toString().trim();
+    if (!u) return null;
+    u = u.replaceAll("\\", "/");
+    if (u.startsWith("http://") || u.startsWith("https://")) return u;
+    if (u.startsWith("/")) return u;
+    return "/" + u;
+  }
+
+  function pickProductId(p) { return p?.id ?? ""; }
+  function pickProductCode(p) { return (p?.codpro ?? p?.CODPRO ?? "").toString(); }
+  function pickPublicId(p) { return p?.publicId ?? p?.public_id ?? ""; }
+  function pickBrandId(p) { return p?.brandId ?? p?.brand_id ?? ""; }
+  function pickGroupId(p) { return p?.groupId ?? p?.group_id ?? ""; }
+  function pickSubgroupId(p) { return p?.subgroupId ?? p?.subgroup_id ?? ""; }
+  function pickCreatedAt(p) { return p?.createdAt ?? p?.created_at ?? ""; }
+  function pickUpdatedAt(p) { return p?.updatedAt ?? p?.updated_at ?? ""; }
+  function pickImageDb(p) { return p?.image ?? ""; }
+  function pickCategoryId(p) { return p?.categoryId ?? ""; }
+  function pickCategoryName(p) { return p?.categoryName ?? ""; }
+
+  function pickViewUrl(p) {
+    const direct = p?.viewUrl ?? p?.detailsUrl ?? p?.urlView ?? null;
+    if (direct) return String(direct);
+    return enableFallbackEndpoints ? `/admin/products/view/${p.id}` : null;
+  }
+
+  function pickPrintUrl(p) {
+    const direct = p?.printUrl ?? p?.urlPrint ?? null;
+    if (direct) return String(direct);
+    return enableFallbackEndpoints ? `/admin/products/print/${p.id}` : null;
+  }
+
+  function renderCategories() {
+    const sel = document.getElementById("categorySelect");
+    sel.innerHTML = `<option value="">Categoria</option>`;
+
+    for (const c of allCategories) {
+      const opt = document.createElement("option");
+      opt.value = String(c.id);
+      opt.textContent = c.name;
+      sel.appendChild(opt);
+    }
+  }
+
+  function applyFiltersAndSort() {
+    const categoryId = document.getElementById("categorySelect").value.trim();
+    const q = document.getElementById("searchInput").value.trim().toLowerCase();
+
+    let filtered = allProducts.slice();
+
+    if (categoryId) {
+      filtered = filtered.filter(p => String(p.categoryId ?? "") === categoryId);
+    }
+
+    if (q) {
+      filtered = filtered.filter(p => {
+        const name = (p.name ?? "").toLowerCase();
+        const code = pickProductCode(p).toLowerCase();
+        return name.includes(q) || code.includes(q);
+      });
+    }
+
+    const { field, dir } = currentSort;
+
+    filtered.sort((a, b) => {
+      if (field === "price") {
+        const av = Number(a.price ?? 0);
+        const bv = Number(b.price ?? 0);
+        return dir === "asc" ? av - bv : bv - av;
+      }
+
+      let av, bv;
+      if (field === "code") {
+        av = pickProductCode(a);
+        bv = pickProductCode(b);
+      } else {
+        av = (a.name ?? "").toString();
+        bv = (b.name ?? "").toString();
+      }
+
+      return dir === "asc"
+        ? String(av).localeCompare(String(bv), "it", { sensitivity: "base" })
+        : String(bv).localeCompare(String(av), "it", { sensitivity: "base" });
+    });
+
+    return filtered;
+  }
+
+  function setNeutralIcons() {
+    document.getElementById("sortCodeIcon").className = "bi bi-arrow-down-up sort-icon";
+    document.getElementById("sortNameIcon").className = "bi bi-arrow-down-up sort-icon";
+    document.getElementById("sortPriceIcon").className = "bi bi-arrow-down-up sort-icon";
+  }
+
+  function updateSortIcons() {
+    setNeutralIcons();
+
+    if (currentSort.field === "code") {
+      document.getElementById("sortCodeIcon").className =
+        "bi " + (currentSort.dir === "asc" ? "bi-sort-alpha-down" : "bi-sort-alpha-up") + " sort-icon";
+    }
+    if (currentSort.field === "name") {
+      document.getElementById("sortNameIcon").className =
+        "bi " + (currentSort.dir === "asc" ? "bi-sort-alpha-down" : "bi-sort-alpha-up") + " sort-icon";
+    }
+    if (currentSort.field === "price") {
+      document.getElementById("sortPriceIcon").className =
+        "bi " + (currentSort.dir === "asc" ? "bi-sort-numeric-down" : "bi-sort-numeric-up") + " sort-icon";
+    }
+  }
+
+  function closeAllSubrows(exceptId) {
+    document.querySelectorAll("#productsTbody tr.subrow").forEach(sr => {
+      if (exceptId && sr.id === exceptId) return;
+      sr.classList.add("d-none");
+    });
+
+    document.querySelectorAll("#productsTbody tr.main-row").forEach(r => {
+      if (exceptId && r.dataset.subrowId === exceptId) return;
+      r.setAttribute("aria-expanded", "false");
+    });
+  }
+
+  function toggleSubrow(mainRow) {
+    const subId = mainRow.dataset.subrowId;
+    const subRow = document.getElementById(subId);
+    if (!subRow) return;
+
+    const isOpen = !subRow.classList.contains("d-none");
+    if (!isOpen) closeAllSubrows(subId);
+
+    subRow.classList.toggle("d-none");
+    mainRow.setAttribute("aria-expanded", String(!isOpen));
+  }
+
+  function openDeleteModal(productId, labelForUser) {
+    pendingDeleteId = productId;
+    pendingDeleteLabel = labelForUser || ("ID " + productId);
+
+    document.getElementById("deleteModalHint").textContent = `Prodotto: ${pendingDeleteLabel}`;
+
+    if (!deleteModalInstance) {
+      deleteModalInstance = new bootstrap.Modal(document.getElementById("deleteModal"));
+    }
+    deleteModalInstance.show();
+  }
+
+  function openInfoModal(p) {
+    const code = pickProductCode(p) || ("ID " + pickProductId(p));
+    const name = (p.name ?? "").toString().trim();
+    document.getElementById("infoModalTitle").textContent = [code, name].filter(Boolean).join(" - ");
+
+    document.getElementById("info_id").textContent = safeText(pickProductId(p));
+    document.getElementById("info_codpro").textContent = safeText(pickProductCode(p));
+    document.getElementById("info_categoryId").textContent = safeText(pickCategoryId(p));
+    document.getElementById("info_categoryName").textContent = safeText(pickCategoryName(p));
+    document.getElementById("info_imageUrl").textContent = safeText(p.imageUrl);
+    document.getElementById("info_imageDb").textContent = safeText(pickImageDb(p));
+    document.getElementById("info_brandId").textContent = safeText(pickBrandId(p));
+    document.getElementById("info_groupId").textContent = safeText(pickGroupId(p));
+    document.getElementById("info_subgroupId").textContent = safeText(pickSubgroupId(p));
+    document.getElementById("info_publicId").textContent = safeText(pickPublicId(p));
+    document.getElementById("info_createdAt").textContent = formatDateTime(pickCreatedAt(p));
+    document.getElementById("info_updatedAt").textContent = formatDateTime(pickUpdatedAt(p));
+
+    if (!infoModalInstance) {
+      infoModalInstance = new bootstrap.Modal(document.getElementById("infoModal"));
+    }
+    infoModalInstance.show();
+  }
+
+  function getMediaMimeType(url) {
+    const clean = String(url ?? "").split("?")[0].toLowerCase();
+    if (clean.endsWith(".webm")) return "video/webm";
+    if (clean.endsWith(".ogg") || clean.endsWith(".ogv")) return "video/ogg";
+    if (clean.endsWith(".mov")) return "video/quicktime";
+    return "video/mp4";
+  }
+
+  function isVideoMedia(url, mediaType) {
+    const type = String(mediaType ?? "").trim().toUpperCase();
+    const clean = String(url ?? "").split("?")[0].toLowerCase();
+    return type === "VIDEO"
+      || clean.endsWith(".webm")
+      || clean.endsWith(".mp4")
+      || clean.endsWith(".ogg")
+      || clean.endsWith(".ogv")
+      || clean.endsWith(".mov")
+      || clean.endsWith(".m4v");
+  }
+
+  function renderProductImage(p) {
+    const mediaUrl = normalizeImageUrl(pickImageUrl(p));
+    const mediaType = pickProductMediaType(p);
+    const posterUrl = normalizeImageUrl(pickProductPosterUrl(p));
+
+    if (!mediaUrl) {
+      return `<img class="product-img" src="${PLACEHOLDER_IMG}" alt="prodotto">`;
+    }
+
+    const safeMediaUrl = escapeHtml(mediaUrl);
+
+    if (isVideoMedia(mediaUrl, mediaType)) {
+      if (posterUrl) {
+        const safePosterUrl = escapeHtml(posterUrl);
+        return `
+          <span class="product-video-thumb" title="Video prodotto">
+            <img class="product-img" src="${safePosterUrl}" alt="video prodotto" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG}'">
+          </span>`;
+      }
+
+      return `
+        <span class="product-video-thumb" title="Video prodotto">
+          <video class="product-img" muted playsinline preload="metadata">
+            <source src="${safeMediaUrl}" type="${getMediaMimeType(mediaUrl)}">
+          </video>
+        </span>`;
+    }
+
+    return `<img class="product-img" src="${safeMediaUrl}" alt="prodotto" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG}'">`;
+  }
+
+  function renderVariantImage(v) {
+    const raw = v?.mainImage ?? v?.imageUrl ?? v?.image ?? "";
+    const mediaUrl = normalizeImageUrl(raw);
+
+    if (!mediaUrl) {
+      return `<img class="variant-thumb" src="${PLACEHOLDER_IMG}" alt="variant">`;
+    }
+
+    const mediaType = v?.mainMediaType ?? v?.mediaType ?? "";
+    const posterUrl = normalizeImageUrl(v?.mainVideoPoster ?? v?.posterUrl ?? v?.poster ?? "");
+    const safeMediaUrl = escapeHtml(mediaUrl);
+    const safePosterUrl = posterUrl ? escapeHtml(posterUrl) : "";
+
+    if (isVideoMedia(mediaUrl, mediaType)) {
+      if (safePosterUrl) {
+        return `
+          <span class="variant-video-thumb" title="Video variante">
+            <img class="variant-thumb" src="${safePosterUrl}" alt="video variante" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG}'">
+          </span>`;
+      }
+
+      return `
+        <span class="variant-video-thumb" title="Video variante">
+          <video class="variant-thumb" muted playsinline preload="metadata">
+            <source src="${safeMediaUrl}" type="${getMediaMimeType(mediaUrl)}">
+          </video>
+        </span>`;
+    }
+
+    return `<img class="variant-thumb" src="${safeMediaUrl}" alt="variant" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG}'">`;
+  }
+
+  function renderVariantsTable(container, variants, productId) {
+    if (!variants || !variants.length) {
+      container.innerHTML = `<div class="text-muted small">Nessuna variante presente per questo prodotto.</div>`;
+      return;
+    }
+
+    const rowsHtml = variants.map(v => {
+      const enabledBadge = v.enabled
+        ? `<span class="badge rounded-pill text-bg-success">ON</span>`
+        : `<span class="badge rounded-pill text-bg-secondary">OFF</span>`;
+
+      const colorLabel = [v.colorCode, v.colorName].filter(Boolean).join(" - ");
+      const sizeLabel = [v.sizeCode, v.sizeName].filter(Boolean).join(" - ");
+
+      const qty = (v.stockQty == null ? null : Number(v.stockQty));
+      const isLow = (qty != null && qty >= 0 && qty < LOW_STOCK_THRESHOLD);
+
+      const stockHtml = (qty == null)
+        ? `<span class="text-muted">—</span>`
+        : `
+          <span class="${isLow ? 'fw-bold text-danger' : ''}">${qty}</span>
+          ${isLow ? `<span class="badge rounded-pill text-bg-warning ms-2">LOW</span>` : ``}
+        `;
+
+      const editUrl = `/admin/variants/${v.id}/edit`;
+
+      return `
+        <tr class="${isLow ? 'table-warning' : ''}">
+          <td class="text-center">${renderVariantImage(v)}</td>
+          <td class="text-nowrap"><strong>${escapeHtml(safeText(v.variantCode))}</strong></td>
+          <td class="text-nowrap">${escapeHtml(safeText(colorLabel))}</td>
+          <td class="text-nowrap">${escapeHtml(safeText(sizeLabel))}</td>
+          <td class="text-end text-nowrap">${v.price != null ? formatEuro(v.price) : `<span class="text-muted">—</span>`}</td>
+          <td class="text-end text-nowrap">${stockHtml}</td>
+          <td class="text-center">${enabledBadge}</td>
+          <td class="text-end text-nowrap">
+            <a class="btn btn-sm btn-outline-primary"
+               href="${editUrl}"
+               title="Modifica variante">
+              <i class="bi bi-pencil"></i>
+            </a>
+
+            <button type="button"
+                    class="btn btn-sm btn-outline-danger ms-1"
+                    data-action="delete-variant"
+                    data-variant-id="${v.id}"
+                    data-product-id="${productId}"
+                    data-variant-code="${escapeHtml(v.variantCode ?? '')}"
+                    title="Elimina variante">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    container.innerHTML = `
+      <div class="table-responsive">
+        <table class="table table-sm variants-table mb-2">
+          <thead>
+            <tr>
+              <th>Img</th>
+              <th>Codice</th>
+              <th>Colore</th>
+              <th>Taglia</th>
+              <th class="text-end">Prezzo</th>
+              <th class="text-end">Stock</th>
+              <th class="text-center">Stato</th>
+              <th class="text-end">Azioni</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+      </div>
+      <div class="small text-muted">
+        Soglia stock basso: <strong>${LOW_STOCK_THRESHOLD}</strong>
+      </div>
+    `;
+  }
+
+  async function loadVariants(productId) {
+    const cached = variantsCache.get(productId);
+    if (cached?.loaded) return cached;
+
+    variantsCache.set(productId, { loaded: false, rows: [] });
+
+    const res = await fetch(`${API_VARIANTS}/${productId}/variants`);
+    if (!res.ok) {
+      const msg = `Errore caricamento varianti (HTTP ${res.status})`;
+      variantsCache.set(productId, { loaded: true, rows: [], error: msg });
+      return variantsCache.get(productId);
+    }
+
+    const data = await res.json();
+    variantsCache.set(productId, {
+      loaded: true,
+      rows: Array.isArray(data) ? data : []
+    });
+
+    return variantsCache.get(productId);
+  }
+
+  function invalidateVariants(productId) {
+    variantsCache.delete(productId);
+  }
+
+  function toggleVariantsBox(productId) {
+    const box = document.getElementById(`variants-box-${productId}`);
+    const body = document.getElementById(`variants-body-${productId}`);
+    const btn = document.querySelector(`[data-action="toggle-variants"][data-id="${productId}"]`);
+
+    if (!box || !body || !btn) return;
+
+    const isHidden = box.classList.contains("d-none");
+    box.classList.toggle("d-none");
+
+    const icon = btn.querySelector("i");
+    const text = btn.querySelector("span");
+
+    if (icon && text) {
+      text.textContent = isHidden ? "Nascondi varianti" : "Varianti";
+      icon.className = isHidden ? "bi bi-chevron-up" : "bi bi-diagram-3";
+    }
+
+    if (isHidden) {
+      body.innerHTML = `
+        <div class="d-flex align-items-center gap-2 small text-muted">
+          <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+          Caricamento varianti…
+        </div>
+      `;
+
+      loadVariants(productId).then(result => {
+        if (result?.error) {
+          body.innerHTML = `<div class="text-danger small">${escapeHtml(result.error)}</div>`;
+          return;
+        }
+        renderVariantsTable(body, result.rows, productId);
+      }).catch(() => {
+        body.innerHTML = `<div class="text-danger small">Errore imprevisto durante caricamento varianti</div>`;
+      });
+    }
+  }
+
+  async function deleteVariant(variantId) {
+    return await fetch(`${API_VARIANTS_DELETE}/${variantId}`, {
+      method: "DELETE",
+      headers: { ...getCsrfHeaders() }
+    });
+  }
+
+  function renderProducts(rows) {
+    const tbody = document.getElementById("productsTbody");
+    tbody.innerHTML = "";
+
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">Nessun prodotto trovato.</td></tr>`;
+      return;
+    }
+
+    rows.forEach((p, idx) => {
+      const imgHtml = renderProductImage(p);
+
+      const subrowId = "subrow-" + p.id;
+
+      const tr = document.createElement("tr");
+      tr.className = "main-row clickable-row " + (idx % 2 === 0 ? "row-even" : "row-odd");
+      tr.dataset.subrowId = subrowId;
+      tr.setAttribute("aria-expanded", "false");
+
+      tr.innerHTML = `
+        <td>${imgHtml}</td>
+        <td><strong class="truncate" title="${escapeHtml(pickProductCode(p) || "—")}">${escapeHtml(pickProductCode(p) || "—")}</strong></td>
+        <td><span class="truncate" title="${escapeHtml(p.name ?? "")}">${escapeHtml(p.name ?? "")}</span></td>
+        <td><span class="truncate" title="${escapeHtml(p.categoryName ?? "—")}">${escapeHtml(p.categoryName ?? "—")}</span></td>
+        <td class="text-end"><span class="truncate" title="${escapeHtml(formatEuro(p.price))}">${formatEuro(p.price)}</span></td>
+        <td class="text-center"><span class="actions-indicator" title="Apri azioni">⋯</span></td>
+        <td class="text-center">
+          <span class="info-icon" data-action="info" title="Apri dettagli record">
+            <i class="bi bi-info-circle"></i>
+          </span>
+        </td>
+      `;
+
+      const viewUrl = pickViewUrl(p);
+      const printUrl = pickPrintUrl(p);
+      const viewClass = viewUrl ? "sub-action view" : "sub-action view disabled";
+      const printClass = printUrl ? "sub-action print" : "sub-action print disabled";
+
+      const addVariantUrl = `/admin/variants/new?productId=${p.id}`;
+
+      const trSub = document.createElement("tr");
+      trSub.className = "subrow d-none";
+      trSub.id = subrowId;
+
+      trSub.innerHTML = `
+        <td colspan="7">
+          <div class="sub-actions">
+            <a class="sub-action edit" href="/admin/products/edit/${p.id}" title="Modifica prodotto">
+              <i class="bi bi-pencil"></i><span>Modifica</span>
+            </a>
+
+            <a class="${viewClass}" href="${viewUrl || '#'}" title="${viewUrl ? 'Visualizza' : 'Non disponibile'}" aria-disabled="${viewUrl ? 'false' : 'true'}">
+              <i class="bi bi-eye"></i><span>Visualizza</span>
+            </a>
+
+            <a class="${printClass}" href="${printUrl || '#'}" title="${printUrl ? 'Stampa' : 'Non disponibile'}" aria-disabled="${printUrl ? 'false' : 'true'}">
+              <i class="bi bi-printer"></i><span>Stampa</span>
+            </a>
+
+            <span class="sub-action variants" role="button" data-action="toggle-variants" data-id="${p.id}" title="Mostra varianti">
+              <i class="bi bi-diagram-3"></i><span>Varianti</span>
+            </span>
+
+            <span class="sub-action delete" role="button" data-action="delete" data-id="${p.id}" title="Elimina prodotto">
+              <i class="bi bi-trash"></i><span>Elimina</span>
+            </span>
+
+            <div class="hint-close">Click sulla riga per chiudere</div>
+          </div>
+
+          <div id="variants-box-${p.id}" class="variants-box d-none">
+            <div class="variants-head">
+              <div class="variants-title">
+                <i class="bi bi-layers"></i>
+                Varianti prodotto
+                <span class="badge rounded-pill badge-soft">ID ${p.id}</span>
+              </div>
+
+      	  
+			  <div class="d-flex gap-2">
+                
+			 
+			 
+			 
+		  <button type="button"
+                        class="btn btn-sm btn-outline-secondary"
+                        data-action="toggle-variants"
+                        data-id="${p.id}">
+                  Chiudi
+                </button>
+              </div>
+            </div>
+
+            <div id="variants-body-${p.id}"></div>
+          </div>
+        </td>
+      `;
+
+      tr.addEventListener("click", () => toggleSubrow(tr));
+
+      const infoBtn = tr.querySelector('[data-action="info"]');
+      infoBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openInfoModal(p);
+      });
+
+      trSub.addEventListener("click", (e) => {
+        const actionEl = e.target.closest(".sub-action");
+        if (actionEl) e.stopPropagation();
+
+        const togVar = e.target.closest('[data-action="toggle-variants"]');
+        if (togVar) {
+          const id = Number(togVar.dataset.id);
+          toggleVariantsBox(id);
+          return;
+        }
+
+        const del = e.target.closest('[data-action="delete"]');
+        if (!del) return;
+
+        const id = Number(del.dataset.id);
+        const label = `${pickProductCode(p) || ("ID " + id)} - ${p.name ?? ""}`.trim();
+        openDeleteModal(id, label);
+      });
+
+      tbody.appendChild(tr);
+      tbody.appendChild(trSub);
+    });
+  }
+
+  async function loadCategories() {
+    const res = await fetch(API_CATEGORIES);
+    if (!res.ok) throw new Error("Errore caricamento categorie");
+    allCategories = await res.json();
+    renderCategories();
+  }
+
+  async function loadProducts() {
+    const res = await fetch(API_PRODUCTS);
+    if (!res.ok) throw new Error("Errore caricamento prodotti");
+    allProducts = await res.json();
+    renderProducts(applyFiltersAndSort());
+  }
+
+  async function deleteProduct(id) {
+    const res = await fetch(`${API_PRODUCTS}/${id}`, {
+      method: "DELETE",
+      headers: { ...getCsrfHeaders() }
+    });
+
+    if (!res.ok) {
+      throw new Error("Errore eliminazione prodotto");
+    }
+
+    allProducts = allProducts.filter(p => p.id !== id);
+    renderProducts(applyFiltersAndSort());
+    showAlert("success", "Prodotto eliminato");
+  }
+
+  document.getElementById("filtersForm").addEventListener("submit", e => {
+    e.preventDefault();
+    renderProducts(applyFiltersAndSort());
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    document.getElementById("categorySelect").value = "";
+    document.getElementById("searchInput").value = "";
+    renderProducts(applyFiltersAndSort());
+  });
+
+  document.getElementById("sortCode").onclick = () => toggleSort("code");
+  document.getElementById("sortName").onclick = () => toggleSort("name");
+  document.getElementById("sortPrice").onclick = () => toggleSort("price");
+
+  function toggleSort(field) {
+    currentSort.dir = (currentSort.field === field && currentSort.dir === "asc") ? "desc" : "asc";
+    currentSort.field = field;
+    updateSortIcons();
+    renderProducts(applyFiltersAndSort());
+  }
+
+  document.addEventListener("click", (e) => {
+    const inside = e.target.closest("#productsTable");
+    if (!inside) closeAllSubrows(null);
+  });
+
+  document.getElementById("confirmDeleteBtn").addEventListener("click", async () => {
+    if (!pendingDeleteId) return;
+
+    try {
+      await deleteProduct(pendingDeleteId);
+      pendingDeleteId = null;
+      pendingDeleteLabel = "";
+      if (deleteModalInstance) deleteModalInstance.hide();
+    } catch (err) {
+      showAlert("danger", "Errore durante eliminazione prodotto");
+    }
+  });
+
+  document.addEventListener("click", async (e) => {
+    const btn = e.target.closest('[data-action="delete-variant"]');
+    if (!btn) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const variantId = Number(btn.dataset.variantId);
+    const productId = Number(btn.dataset.productId);
+    const variantCode = btn.dataset.variantCode || String(variantId);
+
+    if (!confirm(`Vuoi eliminare la variante ${variantCode}?`)) {
+      return;
+    }
+
+    try {
+      const res = await deleteVariant(variantId);
+
+      if (!res.ok) {
+        alert(`Errore eliminazione variante (HTTP ${res.status})`);
+        return;
+      }
+
+      showAlert("success", `Variante ${variantCode} eliminata`);
+
+      invalidateVariants(productId);
+      toggleVariantsBox(productId);
+      toggleVariantsBox(productId);
+
+    } catch (err) {
+      alert("Errore imprevisto durante eliminazione variante");
+    }
+  });
+
+  (async () => {
+    try {
+      updateSortIcons();
+      await loadCategories();
+      await loadProducts();
+    } catch (err) {
+      showAlert("danger", "Errore caricamento dati iniziali");
+      console.error(err);
+    }
+  })();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

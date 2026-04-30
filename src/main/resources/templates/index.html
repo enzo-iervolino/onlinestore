@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Index')}"></head>
+
+
+<body class="home-mobile-page">
+
+    <!-- ================= MOBILE TOP BAR ================= -->
+	<div class="home-mobile-topbar d-md-none">
+	    <div class="home-mobile-topbar-left">
+	        <button
+	            class="home-mobile-menu-btn"
+	            type="button"
+	            data-bs-toggle="modal"
+	            data-bs-target="#mobileMenuModal"
+	            aria-label="Apri menu">
+	            <i class="bi bi-list"></i>
+	        </button>
+	    </div>
+
+	    <div class="home-mobile-topbar-center">
+	        <a href="/" class="home-mobile-brand" aria-label="Home">
+	            <span class="home-mobile-brand-icon">
+					<i class="bi bi-shop fs-4"></i>
+				</span>      
+	            
+	            <span class="home-mobile-brand-text">Online Store</span>
+	        </a>
+	    </div>
+
+	    <div class="home-mobile-topbar-right">
+	        <button
+	            class="home-mobile-search-btn"
+	            type="button"
+	            data-bs-toggle="modal"
+	            data-bs-target="#searchModal"
+	            aria-label="Apri ricerca">
+	            <i class="bi bi-search"></i>
+	        </button>
+	    </div>
+	</div>
+		
+		 
+
+    <!-- ================= NAV ================= -->
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <!-- ================= HERO ================= -->
+    <header class="home-hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="kicker">New Season / Fashion Edit</div>
+
+                <h1>Eleganza urbana con cover e parallax accattivanti</h1>
+
+                <p>
+                    Homepage fashion immersiva con stile premium, collegata a Shop,
+                    Product dinamico e Carrello funzionante via localStorage.
+                </p>
+
+                <div class="hero-actions">
+                    <a class="btn btn-white" th:href="@{/shop}">
+                        <i class="bi bi-stars me-1"></i> Vai allo Shop
+                    </a>
+
+                    <a href="#collezioni" class="btn btn-soft">
+                        <i class="bi bi-grid me-1"></i> Collezioni
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="scroll-indicator">
+            <i class="bi bi-chevron-double-down me-1"></i>Scroll
+        </div>
+    </header>
+
+    <section id="collezioni" class="section-dark">
+        <div class="container">
+            <div class="text-center mb-3 reveal">
+                <h2 class="section-title">Collezioni Iconiche</h2>
+                <p class="section-subtitle">
+                    Sezioni visive in stile editoriale per valorizzare campagne moda e promozioni stagionali.
+                </p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4 reveal">
+                    <div class="fashion-card">
+                        <img th:src="@{/assets/img/collections-donna.jpg}" alt="Donna">
+                        <div class="overlay">
+                            <div>
+                                <h5>Donna</h5>
+                                <p class="mb-0 text-white-50">Look sofisticati</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4 reveal">
+                    <div class="fashion-card">
+                        <img th:src="@{/assets/img/collections-streetwear.jpg}" alt="Streetwear">
+                        <div class="overlay">
+                            <div>
+                                <h5>Streetwear</h5>
+                                <p class="mb-0 text-white-50">Vibe urbana</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4 reveal">
+                    <div class="fashion-card">
+                        <img th:src="@{/assets/img/collections-luxury.jpg}" alt="Luxury">
+                        <div class="overlay">
+                            <div>
+                                <h5>Luxury</h5>
+                                <p class="mb-0 text-white-50">Texture premium</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PARALLAX 1 -->
+    <section class="parallax" th:style="'--bg-img:url(' + @{/assets/img/parallax-1.jpg} + ')'">
+        <div class="inner reveal">
+            <span class="pill">Editorial Campaign</span>
+            <h2>Flow completo Home → Shop → Product → Cart</h2>
+            <p>Navigazione reale tra file con design coerente e carrello sincronizzato.</p>
+            <a th:href="@{/shop}" class="btn btn-white rounded-pill px-4">Esplora lo Shop</a>
+        </div>
+    </section>
+
+    <section id="novita" class="section-light">
+        <div class="container">
+            <div class="text-center mb-5 reveal">
+                <h2 class="section-title">Nuovi Arrivi</h2>
+                <p class="section-subtitle">
+                    Preview prodotti con link dinamici alla pagina dettaglio.
+                </p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-sm-6 col-lg-3 reveal">
+                    <div class="product-tile">
+                        <img th:src="@{/assets/prod/p1-1.jpg}" alt="Blazer">
+                        <div class="product-body">
+                            <div class="product-meta">Blazer</div>
+                            <div class="product-title">Tailored Nude Blazer</div>
+                            <div class="price-wrap">
+                                <span class="price">€129</span>
+                                <span class="price-old">€169</span>
+                            </div>
+                            <a class="btn-open" th:href="@{/shop/1}">Apri prodotto</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3 reveal">
+                    <div class="product-tile">
+                        <img th:src="@{/assets/prod/p2-1.jpg}" alt="Sneakers">
+                        <div class="product-body">
+                            <div class="product-meta">Sneakers</div>
+                            <div class="product-title">Urban White Sneakers</div>
+                            <div class="price-wrap">
+                                <span class="price">€89</span>
+                                <span class="price-old">€119</span>
+                            </div>
+                            <a class="btn-open" th:href="@{/shop/2}">Apri prodotto</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3 reveal">
+                    <div class="product-tile">
+                        <img th:src="@{/assets/prod/p5-1.jpg}" alt="Dress">
+                        <div class="product-body">
+                            <div class="product-meta">Dress</div>
+                            <div class="product-title">Silk Evening Dress</div>
+                            <div class="price-wrap">
+                                <span class="price">€149</span>
+                                <span class="price-old">€199</span>
+                            </div>
+                            <a class="btn-open" th:href="@{/shop/5}">Apri prodotto</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3 reveal">
+                    <div class="product-tile">
+                        <img th:src="@{/assets/prod/f1.jpg}" alt="Bag">
+                        <div class="product-body">
+                            <div class="product-meta">Bag</div>
+                            <div class="product-title">Statement Bag Beige</div>
+                            <div class="price-wrap">
+                                <span class="price">€74</span>
+                                <span class="price-old">€99</span>
+                            </div>
+                            <a class="btn-open" th:href="@{/shop/4}">Apri prodotto</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4 reveal">
+                <a th:href="@{/shop}" class="btn btn-dark rounded-pill px-4">
+                    <i class="bi bi-bag me-1"></i> Vai a tutti i prodotti
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-light pt-0">
+        <div class="container">
+            <div class="promo-box reveal">
+                <div class="row g-4 align-items-center">
+                    <div class="col-lg-7">
+                        <div class="icon">
+                            <i class="bi bi-lightning-charge-fill"></i>
+                        </div>
+
+                        <h3 class="brand-font mb-3">Mid Season Sale fino al 40%</h3>
+                        <p class="text-secondary mb-4">
+                            CTA pulite verso shop, pagina prodotto e carrello.
+                        </p>
+
+                        <div class="d-flex flex-wrap gap-2">
+                            <a th:href="@{/shop}" class="btn btn-dark rounded-pill px-4">Acquista ora</a>
+                            <a th:href="@{/shop/1}" class="btn btn-outline-dark rounded-pill px-4">Apri prodotto</a>
+                            <a th:href="@{/cart}" class="btn btn-outline-dark rounded-pill px-4">Vai al carrello</a>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-5">
+                        <img
+                                class="img-fluid rounded-4 shadow"
+                                style="max-height:360px;width:100%;object-fit:cover"
+                                th:src="@{/assets/img/promo-box.jpg}"
+                                alt="Promo">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PARALLAX 2 -->
+    <section class="parallax" th:style="'--bg-img:url(' + @{/assets/img/parallax-2.jpg} + ')'">
+        <div class="inner reveal">
+            <span class="pill">Runway Inspired</span>
+            <h2>Versione modulare e più professionale</h2>
+            <p>Dati separati, utility riutilizzabili e pagina prodotto dinamica via query string.</p>
+            <a th:href="@{/cart}" class="btn btn-soft rounded-pill px-4">Apri Carrello</a>
+        </div>
+    </section>
+
+    <section id="newsletter" class="section-dark">
+        <div class="container">
+            <div class="newsletter reveal">
+                <div class="row g-4 align-items-center">
+                    <div class="col-lg-7">
+                        <h3 class="brand-font mb-2">Iscriviti alla Newsletter</h3>
+                        <p class="mb-0 text-white-50">Ricevi drop esclusivi, novità e offerte riservate.</p>
+                    </div>
+
+                    <div class="col-lg-5">
+                        <form class="row g-2" id="newsletterForm">
+                            <div class="col-12 col-md-8">
+                                <input type="email" class="form-control" required placeholder="Inserisci la tua email">
+                            </div>
+                            <div class="col-12 col-md-4 d-grid">
+                                <button class="btn btn-light text-dark rounded-pill" type="submit">Iscriviti</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="position-fixed bottom-0 end-0 p-3" style="z-index:1080">
+                <div id="newsletterToast"
+                     class="toast text-bg-dark border-0"
+                     role="alert"
+                     aria-live="assertive"
+                     aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">✅ Iscrizione inviata con successo!</div>
+                        <button type="button"
+                                class="btn-close btn-close-white me-2 m-auto"
+                                data-bs-dismiss="toast"
+                                aria-label="Chiudi"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+	
+	
+	<div class="modal fade" id="mobileMenuModal" tabindex="-1" aria-hidden="true">
+	    <div class="modal-dialog modal-fullscreen-sm-down">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                <h5 class="modal-title">Menu</h5>
+	                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+	            </div>
+	            <div class="modal-body">
+	                <ul class="list-unstyled mb-0">
+	                    <li><a href="/" class="text-decoration-none d-block py-2">Home</a></li>
+	                    <li><a href="/shop" class="text-decoration-none d-block py-2">Shop</a></li>
+	                    <li><a href="/catalogo" class="text-decoration-none d-block py-2">Catalogo</a></li>
+	                    <li><a href="/contatti" class="text-decoration-none d-block py-2">Contatti</a></li>
+	                </ul>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+   
+	
+	<div class="modal fade" id="searchModal" tabindex="-1" aria-hidden="true">
+	    <div class="modal-dialog modal-dialog-centered">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                <h5 class="modal-title">Cerca</h5>
+	                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+	            </div>
+	            <div class="modal-body">
+	                <form action="/search" method="get">
+	                    <div class="input-group">
+	                        <input type="text" name="q" class="form-control" placeholder="Cerca prodotti...">
+	                        <button class="btn btn-dark" type="submit">
+	                            <i class="bi bi-search"></i>
+	                        </button>
+	                    </div>
+	                </form>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	
+	
+	
+	
+	
+    <div th:replace="~{fragments/cart :: cartOffcanvas}"></div>
+    <div th:replace="~{fragments/login-modal :: loginModal}"></div>
+    <div th:replace="~{fragments/forgot-password-modal :: forgotPasswordModal}"></div>
+    <div th:replace="~{fragments/profile-modal :: profileModal}"></div>
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/cart.js}"></script>
+
+</body>
+</html>

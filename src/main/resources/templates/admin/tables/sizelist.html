@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <title>Taglie</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        .code-badge{
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+            letter-spacing:.3px;
+        }
+        .table td, .table th{ vertical-align: middle; }
+    </style>
+</head>
+<body>
+
+<div class="container my-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h3 mb-0">Taglie</h1>
+            <div class="text-muted small">Tabella: <strong>size_options</strong></div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a class="btn btn-primary" th:href="@{/admin/sizes/new}">
+                <i class="bi bi-plus-lg"></i> Nuova taglia
+            </a>
+            <a class="btn btn-outline-secondary" th:href="@{/admin/products}">
+                <i class="bi bi-box-seam"></i> Prodotti
+            </a>
+			<a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/dashboard}">Dashboard</a>
+			
+		</div>
+    </div>
+
+    <div th:if="${success != null}" class="alert alert-success" th:text="${success}">OK</div>
+    <div th:if="${error != null}" class="alert alert-danger" th:text="${error}">Errore</div>
+
+    <form class="row g-2 mb-3" method="get" th:action="@{/admin/sizes}">
+        <div class="col-md-5">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control" name="q"
+                       placeholder="Cerca per nome o codice…"
+                       th:value="${searchText}">
+            </div>
+        </div>
+        <div class="col-md-auto">
+            <button class="btn btn-outline-primary" type="submit">Cerca</button>
+        </div>
+        <div class="col-md-auto">
+            <a class="btn btn-outline-secondary" th:href="@{/admin/sizes}">Reset</a>
+        </div>
+    </form>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width:70px;">ID</th>
+                        <th style="width:140px;">Codice</th>
+                        <th>Nome (IT)</th>
+                        <th style="width:170px;" class="text-end">Azioni</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    <tr th:if="${sizes == null or #lists.isEmpty(sizes)}">
+                        <td colspan="4" class="text-center text-muted py-4">
+                            Nessuna taglia trovata.
+                        </td>
+                    </tr>
+
+                    <tr th:each="s : ${sizes}">
+                        <td th:text="${s.id}">1</td>
+
+                        <td>
+                            <span class="badge bg-dark-subtle text-dark code-badge" th:text="${s.code}">M</span>
+                        </td>
+
+                        <td th:text="${s.nameIt}">M</td>
+
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary"
+                               th:href="@{/admin/sizes/edit/{id}(id=${s.id})}">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+
+                            <form th:action="@{/admin/sizes/delete}" method="post" class="d-inline">
+                                <input type="hidden" name="id" th:value="${s.id}">
+                                <button type="submit"
+                                        class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Eliminare questa taglia?');">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

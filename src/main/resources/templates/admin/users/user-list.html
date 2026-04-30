@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Lista utenti</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/cartOffcanvas.css}">
+    <link rel="stylesheet" th:href="@{/css/product.css}">
+
+    <style>
+        body {
+            background: #f5f7fb;
+        }
+
+        .page-header-card {
+            border: 0;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #0d6efd 0%, #3d8bfd 45%, #6610f2 100%);
+            color: #fff;
+            box-shadow: 0 10px 30px rgba(13, 110, 253, .16);
+        }
+
+        .page-header-card .subtitle {
+            color: rgba(255, 255, 255, .85);
+            font-size: .95rem;
+        }
+
+        .filters-card {
+            border: 1px solid #e9ecef;
+            border-radius: 18px;
+            padding: 16px;
+            background: #ffffff;
+            box-shadow: 0 6px 20px rgba(0,0,0,.04);
+        }
+
+        .table-card {
+            border: 1px solid #e9ecef;
+            border-radius: 18px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(0,0,0,.04);
+        }
+
+        .users-table {
+            margin-bottom: 0;
+        }
+
+        .users-table thead th {
+            background: #111827;
+            color: #fff;
+            font-size: .78rem;
+            font-weight: 700;
+            letter-spacing: .02em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            border: 0;
+            padding-top: .9rem;
+            padding-bottom: .9rem;
+        }
+
+        .users-table tbody td {
+            vertical-align: middle;
+            padding-top: .8rem;
+            padding-bottom: .8rem;
+        }
+
+        tr.sub-row td {
+            background: #f8fbff;
+            border-top: 0;
+        }
+
+        tr.main-row.row-even td {
+            background: #fcfcfd;
+        }
+
+        tr.main-row.row-odd td {
+            background: #ffffff;
+        }
+
+        tr.main-row:hover td {
+            background: #f3f8ff !important;
+            transition: .15s ease-in-out;
+        }
+
+        td.toggle-cell {
+            cursor: pointer;
+        }
+
+        .avatar-mini {
+            width: 38px;
+            height: 38px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,.08);
+            background: #fff;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #212529;
+            line-height: 1.1;
+        }
+
+        .user-sub {
+            font-size: .78rem;
+            color: #6c757d;
+        }
+
+        .badge-soft {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            border-radius: 999px;
+            padding: .45rem .75rem;
+            font-size: .72rem;
+            font-weight: 600;
+        }
+
+        .badge-role-admin {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-role-user {
+            background: #e7f1ff;
+            color: #0d6efd;
+        }
+
+        .badge-status-on {
+            background: #d1f7df;
+            color: #157347;
+        }
+
+        .badge-status-off {
+            background: #f8d7da;
+            color: #b02a37;
+        }
+
+        .expand-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .table-toolbar-note {
+            font-size: .82rem;
+            color: #6c757d;
+        }
+
+        .empty-state {
+            padding: 2rem 1rem;
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .page-header-card .btn {
+                width: 100%;
+            }
+
+            .filters-card .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container py-4">
+
+    <div class="card page-header-card mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+                <div>
+                    <h2 class="mb-1 fw-bold">
+                        <i class="bi bi-people-fill me-2"></i>Gestione Utenti
+                    </h2>
+                    <div class="subtitle">
+                        Elenco utenti con filtri, ricerca rapida e azioni espandibili per ogni riga.
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-light btn-sm rounded-pill px-3" th:href="@{/admin/dashboard}">
+                        <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                    </a>
+                    <a class="btn btn-outline-light btn-sm rounded-pill px-3" th:href="@{/admin/users/new}">
+                        <i class="bi bi-plus-circle me-1"></i>Nuovo utente
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="filters-card mb-3">
+        <form id="filtersForm" class="row g-3 align-items-end" onsubmit="return false;">
+            <div class="col-lg-4 col-md-6">
+                <label for="searchInput" class="form-label small fw-semibold text-muted mb-1">Ricerca</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input
+                            id="searchInput"
+                            class="form-control"
+                            type="text"
+                            placeholder="Cerca per ID, nome o email">
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <label for="roleSelect" class="form-label small fw-semibold text-muted mb-1">Ruolo</label>
+                <select id="roleSelect" class="form-select form-select-sm">
+                    <option value="">Tutti i ruoli</option>
+                    <option value="ROLE_ADMIN">Amministratore</option>
+                    <option value="ROLE_USER">Utente</option>
+                </select>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <label for="sortSelect" class="form-label small fw-semibold text-muted mb-1">Ordina per</label>
+                <select id="sortSelect" class="form-select form-select-sm">
+                    <option value="name-asc">Nome A-Z</option>
+                    <option value="name-desc">Nome Z-A</option>
+                    <option value="email-asc">Email A-Z</option>
+                    <option value="email-desc">Email Z-A</option>
+                </select>
+            </div>
+
+            <div class="col-lg-2 col-md-6 d-flex gap-2">
+                <button class="btn btn-primary btn-sm w-100 rounded-pill" id="applyBtn" type="button">
+                    <i class="bi bi-funnel me-1"></i>Filtra
+                </button>
+                <button id="resetBtn" class="btn btn-outline-secondary btn-sm w-100 rounded-pill" type="button">
+                    Reset
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+        <div class="table-toolbar-note">
+            Clicca su una riga per aprire le azioni rapide dell’utente.
+        </div>
+        <div class="table-toolbar-note" th:if="${users != null}">
+            Totale utenti:
+            <strong th:text="${#lists.size(users)}">0</strong>
+        </div>
+    </div>
+
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="table users-table align-middle small" id="usersTable">
+                <thead>
+                <tr>
+                    <th style="width: 70px;">Avatar</th>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Telefono</th>
+                    <th>Ruolo</th>
+                    <th>Stato</th>
+                    <th class="text-center" style="width: 90px;">Azioni</th>
+                </tr>
+                </thead>
+
+                <tbody id="usersTableBody">
+                <th:block th:if="${users != null and !users.isEmpty()}">
+                    <th:block th:each="user, i : ${users}">
+                        <th:block th:replace="~{fragments/table-rows :: userRows(user=${user}, idx=${i.index})}"></th:block>
+                    </th:block>
+                </th:block>
+
+                <tr id="emptyRow" th:if="${users == null or users.isEmpty()}">
+                    <td colspan="7" class="text-center empty-state">
+                        <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+                        Nessun utente trovato.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const tableBody = document.getElementById("usersTableBody");
+        const searchInput = document.getElementById("searchInput");
+        const roleSelect = document.getElementById("roleSelect");
+        const sortSelect = document.getElementById("sortSelect");
+        const applyBtn = document.getElementById("applyBtn");
+        const resetBtn = document.getElementById("resetBtn");
+
+        if (!tableBody) {
+            return;
+        }
+
+        const staticEmptyRow = document.getElementById("emptyRow");
+
+        function getCellText(row, index) {
+            if (!row || !row.cells || row.cells.length <= index) {
+                return "";
+            }
+            return (row.cells[index].innerText || row.cells[index].textContent || "").trim();
+        }
+
+        function normalize(value) {
+            return (value || "").toString().trim().toLowerCase();
+        }
+
+        function buildUserGroups() {
+            const rows = Array.from(tableBody.querySelectorAll("tr")).filter(row => row.id !== "emptyRow");
+            const groups = [];
+            let i = 0;
+
+            while (i < rows.length) {
+                const current = rows[i];
+
+                if (!current.classList.contains("main-row")) {
+                    i++;
+                    continue;
+                }
+
+                const groupRows = [current];
+                let j = i + 1;
+
+                while (j < rows.length && rows[j].classList.contains("sub-row")) {
+                    groupRows.push(rows[j]);
+                    j++;
+                }
+
+                const name = getCellText(current, 1);
+                const email = getCellText(current, 2);
+                const role = getCellText(current, 4);
+                const detailsText = groupRows.map(r => r.innerText || r.textContent || "").join(" ");
+                const codeMatch = detailsText.match(/\bID\b\s*[:#-]?\s*(\d+)/i);
+                const code = codeMatch ? codeMatch[1] : "";
+
+                groups.push({
+                    mainRow: current,
+                    rows: groupRows,
+                    name: name,
+                    email: email,
+                    role: role,
+                    code: code,
+                    searchableText: normalize(name + " " + email + " " + code + " " + detailsText)
+                });
+
+                i = j;
+            }
+
+            return groups;
+        }
+
+        function ensureDynamicEmptyRow() {
+            let row = document.getElementById("dynamicEmptyRow");
+            if (!row) {
+                row = document.createElement("tr");
+                row.id = "dynamicEmptyRow";
+                row.innerHTML = '<td colspan="7" class="text-center empty-state"><i class="bi bi-search fs-4 d-block mb-2"></i>Nessun utente trovato.</td>';
+            }
+            return row;
+        }
+
+        function removeDynamicEmptyRow() {
+            const row = document.getElementById("dynamicEmptyRow");
+            if (row) {
+                row.remove();
+            }
+        }
+
+        function applyFiltersAndSorting() {
+            const query = normalize(searchInput.value);
+            const selectedRole = normalize(roleSelect.value);
+            const selectedSort = sortSelect.value;
+
+            const groups = buildUserGroups();
+
+            let filteredGroups = groups.filter(group => {
+                const matchesQuery = !query || group.searchableText.includes(query);
+                const matchesRole = !selectedRole || normalize(group.role) === selectedRole;
+                return matchesQuery && matchesRole;
+            });
+
+            filteredGroups.sort((a, b) => {
+                const nameA = normalize(a.name);
+                const nameB = normalize(b.name);
+                const emailA = normalize(a.email);
+                const emailB = normalize(b.email);
+
+                switch (selectedSort) {
+                    case "name-desc":
+                        return nameB.localeCompare(nameA, "it", { sensitivity: "base" }) ||
+                               emailA.localeCompare(emailB, "it", { sensitivity: "base" });
+                    case "email-asc":
+                        return emailA.localeCompare(emailB, "it", { sensitivity: "base" }) ||
+                               nameA.localeCompare(nameB, "it", { sensitivity: "base" });
+                    case "email-desc":
+                        return emailB.localeCompare(emailA, "it", { sensitivity: "base" }) ||
+                               nameA.localeCompare(nameB, "it", { sensitivity: "base" });
+                    case "name-asc":
+                    default:
+                        return nameA.localeCompare(nameB, "it", { sensitivity: "base" }) ||
+                               emailA.localeCompare(emailB, "it", { sensitivity: "base" });
+                }
+            });
+
+            groups.forEach(group => group.rows.forEach(row => row.remove()));
+            removeDynamicEmptyRow();
+            if (staticEmptyRow) {
+                staticEmptyRow.remove();
+            }
+
+            if (filteredGroups.length === 0) {
+                tableBody.appendChild(ensureDynamicEmptyRow());
+                return;
+            }
+
+            filteredGroups.forEach(group => {
+                group.rows.forEach(row => tableBody.appendChild(row));
+            });
+        }
+
+        applyBtn.addEventListener("click", applyFiltersAndSorting);
+        searchInput.addEventListener("input", applyFiltersAndSorting);
+        roleSelect.addEventListener("change", applyFiltersAndSorting);
+        sortSelect.addEventListener("change", applyFiltersAndSorting);
+
+        resetBtn.addEventListener("click", function () {
+            searchInput.value = "";
+            roleSelect.value = "";
+            sortSelect.value = "name-asc";
+            applyFiltersAndSorting();
+        });
+
+        applyFiltersAndSorting();
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const params = new URLSearchParams(window.location.search);
+        const userId = params.get('openOrdersUserId');
+
+        if (!userId || typeof bootstrap === 'undefined') {
+            return;
+        }
+
+        const collapseEl = document.getElementById('user-actions-' + userId);
+        if (collapseEl) {
+            const collapse = bootstrap.Collapse.getOrCreateInstance(collapseEl, { toggle: false });
+            collapse.show();
+        }
+
+        const modalEl = document.getElementById('ordersModal-' + userId);
+        if (modalEl) {
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    });
+</script>
+
+</body>
+</html>

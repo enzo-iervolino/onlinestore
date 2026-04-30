@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-page: #f5f7fb;
+            --card-bg: #ffffff;
+            --card-border: rgba(17, 24, 39, 0.08);
+            --text-main: #1f2937;
+            --text-soft: #6b7280;
+            --shadow-soft: 0 14px 36px rgba(15, 23, 42, 0.06);
+            --radius-xl: 22px;
+            --radius-lg: 18px;
+            --radius-md: 14px;
+        }
+
+        body {
+            background: var(--bg-page);
+            color: var(--text-main);
+        }
+
+        .checkout-page {
+            padding: .75rem 0 2rem;
+        }
+
+        .checkout-shell {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        .page-head {
+            margin-bottom: .65rem;
+        }
+
+        .page-title {
+            font-size: clamp(1.45rem, 2.2vw, 2rem);
+            font-weight: 800;
+            margin-bottom: .15rem;
+        }
+
+        .page-subtitle {
+            color: var(--text-soft);
+            margin: 0;
+        }
+
+        .checkout-stack {
+            display: flex;
+            flex-direction: column;
+            gap: .85rem;
+        }
+
+        .checkout-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+        }
+
+        .checkout-card.summary-card-main {
+            position: sticky;
+            top: 64px;
+            z-index: 30;
+            max-height: none;
+            overflow: visible;
+        }
+
+        .card-head {
+            padding: .8rem 1.15rem;
+            border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+        }
+
+        .summary-card-main .card-head {
+            padding: .55rem 1rem;
+            font-size: .92rem;
+        }
+
+        .card-body-custom {
+            padding: 1rem 1.15rem;
+        }
+
+        .summary-card-main .card-body-custom {
+            padding: .65rem 1rem .75rem;
+        }
+
+        .readonly-banner {
+            border-radius: 14px;
+            border: 1px solid rgba(108, 117, 125, 0.18);
+            background: #f8f9fa;
+            color: #495057;
+        }
+
+        .summary-empty {
+            text-align: center;
+            color: var(--text-soft);
+            padding: 1rem 0;
+        }
+
+        .summary-list {
+            display: flex;
+            flex-direction: column;
+            gap: .45rem;
+            max-height: none;
+            overflow: visible;
+        }
+
+        .summary-item {
+            display: grid;
+            grid-template-columns: 48px minmax(0, 1fr) auto;
+            gap: .65rem;
+            align-items: center;
+            padding-bottom: .45rem;
+            border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+        }
+
+        .summary-item:last-child {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .summary-thumb {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            border-radius: 12px;
+            background: #f8f9fa;
+            border: 1px solid rgba(17, 24, 39, 0.06);
+            padding: 3px;
+            display: block;
+        }
+
+        video.summary-thumb {
+            display: block;
+        }
+
+        .summary-name {
+            font-size: .86rem;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: .1rem;
+            overflow-wrap: anywhere;
+        }
+
+        .summary-meta {
+            font-size: .76rem;
+            color: var(--text-soft);
+            line-height: 1.2;
+        }
+
+        .summary-price {
+            font-size: .84rem;
+            font-weight: 800;
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        .total-box {
+            margin-top: .45rem;
+            padding-top: .5rem;
+            border-top: 1px solid rgba(17, 24, 39, 0.08);
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: .28rem;
+            font-size: .82rem;
+            line-height: 1.15;
+        }
+
+        .total-row.muted {
+            color: var(--text-soft);
+        }
+
+        .total-row.discount {
+            color: #dc3545;
+        }
+
+        .total-row.gift {
+            color: #0d6efd;
+        }
+
+        .total-row.final {
+            margin-top: .4rem;
+            padding-top: .5rem;
+            border-top: 1px solid rgba(17, 24, 39, 0.08);
+            font-size: .98rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .shipping-grid .form-label {
+            font-size: .8rem;
+            font-weight: 700;
+            color: #4b5563;
+            margin-bottom: .25rem;
+        }
+
+        .shipping-grid .form-control {
+            min-height: 40px;
+            border-radius: 12px;
+            font-size: .9rem;
+        }
+
+        .shipping-grid .input-group-text {
+            min-width: 40px;
+            justify-content: center;
+            background: #f8f9fa;
+            border-color: #dee2e6;
+            border-radius: 12px 0 0 12px;
+        }
+
+        .shipping-grid .input-group .form-control {
+            border-radius: 0 12px 12px 0;
+        }
+
+        .tool-box {
+            border: 1px solid rgba(17, 24, 39, 0.07);
+            border-radius: 14px;
+            background: #fbfcfe;
+            padding: .75rem;
+            height: 100%;
+        }
+
+        .tool-title {
+            font-size: .92rem;
+            font-weight: 800;
+            margin-bottom: .7rem;
+            display: flex;
+            align-items: center;
+            gap: .45rem;
+        }
+
+        .btn-trash {
+            width: 44px;
+            min-width: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pm-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .pm-option {
+            border: 1px solid #dee2e6;
+            border-radius: 16px;
+            padding: 9px;
+            background: #fff;
+            cursor: pointer;
+            transition: all .18s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .pm-option:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.06);
+        }
+
+        .pm-option input {
+            display: none;
+        }
+
+        .pm-option .pm-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex: 0 0 auto;
+        }
+
+        .pm-option .pm-title {
+            font-weight: 800;
+            font-size: .96rem;
+            line-height: 1.1;
+        }
+
+        .pm-option .pm-sub {
+            font-size: .82rem;
+            color: var(--text-soft);
+            margin-top: 2px;
+            line-height: 1.25;
+        }
+
+        .pm-option .pm-right {
+            flex: 0 0 auto;
+            width: 28px;
+            text-align: right;
+            margin-left: auto;
+        }
+
+        .pm-option.active {
+            border-color: #0d6efd;
+            background: #fdfefe;
+            box-shadow: 0 0 0 .22rem rgba(13,110,253,.12);
+        }
+
+        .pay-banner {
+            border-radius: 16px;
+            border: 1px solid rgba(25, 135, 84, 0.18);
+            background: #eef9f2;
+        }
+
+        .cta-box {
+            padding: .9rem 1.15rem;
+            border-top: 1px solid rgba(17, 24, 39, 0.08);
+            background: #fbfcfe;
+        }
+
+        .checkout-cta {
+            min-height: 46px;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: .95rem;
+        }
+
+        .helper-text {
+            color: var(--text-soft);
+            font-size: .9rem;
+            text-align: center;
+            margin-top: .65rem;
+        }
+
+        .gift-modal-info {
+            border-radius: 14px;
+            background: #eef5ff;
+            border: 1px solid rgba(13,110,253,.18);
+        }
+
+        @media (max-width: 991.98px) {
+            .pm-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .checkout-page {
+                padding: .55rem 0 1.5rem;
+            }
+
+            .card-head,
+            .card-body-custom,
+            .cta-box {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .summary-item {
+                grid-template-columns: 44px minmax(0, 1fr);
+                align-items: start;
+            }
+
+            .checkout-card.summary-card-main {
+                top: 54px;
+            }
+
+            .summary-thumb {
+                width: 44px;
+                height: 44px;
+            }
+
+            .summary-price {
+                grid-column: 2;
+                text-align: left;
+                margin-top: .3rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="checkout-page">
+    <div class="container">
+        <div class="checkout-shell">
+
+            <div class="page-head text-center">
+                <h1 class="page-title">Checkout</h1>
+                <p class="page-subtitle">Completa il tuo ordine in pochi passaggi.</p>
+            </div>
+
+            <div class="checkout-stack">
+
+                <div class="checkout-card summary-card-main">
+					<div class="card-head d-flex align-items-center gap-2">
+					    <i class="bi bi-bag-check"></i>
+					    <span>Il tuo ordine</span>
+
+					    <a th:href="@{/shop}" class="btn btn-sm btn-outline-secondary ms-auto">
+					        <i class="bi bi-arrow-left me-2"></i>
+					        Torna allo shop
+					    </a>
+					</div>
+						 
+				
+
+                    <div class="card-body-custom">
+                        <div th:if="${cart == null or cart.empty}" class="summary-empty">
+                            Carrello vuoto
+                        </div>
+
+                        <div th:if="${cart != null and !cart.empty}">
+                            <div class="summary-list">
+                                <div th:each="item : ${cart.items}"
+                                     class="summary-item"
+                                     th:with="mediaUrl=${item.image},
+                                              mediaLower=${item.image != null ? #strings.toLowerCase(item.image) : ''},
+                                              isVideo=${item.image != null and !#strings.isEmpty(item.image) and (#strings.endsWith(mediaLower, '.webm') or #strings.endsWith(mediaLower, '.mp4') or #strings.endsWith(mediaLower, '.mov') or #strings.endsWith(mediaLower, '.ogg') or #strings.endsWith(mediaLower, '.ogv'))}">
+
+                                    <video th:if="${isVideo}"
+                                           class="summary-thumb"
+                                           muted
+                                           autoplay
+                                           loop
+                                           playsinline
+                                           preload="metadata"
+                                           aria-label="Video prodotto">
+                                        <source th:src="${mediaUrl}"
+                                                th:type="${#strings.endsWith(mediaLower, '.webm') ? 'video/webm' : (#strings.endsWith(mediaLower, '.ogg') or #strings.endsWith(mediaLower, '.ogv') ? 'video/ogg' : 'video/mp4')}">
+                                    </video>
+
+                                    <img th:unless="${isVideo}"
+                                         th:src="${item.image != null and !#strings.isEmpty(item.image)} ? ${item.image} : @{/images/no-image.png}"
+                                         class="summary-thumb"
+                                         alt="img">
+
+                                    <div style="min-width:0;">
+                                        <div class="summary-name" th:text="${item.name}">Prodotto</div>
+
+                                        <div class="summary-meta"
+                                             th:if="${(item.color != null and !#strings.isEmpty(item.color)) or (item.size != null and !#strings.isEmpty(item.size))}">
+                                            <span th:text="${item.color}">Colore</span>
+                                            <span th:if="${item.color != null and !#strings.isEmpty(item.color) and item.size != null and !#strings.isEmpty(item.size)}"> / </span>
+                                            <span th:text="${item.size}">Taglia</span>
+                                        </div>
+
+                                        <div class="summary-meta">
+                                            € <span th:text="${item.price}">0</span>
+                                            × <span th:text="${item.quantity}">1</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="summary-price">
+                                        € <span th:text="${item.rowTotal}">0</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="total-box">
+                                <div class="total-row muted">
+                                    <span>Subtotale</span>
+                                    <span>€ <span th:text="${cart.total}">0</span></span>
+                                </div>
+
+                                <div class="total-row muted">
+                                    <span>Spedizione</span>
+
+                                    <span th:if="${shippingCost != null and shippingCost.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                                        € <span th:text="${shippingCost}">0</span>
+                                    </span>
+
+                                    <span th:if="${shippingCost == null or shippingCost.compareTo(T(java.math.BigDecimal).ZERO) == 0}"
+                                          class="text-success fw-semibold">
+                                        Gratuita
+                                    </span>
+                                </div>
+
+                                <div class="total-row discount"
+                                     th:if="${discountAmount != null and discountAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                                    <span>Sconto</span>
+                                    <span>- € <span th:text="${discountAmount}">0</span></span>
+                                </div>
+
+                                <div class="total-row gift"
+                                     th:if="${giftAmount != null and giftAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                                    <span>Gift card</span>
+                                    <span>- € <span th:text="${giftAmount}">0</span></span>
+                                </div>
+
+                                <div class="total-row final">
+                                    <span>Totale finale</span>
+                                    <span>€ <span th:text="${finalTotal}">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+				<div class="checkout-card">
+				                          <div class="card-head">
+				                              <i class="bi bi-percent"></i>
+				                              <span>Sconti e gift card</span>
+				                          </div>
+
+				                          <div class="card-body-custom">
+				                              <div class="row g-3">
+
+				                                  <div class="col-md-6">
+				                                      <div class="tool-box">
+				                                          <div class="tool-title">
+				                                              <i class="bi bi-ticket-perforated"></i>
+				                                              <span>Codice sconto</span>
+				                                          </div>
+
+				                                          <div th:classappend="${couponApplied} ? 'd-none' : ''">
+				                                              <form method="post"
+				                                                    th:action="@{/checkout/applica-sconto}"
+				                                                    class="input-group input-group-sm">
+
+				                                                  <input type="hidden"
+				                                                         th:name="${_csrf.parameterName}"
+				                                                         th:value="${_csrf.token}"/>
+
+				                                                  <input type="text"
+				                                                         name="couponCode"
+				                                                         class="form-control"
+				                                                         placeholder="Inserisci il codice"
+				                                                         autocomplete="off">
+
+				                                                  <button class="btn btn-outline-primary" type="submit" formnovalidate>
+				                                                      Applica
+				                                                  </button>
+				                                              </form>
+				                                          </div>
+
+				                                          <div th:classappend="${couponApplied} ? '' : 'd-none'">
+				                                              <form method="post"
+				                                                    th:action="@{/checkout/rimuovi-sconto}"
+				                                                    class="row g-2 align-items-center flex-nowrap">
+
+				                                                  <input type="hidden"
+				                                                         th:name="${_csrf.parameterName}"
+				                                                         th:value="${_csrf.token}"/>
+
+				                                                  <div class="col">
+				                                                      <div class="form-control form-control-sm bg-light d-flex align-items-center">
+				                                                          <div class="small text-truncate">
+				                                                              <i class="bi bi-check-circle text-success"></i>
+				                                                              Sconto applicato
+				                                                              <span class="fw-semibold"
+				                                                                    th:text="${discountPercent != null ? discountPercent : 0} + '%'">0%</span>
+				                                                          </div>
+				                                                      </div>
+				                                                  </div>
+
+				                                                  <div class="col-auto">
+				                                                      <button type="submit"
+				                                                              class="btn btn-outline-danger btn-sm btn-trash"
+				                                                              title="Rimuovi sconto">
+				                                                          <i class="bi bi-trash3"></i>
+				                                                      </button>
+				                                                  </div>
+				                                              </form>
+				                                          </div>
+				                                      </div>
+				                                  </div>
+
+				                                  <div class="col-md-6">
+				                                      <div class="tool-box">
+				                                          <div class="tool-title">
+				                                              <i class="bi bi-gift"></i>
+				                                              <span>Gift card</span>
+				                                          </div>
+
+				                                          <div th:classappend="${giftApplied} ? 'd-none' : ''">
+				                                              <form method="post"
+				                                                    th:action="@{/checkout/applica-giftcard}"
+				                                                    class="input-group input-group-sm">
+
+				                                                  <input type="hidden"
+				                                                         th:name="${_csrf.parameterName}"
+				                                                         th:value="${_csrf.token}"/>
+
+				                                                  <input type="text"
+				                                                         name="giftCardCode"
+				                                                         class="form-control"
+				                                                         placeholder="Inserisci la gift card"
+				                                                         autocomplete="off">
+
+				                                                  <button class="btn btn-outline-primary" type="submit" formnovalidate>
+				                                                      Applica
+				                                                  </button>
+				                                              </form>
+				                                          </div>
+
+				                                          <div th:classappend="${giftApplied} ? '' : 'd-none'">
+				                                              <form method="post"
+				                                                    th:action="@{/checkout/rimuovi-giftcard}"
+				                                                    class="row g-2 align-items-center flex-nowrap">
+
+				                                                  <input type="hidden"
+				                                                         th:name="${_csrf.parameterName}"
+				                                                         th:value="${_csrf.token}"/>
+
+				                                                  <div class="col">
+				                                                      <div class="form-control form-control-sm bg-light d-flex align-items-center justify-content-between">
+				                                                          <div class="small text-truncate me-2">
+				                                                              <i class="bi bi-check-circle text-success"></i>
+				                                                              Gift card applicata
+				                                                          </div>
+				                                                          <span class="fw-semibold text-primary text-nowrap">
+				                                                              -€ <span th:text="${giftAmount}">0</span>
+				                                                          </span>
+				                                                      </div>
+				                                                  </div>
+
+				                                                  <div class="col-auto">
+				                                                      <button type="submit"
+				                                                              class="btn btn-outline-danger btn-sm btn-trash"
+				                                                              title="Rimuovi gift card">
+				                                                          <i class="bi bi-trash3"></i>
+				                                                      </button>
+				                                                  </div>
+				                                              </form>
+				                                          </div>
+
+				                                          <div class="mt-2" th:if="${session.GIFT_PROPOSAL != null}">
+				                                              <button type="button"
+				                                                      class="btn btn-outline-primary btn-sm w-100"
+				                                                      id="btnOpenGiftModal">
+				                                                  <i class="bi bi-sliders"></i> Scegli importo gift card
+				                                              </button>
+				                                          </div>
+				                                      </div>
+				                                  </div>
+
+				                              </div>
+				                          </div>
+				                      </div>
+
+				
+				
+				<div class="checkout-card">
+                    <div class="card-head">
+                        <i class="bi bi-truck"></i>
+                        <span>Dati spedizione</span>
+                    </div>
+
+                    <div class="card-body-custom">
+                        <div class="alert readonly-banner py-2 small mb-3" th:if="${shippingLocked}">
+                            <i class="bi bi-lock"></i>
+                            Dati caricati dal tuo account e non modificabili da qui.
+                        </div>
+
+                        <form method="post"
+                              th:action="@{/checkout/salva-spedizione}"
+                              id="shippingForm"
+                              novalidate>
+
+                            <input type="hidden"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}"/>
+
+                            <div class="shipping-grid">
+                                <div class="row g-3 mb-1">
+                                    <div class="col-md-6">
+                                        
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                            <input type="email"
+                                                   name="email"
+                                                   class="form-control"
+                                                   placeholder="Email"
+                                                   required
+                                                   th:value="${shippingForm != null ? shippingForm.email : ''}"
+                                                   th:readonly="${shippingLocked}">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                     
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                            <input type="text"
+                                                   name="telefono"
+                                                   class="form-control"
+                                                   placeholder="Telefono"
+                                                   required
+                                                   th:value="${shippingForm != null ? shippingForm.telefono : ''}"
+                                                   th:readonly="${shippingLocked}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-1">
+                                    <div class="col-12">
+                                        
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                            <input type="text"
+                                                   name="fullName"
+                                                   class="form-control"
+                                                   placeholder="Nome e cognome"
+                                                   required
+                                                   th:value="${shippingForm != null ? shippingForm.fullName : ''}"
+                                                   th:readonly="${shippingLocked}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-1">
+                                    <div class="col-12">
+                                       
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                                            <input type="text"
+                                                   name="indirizzo"
+                                                   class="form-control"
+                                                   placeholder="Indirizzo completo"
+                                                   required
+                                                   th:value="${shippingForm != null ? shippingForm.indirizzo : ''}"
+                                                   th:readonly="${shippingLocked}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-4">
+                                       
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-mailbox"></i></span>
+                                            <input type="text"
+                                                   name="cap"
+                                                   class="form-control"
+                                                   placeholder="CAP"
+                                                   required
+                                                   th:value="${shippingForm != null ? shippingForm.cap : ''}"
+                                                   th:readonly="${shippingLocked}">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-5">
+                                      
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-building"></i></span>
+                                            <input type="text"
+                                                   name="citta"
+                                                   class="form-control"
+                                                   placeholder="Città"
+                                                   required
+                                                   th:value="${shippingForm != null ? shippingForm.citta : ''}"
+                                                   th:readonly="${shippingLocked}">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-3">
+                                        
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-flag"></i></span>
+                                            <input type="text"
+                                                   name="provincia"
+                                                   class="form-control"
+                                                   placeholder="Prov."
+                                                   required
+                                                   th:value="${shippingForm != null ? shippingForm.provincia : ''}"
+                                                   th:readonly="${shippingLocked}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <input type="hidden"
+                                   name="paymentMethod"
+                                   id="pmHidden"
+                                   th:value="${paymentMethod != null ? paymentMethod : ''}"/>
+
+                            <input type="hidden"
+                                   name="autoFinalize"
+                                   th:value="${finalTotal != null and finalTotal.compareTo(T(java.math.BigDecimal).ZERO) == 0} ? '1' : ''"/>
+                        </form>
+                    </div>
+                </div>
+
+                
+                <div class="checkout-card">
+                    <div class="card-head">
+                        <i class="bi bi-credit-card"></i>
+                        <span>Metodo di pagamento</span>
+                    </div>
+
+                    <div class="card-body-custom">
+                        <div class="text-muted small mb-3">
+                            Seleziona il metodo. La scelta viene salvata automaticamente.
+                        </div>
+
+                        <form method="post"
+                              th:action="@{/checkout/seleziona-metodo-pagamento}"
+                              id="paymentMethodForm">
+
+                            <input type="hidden" id="pmCsrfName" th:value="${_csrf.parameterName}">
+                            <input type="hidden" id="pmCsrfToken" th:value="${_csrf.token}">
+
+                            <div class="alert pay-banner py-2 small mb-3"
+                                 th:if="${finalTotal != null and finalTotal.compareTo(T(java.math.BigDecimal).ZERO) == 0}">
+                                <i class="bi bi-check-circle"></i>
+                                Totale <strong>0€</strong>: interamente coperto da Gift Card.
+                            </div>
+
+                            <div class="pm-grid">
+
+                                <label class="pm-option"
+                                       data-pm="GIFTCARD"
+                                       th:if="${finalTotal != null and finalTotal.compareTo(T(java.math.BigDecimal).ZERO) == 0}">
+                                    <input type="radio" name="paymentMethod" value="GIFTCARD" required
+                                           th:checked="${true}">
+                                    <div class="pm-icon"><i class="bi bi-gift"></i></div>
+                                    <div class="flex-grow-1">
+                                        <div class="pm-title">Gift Card</div>
+                                        <div class="pm-sub">Nessun pagamento richiesto</div>
+                                    </div>
+                                    <div class="pm-right text-muted"><i class="bi bi-check2-circle"></i></div>
+                                </label>
+
+                                <label class="pm-option"
+                                       data-pm="STRIPE"
+                                       th:if="${finalTotal == null or finalTotal.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                                    <input type="radio" name="paymentMethod" value="STRIPE" required
+                                           th:checked="${paymentMethod == null or paymentMethod.toString() == 'STRIPE'}">
+                                    <div class="pm-icon"><i class="bi bi-lightning-charge"></i></div>
+                                    <div class="flex-grow-1">
+                                        <div class="pm-title">Stripe</div>
+                                        <div class="pm-sub">Carta / Apple Pay / Google Pay</div>
+                                    </div>
+                                    <div class="pm-right text-muted"><i class="bi bi-check2-circle"></i></div>
+                                </label>
+
+                                <label class="pm-option"
+                                       data-pm="PAYPAL"
+                                       th:if="${finalTotal == null or finalTotal.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                                    <input type="radio" name="paymentMethod" value="PAYPAL" required
+                                           th:checked="${paymentMethod != null and paymentMethod.toString() == 'PAYPAL'}">
+                                    <div class="pm-icon"><i class="bi bi-paypal"></i></div>
+                                    <div class="flex-grow-1">
+                                        <div class="pm-title">PayPal</div>
+                                        <div class="pm-sub">Paga con account PayPal o carta</div>
+                                    </div>
+                                    <div class="pm-right text-muted"><i class="bi bi-check2-circle"></i></div>
+                                </label>
+
+                                <label class="pm-option"
+                                       data-pm="CASH"
+                                       th:if="${finalTotal == null or finalTotal.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                                    <input type="radio" name="paymentMethod" value="CASH" required
+                                           th:checked="${paymentMethod != null and paymentMethod.toString() == 'CASH'}">
+                                    <div class="pm-icon"><i class="bi bi-cash-coin"></i></div>
+                                    <div class="flex-grow-1">
+                                        <div class="pm-title">Contante</div>
+                                        <div class="pm-sub">Pagamento alla consegna o ritiro</div>
+                                    </div>
+                                    <div class="pm-right text-muted"><i class="bi bi-check2-circle"></i></div>
+                                </label>
+
+                            </div>
+                        </form>
+
+                        <div class="text-danger text-center mt-3 d-none small" id="pmHint">
+                            Seleziona un metodo di pagamento per continuare
+                        </div>
+
+                        <div class="alert alert-danger py-2 small mt-3 mb-0 d-none" id="pmSaveError">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Errore nel salvataggio del metodo di pagamento. Riprova.
+                        </div>
+                    </div>
+
+                    <div class="cta-box">
+                        <button type="submit"
+                                class="btn btn-primary w-100 checkout-cta"
+                                id="btnPagamento"
+                                form="shippingForm"
+                                disabled
+                                th:text="${finalTotal != null and finalTotal.compareTo(T(java.math.BigDecimal).ZERO) == 0} ? 'Conferma ordine' : 'Salva dati e continua'">
+                            Salva dati e continua
+                        </button>
+
+                        <div class="helper-text" id="formHint">
+                            Compila tutti i campi per continuare
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="giftModal" tabindex="-1" aria-hidden="true"
+     th:if="${session.GIFT_PROPOSAL != null}">
+    <div class="modal-dialog">
+        <div class="modal-content border-0" style="border-radius: 20px; overflow:hidden;">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-gift"></i> Utilizza Gift Card</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="small mb-1">
+                    Codice: <strong th:text="${giftCode}">-</strong>
+                </p>
+                <p class="small mb-2">
+                    Credito residuo: € <strong th:text="${session.GIFT_REMAINING}">0</strong>
+                </p>
+
+                <div class="gift-modal-info alert py-2 small">
+                    Importo suggerito: € <strong th:text="${session.GIFT_PROPOSAL}">0</strong>
+                </div>
+
+                <form method="post" th:action="@{/checkout/conferma-giftcard}">
+                    <input type="hidden"
+                           th:name="${_csrf.parameterName}"
+                           th:value="${_csrf.token}"/>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Importo da utilizzare</label>
+                        <input type="number"
+                               step="0.01"
+                               min="0"
+                               name="amount"
+                               class="form-control"
+                               th:value="${session.GIFT_PROPOSAL}"
+                               required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100" style="border-radius: 14px; min-height:46px; font-weight:700;">
+                        Conferma utilizzo
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const form = document.getElementById('shippingForm');
+    const btn = document.getElementById('btnPagamento');
+    const hint = document.getElementById('formHint');
+    const pmHint = document.getElementById('pmHint');
+
+    const pmForm = document.getElementById('paymentMethodForm');
+    const pmOptions = document.querySelectorAll('.pm-option');
+    const pmHidden = document.getElementById('pmHidden');
+
+    const pmCsrfName = document.getElementById('pmCsrfName');
+    const pmCsrfToken = document.getElementById('pmCsrfToken');
+    const pmSaveError = document.getElementById('pmSaveError');
+
+    let pmSavedOk = false;
+
+    function getSelectedPm() {
+        const checked = document.querySelector('input[name="paymentMethod"]:checked');
+        return checked ? checked.value : null;
+    }
+
+    function refreshPmUI() {
+        pmOptions.forEach(opt => {
+            const input = opt.querySelector('input[type="radio"]');
+            const active = input && input.checked;
+            opt.classList.toggle('active', !!active);
+        });
+    }
+
+    async function savePaymentMethod(pm) {
+        if (!pmForm || !pmCsrfName || !pmCsrfToken) return true;
+
+        try {
+            if (pmSaveError) pmSaveError.classList.add('d-none');
+
+            const params = new URLSearchParams();
+            params.append(pmCsrfName.value, pmCsrfToken.value);
+            params.append('paymentMethod', pm);
+
+            const res = await fetch(pmForm.getAttribute('action'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+                body: params.toString(),
+                credentials: 'same-origin'
+            });
+
+            if (!res.ok) {
+                if (pmSaveError) pmSaveError.classList.remove('d-none');
+                return false;
+            }
+            return true;
+        } catch (e) {
+            if (pmSaveError) pmSaveError.classList.remove('d-none');
+            return false;
+        }
+    }
+
+    function updateBtn() {
+        const validShipping = form ? form.checkValidity() : false;
+        const selectedPm = getSelectedPm();
+        const ok = validShipping && !!selectedPm && pmSavedOk;
+
+        if (btn) btn.disabled = !ok;
+        if (hint) hint.style.display = validShipping ? 'none' : 'block';
+        if (pmHint) pmHint.classList.toggle('d-none', !!selectedPm);
+    }
+
+    const btnOpenGiftModal = document.getElementById('btnOpenGiftModal');
+    const giftModalElement = document.getElementById('giftModal');
+
+    if (btnOpenGiftModal && giftModalElement) {
+        btnOpenGiftModal.addEventListener('click', function () {
+            const modal = new bootstrap.Modal(giftModalElement, { backdrop: 'static' });
+            modal.show();
+        });
+    }
+
+    pmOptions.forEach(opt => {
+        opt.addEventListener('click', async () => {
+            const input = opt.querySelector('input[type="radio"]');
+            if (input) input.checked = true;
+
+            const pm = getSelectedPm();
+            if (pmHidden) pmHidden.value = pm ? pm : '';
+
+            refreshPmUI();
+            pmSavedOk = await savePaymentMethod(pm);
+            updateBtn();
+        });
+    });
+
+    if (form) {
+        form.addEventListener('input', updateBtn);
+        form.addEventListener('change', updateBtn);
+    }
+
+    (async function init() {
+        refreshPmUI();
+
+        const pm = getSelectedPm();
+        if (pmHidden) pmHidden.value = pm ? pm : '';
+
+        pmSavedOk = pm ? await savePaymentMethod(pm) : false;
+        updateBtn();
+    })();
+
+});
+</script>
+
+<script th:if="${openGiftModal}">
+    var giftModal = new bootstrap.Modal(
+        document.getElementById('giftModal')
+    );
+    giftModal.show();
+</script>
+
+</body>
+</html>

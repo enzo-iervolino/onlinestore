@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle}">Categoria</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+</head>
+<body>
+<div class="container py-4">
+
+    <div class="mb-4">
+        <h1 class="h3 mb-1" th:text="${pageTitle}">Categoria</h1>
+        <p class="text-muted mb-0">
+            <span th:if="${isEdit}">Modifica i dati della categoria</span>
+            <span th:unless="${isEdit}">Inserisci una nuova categoria</span>
+        </p>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <form th:action="${formAction}" th:object="${category}" method="post" enctype="multipart/form-data">
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="code" class="form-label">Codice *</label>
+                        <input type="text"
+                               id="code"
+                               th:field="*{code}"
+                               class="form-control"
+                               maxlength="50"
+                               placeholder="Es. PIZZE"
+                               required>
+                    </div>
+
+                    <div class="col-md-8">
+                        <label for="name" class="form-label">Nome *</label>
+                        <input type="text"
+                               id="name"
+                               th:field="*{name}"
+                               class="form-control"
+                               maxlength="255"
+                               placeholder="Nome categoria"
+                               required>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="description" class="form-label">Descrizione</label>
+                        <textarea id="description"
+                                  th:field="*{description}"
+                                  class="form-control"
+                                  rows="4"
+                                  placeholder="Descrizione categoria"></textarea>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="imageFile" class="form-label">Immagine categoria da file</label>
+                        <input type="file"
+                               id="imageFile"
+                               name="imageFile"
+                               class="form-control"
+                               accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+
+                        <div class="form-text">
+                            Formati consentiti: JPG, JPEG, PNG, WEBP
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="imageUrl" class="form-label">Image URL</label>
+                        <input type="text"
+                               id="imageUrl"
+                               th:field="*{imageUrl}"
+                               class="form-control"
+                               maxlength="500"
+                               placeholder="https://... oppure /uploads/categories/...">
+
+                        <div class="form-text">
+                            Puoi usare un URL oppure caricare un file. Se selezioni un file, verrà mostrata l'anteprima.
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="sortOrder" class="form-label">Ordine</label>
+                        <input type="number"
+                               id="sortOrder"
+                               th:field="*{sortOrder}"
+                               class="form-control"
+                               placeholder="0">
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-end">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   id="enabled"
+                                   th:field="*{enabled}">
+                            <label class="form-check-label" for="enabled">
+                                Abilitata
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Anteprima immagine</label>
+
+                        <div id="previewWrapper"
+                             class="border rounded p-3 bg-light text-center"
+                             th:style="${category.imageUrl != null and !#strings.isEmpty(category.imageUrl)} ? '' : 'display:none;'">
+
+                            <img id="imagePreview"
+                                 th:src="${category.imageUrl != null and !#strings.isEmpty(category.imageUrl) ? category.imageUrl : ''}"
+                                 alt="Anteprima immagine categoria"
+                                 class="img-fluid rounded"
+                                 style="max-width: 100%; max-height: 260px; object-fit: contain;">
+                        </div>
+
+                        <div id="previewPlaceholder"
+                             class="border rounded p-4 bg-light text-center text-muted"
+                             th:style="${category.imageUrl != null and !#strings.isEmpty(category.imageUrl)} ? 'display:none;' : ''">
+                            Nessuna immagine selezionata
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <span th:if="${isEdit}">Aggiorna</span>
+                        <span th:unless="${isEdit}">Salva</span>
+                    </button>
+
+                    <a th:href="@{/admin/categories}" class="btn btn-outline-secondary">Indietro</a>
+
+                    <a th:if="${isEdit}"
+                       th:href="@{/admin/categories/{id}(id=${category.id})}"
+                       class="btn btn-outline-info">
+                        View
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const imageFileInput = document.getElementById('imageFile');
+        const imageUrlInput = document.getElementById('imageUrl');
+        const previewWrapper = document.getElementById('previewWrapper');
+        const previewPlaceholder = document.getElementById('previewPlaceholder');
+        const imagePreview = document.getElementById('imagePreview');
+
+        function showPreview(src) {
+            imagePreview.src = src;
+            previewWrapper.style.display = 'block';
+            previewPlaceholder.style.display = 'none';
+        }
+
+        function hidePreview() {
+            imagePreview.src = '';
+            previewWrapper.style.display = 'none';
+            previewPlaceholder.style.display = 'block';
+        }
+
+        imageFileInput.addEventListener('change', function (event) {
+            const file = event.target.files[0];
+
+            if (file) {
+                const objectUrl = URL.createObjectURL(file);
+                showPreview(objectUrl);
+            } else {
+                const currentUrl = imageUrlInput.value ? imageUrlInput.value.trim() : '';
+                if (currentUrl) {
+                    showPreview(currentUrl);
+                } else {
+                    hidePreview();
+                }
+            }
+        });
+
+        imageUrlInput.addEventListener('input', function () {
+            if (imageFileInput.files && imageFileInput.files.length > 0) {
+                return;
+            }
+
+            const url = imageUrlInput.value ? imageUrlInput.value.trim() : '';
+            if (url) {
+                showPreview(url);
+            } else {
+                hidePreview();
+            }
+        });
+    });
+</script>
+</body>
+</html>

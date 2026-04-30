@@ -1,0 +1,359 @@
+<nav th:fragment="nav" class="nav-small">
+
+  <div class="container nav-wrapper">
+
+    <!-- ================= LEFT ================= -->
+    <div class="nav-left">
+      <a class="logo nav-link" th:href="@{/}">
+        <i class="bi bi-shop fs-4"></i>
+        <span>Online Store</span>
+      </a>
+
+      <input class="nav-toggle" type="checkbox" id="nav-toggle"/>
+      <label class="nav-burger" for="nav-toggle">
+        <i class="bi bi-list fs-3"></i>
+      </label>
+    </div>
+
+    <!-- ================= MENU ================= -->
+    <div class="nav-menu">
+
+      <!-- PAGES -->
+      <div class="nav-pages">
+        <a class="nav-link nav-link-home" th:href="@{/}">
+          <i class="bi bi-house"></i><span>Home</span>
+        </a>
+
+        <a class="nav-link nav-link-shop" th:href="@{/shop}">
+          <i class="bi bi-bag"></i><span>Shop</span>
+        </a>
+
+		
+		
+		
+		
+		
+		<!-- CARRELLO PAGINA: SOLO DESKTOP/TABLET -->
+        <a class="nav-link nav-link-page-cart" th:href="@{/cart}">
+          <i class="bi bi-cart3 fs-3"></i><span>Carrello</span>
+        </a>
+		
+		
+        
+		
+		
+		
+		
+		<!-- CARRELLO MODALE: SOLO MOBILE -->
+        <button class="nav-link nav-link-mobile-cart position-relative"
+                type="button"
+                th:disabled="${cart.count == 0}"
+                th:classappend="${cart.count == 0} ? ' cart-btn-disabled' : ''"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#cartOffcanvas"
+                aria-controls="cartOffcanvas"
+                aria-label="Apri carrello">
+          <i class="bi bi-cart3 fs-3"></i>
+          <span>Carrello</span>
+
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count mobile-cart-badge"
+                th:text="${cart.count}"
+                th:classappend="${cart.count == 0} ? ' d-none' : ''">
+          </span>
+        </button>
+
+        <!-- CONTATTI: SOLO DESKTOP/TABLET -->
+        <a class="nav-link nav-link-contatti" th:href="@{/contatti}">
+          <i class="bi bi-telephone"></i><span>Contatti</span>
+        </a>
+
+        <!-- LOGIN: SOLO MOBILE -->
+        <label class="nav-link nav-link-mobile-login"
+               th:if="${!isAuthenticated}"
+               for="login-modal-toggle"
+               style="cursor:pointer;">
+          <i class="bi bi-box-arrow-in-right"></i>
+          <span>Login</span>
+        </label>
+
+        <!-- PROFILO MOBILE: SOLO AUTENTICATO -->
+        <div class="nav-link nav-link-mobile-profile nav-user-dropdown-mobile"
+             th:if="${isAuthenticated}"
+             tabindex="0">
+          <div class="nav-user-mobile-trigger">
+            <img class="nav-avatar"
+                 th:src="${currentAvatar}"
+                 alt="Avatar">
+            <span>Profilo</span>
+          </div>
+
+          <div class="nav-user-menu nav-user-menu-mobile">
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/dashboard}"
+               class="nav-user-menu-item">
+              Dashboard
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/products}"
+               class="nav-user-menu-item">
+              Prodotti
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/api/admin/products/view}"
+               class="nav-user-menu-item">
+              Prodotti json
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/api/admin/products/pretty}"
+               class="nav-user-menu-item">
+              Prodotti json-pretty
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/orders}"
+               class="nav-user-menu-item">
+              Ordini
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/categories}"
+               class="nav-user-menu-item">
+              Gestione Categorie
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/users}"
+               class="nav-user-menu-item">
+              Utenti
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/giftcard-movimenti}"
+               class="nav-user-menu-item">
+              GiftCard
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/discount-codes}"
+               class="nav-user-menu-item">
+              Buoni Sconto
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/colors}"
+               class="nav-user-menu-item">
+              Tabella colori
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/sizes}"
+               class="nav-user-menu-item">
+              Tabella Taglie
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/order-types}"
+               class="nav-user-menu-item">
+              Tabella Tipo Ordine
+            </a>
+
+            <a th:if="${!isAdmin}"
+               href="#"
+               class="nav-user-menu-item"
+               data-bs-toggle="modal"
+               data-bs-target="#profileModal">
+              Profilo
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/prove}"
+               class="nav-user-menu-item">
+              Tabella cartitemDto
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/prove/ordertempdata-table}"
+               class="nav-user-menu-item">
+              Tabella ordertempdata
+            </a>
+
+            <form th:action="@{/logout}" method="post">
+              <input type="hidden"
+                     th:name="${_csrf.parameterName}"
+                     th:value="${_csrf.token}"/>
+              <button type="submit"
+                      class="nav-user-menu-item">
+                Logout
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= RIGHT ================= -->
+      <div class="nav-right position-relative">
+
+        <!-- 🛒 CART -->
+        <div class="position-relative nav-cart-shortcut">
+          <button class="cart-btn position-relative"
+                  type="button"
+                  th:disabled="${cart.count == 0}"
+                  th:classappend="${cart.count == 0} ? ' cart-btn-disabled' : ''"
+                  data-bs-toggle="offcanvas"
+                  data-bs-target="#cartOffcanvas"
+                  aria-controls="cartOffcanvas"
+                  aria-label="Apri carrello">
+
+            <i class="bi bi-cart3 fs-3"></i>
+
+            <span id="cartQty"
+                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count"
+                  th:text="${cart.count}"
+                  th:classappend="${cart.count == 0} ? ' d-none' : ''">
+            </span>
+          </button>
+
+          <div class="cart-empty-preview"
+               th:if="${cart.count == 0}">
+            <i class="bi bi-cart fs-2"></i>
+            <strong>Il carrello è vuoto</strong>
+            <span>Aggiungi un prodotto per iniziare</span>
+          </div>
+        </div>
+
+        <!-- LOGIN DESKTOP/TABLET -->
+        <label class="nav-link nav-link-login"
+               th:if="${!isAuthenticated}"
+               for="login-modal-toggle"
+               style="cursor:pointer;">
+          <i class="bi bi-box-arrow-in-right"></i>
+          <span>Login</span>
+        </label>
+
+        <!-- USER MENU DESKTOP/TABLET -->
+        <div class="nav-user-dropdown"
+             th:if="${isAuthenticated}"
+             tabindex="0">
+
+          <div class="nav-user-trigger">
+            <img class="nav-avatar"
+                 th:src="${currentAvatar}"
+                 alt="Avatar">
+
+            <span class="nav-user-email"
+                  th:text="${currentUserEmail}"></span>
+            <i class="bi bi-caret-down-fill"></i>
+          </div>
+
+          <div class="nav-user-menu">
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/dashboard}"
+               class="nav-user-menu-item">
+              Dashboard
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/products}"
+               class="nav-user-menu-item">
+              Prodotti
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/api/admin/products/view}"
+               class="nav-user-menu-item">
+              Prodotti json
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/api/admin/products/pretty}"
+               class="nav-user-menu-item">
+              Prodotti json-pretty
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/orders}"
+               class="nav-user-menu-item">
+              Ordini
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/categories}"
+               class="nav-user-menu-item">
+              Gestione Categorie
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/users}"
+               class="nav-user-menu-item">
+              Utenti
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/giftcard-movimenti}"
+               class="nav-user-menu-item">
+              GiftCard
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/discount-codes}"
+               class="nav-user-menu-item">
+              Buoni Sconto
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/colors}"
+               class="nav-user-menu-item">
+              Tabella colori
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/sizes}"
+               class="nav-user-menu-item">
+              Tabella Taglie
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/order-types}"
+               class="nav-user-menu-item">
+              Tabella Tipo Ordine
+            </a>
+
+            <a th:if="${!isAdmin}"
+               href="#"
+               class="nav-user-menu-item"
+               data-bs-toggle="modal"
+               data-bs-target="#profileModal">
+              Profilo
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/prove}"
+               class="nav-user-menu-item">
+              Tabella cartitemDto
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/prove/ordertempdata-table}"
+               class="nav-user-menu-item">
+              Tabella ordertempdata
+            </a>
+
+            <form th:action="@{/logout}" method="post">
+              <input type="hidden"
+                     th:name="${_csrf.parameterName}"
+                     th:value="${_csrf.token}"/>
+              <button type="submit"
+                      class="nav-user-menu-item">
+                Logout
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</nav>

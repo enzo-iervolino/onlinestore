@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<th:block th:fragment="userRows(user, idx)">
+
+    <tr class="main-row"
+        th:classappend="${idx % 2 == 0} ? 'row-even' : 'row-odd'">
+
+        <td class="toggle-cell"
+            role="button"
+            th:attr="data-bs-toggle='collapse',
+                     data-bs-target='#user-actions-' + ${user.id},
+                     aria-controls='user-actions-' + ${user.id}">
+            <img th:src="${user.avatar != null}
+                    ? @{/uploads/avatars/{img}(img=${user.avatar})}
+                    : @{/images/avatar-default.png}"
+                 class="avatar-mini"
+                 alt="avatar">
+        </td>
+
+        <td class="toggle-cell"
+            role="button"
+            th:attr="data-bs-toggle='collapse',
+                     data-bs-target='#user-actions-' + ${user.id},
+                     aria-controls='user-actions-' + ${user.id}">
+            <div class="user-name"
+                 th:text="${user.fullname != null and !#strings.isEmpty(user.fullname)}
+                         ? ${user.fullname}
+                         : ${(user.firstname != null ? user.firstname : '') + ' ' + (user.lastname != null ? user.lastname : '')}">
+                Nome
+            </div>
+            <div class="user-sub">
+                ID <span th:text="${user.id}">1</span>
+            </div>
+        </td>
+
+        <td class="toggle-cell"
+            role="button"
+            th:text="${user.email}"
+            th:attr="data-bs-toggle='collapse',
+                     data-bs-target='#user-actions-' + ${user.id},
+                     aria-controls='user-actions-' + ${user.id}">
+            email
+        </td>
+
+        <td class="toggle-cell"
+            role="button"
+            th:text="${user.phone != null ? user.phone : '-'}"
+            th:attr="data-bs-toggle='collapse',
+                     data-bs-target='#user-actions-' + ${user.id},
+                     aria-controls='user-actions-' + ${user.id}">
+            telefono
+        </td>
+
+        <td class="toggle-cell"
+            role="button"
+            th:attr="data-bs-toggle='collapse',
+                     data-bs-target='#user-actions-' + ${user.id},
+                     aria-controls='user-actions-' + ${user.id}">
+            <span class="badge-soft"
+                  th:classappend="${user.role == 'ROLE_ADMIN'} ? ' badge-role-admin' : ' badge-role-user'">
+                <i class="bi"
+                   th:classappend="${user.role == 'ROLE_ADMIN'} ? ' bi-shield-lock-fill' : ' bi-person-badge-fill'"></i>
+                <span th:text="${user.role}">ROLE_USER</span>
+            </span>
+        </td>
+
+        <td class="toggle-cell"
+            role="button"
+            th:attr="data-bs-toggle='collapse',
+                     data-bs-target='#user-actions-' + ${user.id},
+                     aria-controls='user-actions-' + ${user.id}">
+            <span th:if="${user.enabled}" class="badge-soft badge-status-on">
+                <i class="bi bi-check-circle-fill"></i>Attivo
+            </span>
+            <span th:unless="${user.enabled}" class="badge-soft badge-status-off">
+                <i class="bi bi-x-circle-fill"></i>Disabilitato
+            </span>
+        </td>
+
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-dark expand-btn"
+                    type="button"
+                    th:attr="data-bs-toggle='collapse',
+                             data-bs-target='#user-actions-' + ${user.id},
+                             aria-controls='user-actions-' + ${user.id}">
+                <i class="bi bi-chevron-down"></i>
+            </button>
+        </td>
+    </tr>
+
+    <tr class="sub-row">
+        <td colspan="7" class="p-0 border-0">
+            <div class="collapse" th:id="'user-actions-' + ${user.id}">
+                <div class="p-3 d-flex gap-2 flex-wrap align-items-center bg-white border-top">
+
+                    <form th:action="@{/admin/users/toggle}" method="post" class="m-0">
+                        <input type="hidden" name="userId" th:value="${user.id}" />
+                        <button type="submit"
+                                class="btn btn-sm btn-outline-warning rounded-pill px-3">
+                            <i class="bi me-1"
+                               th:classappend="${user.enabled} ? ' bi-person-slash' : ' bi-person-check'"></i>
+                            <span th:text="${user.enabled} ? 'Disabilita' : 'Abilita'">Azione</span>
+                        </button>
+                    </form>
+
+                    <form th:action="@{/admin/users/role}" method="post" class="m-0">
+                        <input type="hidden" name="userId" th:value="${user.id}" />
+                        <input type="hidden" name="role"
+                               th:value="${user.role == 'ROLE_ADMIN' ? 'ROLE_USER' : 'ROLE_ADMIN'}" />
+                        <button type="submit"
+                                class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                            <i class="bi bi-shield-lock me-1"></i>
+                            Ruolo
+                        </button>
+                    </form>
+
+                    <button type="button"
+                            class="btn btn-sm btn-primary rounded-pill px-3"
+                            th:attr="data-bs-toggle='modal',
+                                     data-bs-target='#userModal-' + ${user.id}">
+                        <i class="bi bi-person-vcard-fill me-1"></i>
+                        Scheda
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-sm btn-outline-dark rounded-pill px-3"
+                            th:attr="data-bs-toggle='modal',
+                                     data-bs-target='#ordersModal-' + ${user.id}">
+                        <i class="bi bi-bag-check-fill me-1"></i>
+                        Ordini
+                    </button>
+                </div>
+
+                <!-- MODALE SCHEDA UTENTE -->
+                <div class="modal fade"
+                     th:id="'userModal-' + ${user.id}"
+                     tabindex="-1"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
+
+                            <div class="modal-header border-0 p-0">
+                                <div class="w-100 text-white"
+                                     style="background: linear-gradient(135deg, #0d6efd 0%, #3d8bfd 45%, #6610f2 100%);">
+                                    <div class="p-3">
+                                        <div class="d-flex align-items-center justify-content-between gap-3">
+                                            <div class="d-flex align-items-center gap-3 min-w-0">
+                                                <img th:if="${user.avatar != null}"
+                                                     th:src="@{/uploads/avatars/{img}(img=${user.avatar})}"
+                                                     alt="Avatar"
+                                                     class="rounded-circle border border-3 border-white shadow-sm"
+                                                     style="width:58px;height:58px;object-fit:cover;background:#fff;">
+
+                                                <img th:if="${user.avatar == null}"
+                                                     th:src="@{/images/avatar-default.png}"
+                                                     alt="Avatar"
+                                                     class="rounded-circle border border-3 border-white shadow-sm"
+                                                     style="width:58px;height:58px;object-fit:cover;background:#fff;">
+
+                                                <div class="min-w-0">
+                                                    <h6 class="fw-bold mb-1 text-truncate"
+                                                        th:text="${user.fullname != null and !#strings.isEmpty(user.fullname)}
+                                                                ? ${user.fullname}
+                                                                : ${(user.firstname != null ? user.firstname : '') + ' ' + (user.lastname != null ? user.lastname : '')}">
+                                                        Nome Utente
+                                                    </h6>
+
+                                                    <div class="small opacity-75 text-truncate">
+                                                        <i class="bi bi-envelope-fill me-1"></i>
+                                                        <span th:text="${user.email != null ? user.email : '-'}">email@example.com</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+                                                <span class="badge rounded-pill bg-light text-dark px-2 py-1" style="font-size:.70rem;">
+                                                    ID <span th:text="${user.id}">1</span>
+                                                </span>
+
+                                                <span class="badge rounded-pill px-2 py-1"
+                                                      style="font-size:.70rem;"
+                                                      th:classappend="${user.role == 'ROLE_ADMIN'} ? ' bg-warning text-dark' : ' bg-primary text-white'">
+                                                    <span th:text="${user.role != null ? user.role : '-'}">ROLE_USER</span>
+                                                </span>
+
+                                                <span th:if="${user.enabled}"
+                                                      class="badge rounded-pill bg-success px-2 py-1"
+                                                      style="font-size:.70rem;">Attivo</span>
+
+                                                <span th:unless="${user.enabled}"
+                                                      class="badge rounded-pill bg-danger px-2 py-1"
+                                                      style="font-size:.70rem;">Disabilitato</span>
+
+                                                <button type="button"
+                                                        class="btn-close btn-close-white ms-1"
+                                                        data-bs-dismiss="modal"
+                                                        aria-label="Chiudi"></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-body p-3 bg-white">
+                                <div class="row g-3">
+
+                                    <div class="col-md-6">
+                                        <div class="border rounded-4 overflow-hidden h-100">
+                                            <div class="bg-light px-3 py-2 fw-semibold small">
+                                                <i class="bi bi-person-lines-fill me-1 text-primary"></i>
+                                                Dati profilo
+                                            </div>
+
+                                            <div class="table-responsive">
+                                                <table class="table table-sm align-middle mb-0">
+                                                    <tbody>
+                                                    <tr><th class="text-muted fw-semibold" style="width:38%;">Nome</th><td th:text="${user.firstname != null ? user.firstname : '-'}">Mario</td></tr>
+                                                    <tr><th class="text-muted fw-semibold">Cognome</th><td th:text="${user.lastname != null ? user.lastname : '-'}">Rossi</td></tr>
+                                                    <tr><th class="text-muted fw-semibold">Nome completo</th><td th:text="${user.fullname != null ? user.fullname : '-'}">Mario Rossi</td></tr>
+                                                    <tr><th class="text-muted fw-semibold">Email</th><td class="text-break" th:text="${user.email != null ? user.email : '-'}">mario@email.it</td></tr>
+                                                    <tr><th class="text-muted fw-semibold">Telefono</th><td th:text="${user.phone != null ? user.phone : '-'}">3331234567</td></tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="border rounded-4 overflow-hidden h-100">
+                                            <div class="bg-light px-3 py-2 fw-semibold small">
+                                                <i class="bi bi-shield-lock-fill me-1 text-primary"></i>
+                                                Account
+                                            </div>
+
+                                            <div class="table-responsive">
+                                                <table class="table table-sm align-middle mb-0">
+                                                    <tbody>
+                                                    <tr><th class="text-muted fw-semibold" style="width:38%;">ID</th><td th:text="${user.id}">1</td></tr>
+                                                    <tr><th class="text-muted fw-semibold">Ruolo</th><td th:text="${user.role != null ? user.role : '-'}">ROLE_USER</td></tr>
+                                                    <tr><th class="text-muted fw-semibold">Stato</th><td th:text="${user.enabled} ? 'Attivo' : 'Disabilitato'">Attivo</td></tr>
+                                                    <tr><th class="text-muted fw-semibold">Avatar</th><td class="text-truncate" style="max-width:180px;" th:text="${user.avatar != null ? user.avatar : '-'}">avatar.png</td></tr>
+                                                    <tr><th class="text-muted fw-semibold">Password</th><td>********</td></tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="border rounded-4 overflow-hidden">
+                                            <div class="bg-light px-3 py-2 fw-semibold small">
+                                                <i class="bi bi-geo-alt-fill me-1 text-success"></i>
+                                                Indirizzo
+                                            </div>
+
+                                            <div class="table-responsive">
+                                                <table class="table table-sm align-middle mb-0">
+                                                    <tbody>
+                                                    <tr>
+                                                        <th class="text-muted fw-semibold" style="width:19%;">Via</th>
+                                                        <td th:text="${user.address != null and user.address.street != null ? user.address.street : '-'}">Via Roma 1</td>
+                                                        <th class="text-muted fw-semibold" style="width:12%;">CAP</th>
+                                                        <td th:text="${user.address != null and user.address.zipcode != null ? user.address.zipcode : '-'}">80000</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th class="text-muted fw-semibold">Città</th>
+                                                        <td th:text="${user.address != null and user.address.city != null ? user.address.city : '-'}">Napoli</td>
+                                                        <th class="text-muted fw-semibold">Provincia</th>
+                                                        <td th:text="${user.address != null and user.address.province != null ? user.address.province : '-'}">NA</td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="modal-footer border-0 py-2 px-3 bg-white">
+                                <button type="button" class="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">
+                                    Chiudi
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODALE ORDINI -->
+                <div class="modal fade"
+                     th:id="'ordersModal-' + ${user.id}"
+                     tabindex="-1"
+                     aria-hidden="true"
+                     th:with="orders=${userOrdersMap != null ? userOrdersMap[user.id] : null}">
+                    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+                        <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
+
+                            <div class="modal-header border-0 p-0">
+                                <div class="w-100 text-white"
+                                     style="background: linear-gradient(135deg, #198754 0%, #20c997 100%);">
+                                    <div class="p-3">
+                                        <div class="d-flex align-items-center justify-content-between gap-3">
+                                            <div class="min-w-0">
+                                                <h6 class="fw-bold mb-1 text-truncate">
+                                                    <i class="bi bi-bag-check-fill me-2"></i>
+                                                    Ordini cliente
+                                                </h6>
+                                                <div class="small opacity-75 text-truncate">
+                                                    <span th:text="${user.fullname != null and !#strings.isEmpty(user.fullname) ? user.fullname : user.email}">Cliente</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="badge rounded-pill bg-light text-dark px-2 py-1" style="font-size:.72rem;">
+                                                    Totale:
+                                                    <span th:text="${orders != null ? #lists.size(orders) : 0}">0</span>
+                                                </span>
+
+                                                <button type="button"
+                                                        class="btn-close btn-close-white"
+                                                        data-bs-dismiss="modal"
+                                                        aria-label="Chiudi"></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-body p-3 bg-white">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover align-middle mb-0">
+                                        <thead class="table-light">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Data</th>
+                                            <th>Totale</th>
+                                            <th>Stato</th>
+                                            <th class="text-center">Azione</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:if="${orders == null or #lists.isEmpty(orders)}">
+                                            <td colspan="5" class="text-center text-muted py-4">
+                                                Nessun ordine trovato per questo cliente.
+                                            </td>
+                                        </tr>
+
+                                        <tr th:each="order : ${orders}">
+                                            <td><strong th:text="${order.id}">1</strong></td>
+                                            <td th:text="${order.createdAt != null ? #temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm') : '-'}">22/03/2026 10:30</td>
+                                            <td>
+                                                € <span th:text="${order.totalAmount != null ? #numbers.formatDecimal(order.totalAmount, 1, 2, 'COMMA') : '0,00'}">0,00</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge rounded-pill text-bg-secondary"
+                                                      th:text="${order.status != null ? order.status : '-'}">PAGATO</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <a class="btn btn-sm btn-outline-primary rounded-pill px-3"
+                                                   th:href="@{/admin/orders/{id}(id=${order.id},from='users',userId=${user.id})}">
+                                                    <i class="bi bi-eye-fill me-1"></i>
+                                                    Dettaglio
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer border-0 py-2 px-3 bg-white">
+                                <button type="button"
+                                        class="btn btn-sm btn-light rounded-pill px-3"
+                                        data-bs-dismiss="modal">
+                                    Chiudi
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </td>
+    </tr>
+
+</th:block>
+
+</body>
+</html>

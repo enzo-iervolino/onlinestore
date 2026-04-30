@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tabella Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+          rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/admin-subrow-table.css}">
+</head>
+<body>
+
+<div class="page-wrapper">
+    <div class="page-container">
+
+        <div class="page-header">
+            <h1>Gestione Elementi</h1>
+            <p>Click sulla riga per aprire la sottoriga con azioni</p>
+        </div>
+
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="subrow-table">
+                    <thead>
+                    <tr>
+                        <th style="width: 60px;">ID</th>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th style="width: 110px;">Stato</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    <th:block th:each="item, stat : ${items}">
+                        <tr class="main-row"
+                            th:attr="data-target='detail-row-' + ${stat.index}">
+                            <td th:text="${item.id}">1</td>
+                            <td th:text="${item.nome}">Mario Rossi</td>
+                            <td th:text="${item.email}">mario@email.it</td>
+                            <td>
+                                <span class="status-badge"
+                                      th:classappend="${item.attivo} ? ' status-active' : ' status-inactive'"
+                                      th:text="${item.attivo} ? 'Attivo' : 'Disattivo'">
+                                    Attivo
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr class="detail-row is-hidden"
+                            th:id="'detail-row-' + ${stat.index}">
+                            <td colspan="4">
+                                <div class="subrow-box">
+
+                                    <div class="subrow-actions-links">
+                                        <a th:href="@{/admin/view/{id}(id=${item.id})}"
+                                           class="action-link action-link-view">
+                                            <i class="bi bi-eye"></i>
+                                            <span>Visualizza</span>
+                                        </a>
+
+                                        <a th:href="@{/admin/edit/{id}(id=${item.id})}"
+                                           class="action-link action-link-edit">
+                                            <i class="bi bi-pencil"></i>
+                                            <span>Modifica</span>
+                                        </a>
+
+                                        <a th:href="@{/admin/delete/{id}(id=${item.id})}"
+                                           class="action-link action-link-delete"
+                                           onclick="return confirm('Confermi eliminazione?')">
+                                            <i class="bi bi-trash"></i>
+                                            <span>Elimina</span>
+                                        </a>
+
+                                        <a th:href="@{/admin/storico/{id}(id=${item.id})}"
+                                           class="action-link action-link-secondary">
+                                            <i class="bi bi-card-text"></i>
+                                            <span>Scheda</span>
+                                        </a>
+                                    </div>
+<!--
+                                    <div class="subrow-details">
+                                        <div class="detail-item">
+                                            <div class="detail-label">Telefono</div>
+                                            <div class="detail-value" th:text="${item.telefono}">3331234567</div>
+                                        </div>
+
+                                        <div class="detail-item">
+                                            <div class="detail-label">Città</div>
+                                            <div class="detail-value" th:text="${item.citta}">Napoli</div>
+                                        </div>
+
+                                        <div class="detail-item">
+                                            <div class="detail-label">Data creazione</div>
+                                            <div class="detail-value" th:text="${item.dataCreazione}">19/04/2026</div>
+                                        </div>
+                                    </div>
+					-->
+                                </div>
+                            </td>
+                        </tr>
+                    </th:block>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script th:src="@{/js/admin-subrow-table.js}"></script>
+</body>
+</html>

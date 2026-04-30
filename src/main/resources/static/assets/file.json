@@ -1,0 +1,2071 @@
+[
+  {
+    "brandId": null,
+    "categoryCode": "UOMO",
+    "categoryId": 1,
+    "categoryName": "Uomo",
+    "codpro": "ZZZZZ",
+    "createdAt": "2026-04-11T18:50:02.504552",
+    "description": null,
+    "groupId": null,
+    "id": 32,
+    "image": null,
+    "images": [],
+    "materials": null,
+    "name": "AAAAA",
+    "price": 10,
+    "publicId": "4d4ece88-5121-43fc-9a88-cf9718eaf094",
+    "shippingInfo": null,
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-04-11T18:50:02.504552",
+    "variants": []
+  },
+  {
+    "brandId": null,
+    "categoryCode": "DONNA",
+    "categoryId": 2,
+    "categoryName": "Donna",
+    "codpro": "JEANS-002",
+    "createdAt": "2026-03-08T14:54:53.387003",
+    "description": "Blazer dal taglio sartoriale con silhouette contemporanea, ideale per outfit eleganti o look smart-casual. Tessuto morbido e dettagli premium.",
+    "groupId": null,
+    "id": 31,
+    "image": "/uploads/products/579c4c1f326c459993b387d8e503f0de.jpg",
+    "images": [
+      {
+        "altText": "Jeans Ruth a gamba dritta",
+        "id": 58,
+        "imageUrl": "/uploads/products/6a861e8d319d491ea032aeecfb88999c.jpg",
+        "sortOrder": 1
+      },
+      {
+        "altText": "Jeans Ruth a gamba dritta",
+        "id": 59,
+        "imageUrl": "/uploads/products/cc3290d5e7404c90a20dd6a5375020ac.jpg",
+        "sortOrder": 2
+      },
+      {
+        "altText": "Jeans Ruth a gamba dritta",
+        "id": 60,
+        "imageUrl": "/uploads/products/ebe361ddc1af4f98919c000890089548.jpg",
+        "sortOrder": 3
+      },
+      {
+        "altText": "Jeans Ruth a gamba dritta",
+        "id": 61,
+        "imageUrl": "/uploads/products/dbec7b5056994c2a99b73a75ab78bcaf.jpg",
+        "sortOrder": 4
+      }
+    ],
+    "materials": "65% poliestere, 30% viscosa, 5% elastan. Regular fit con taglio sartoriale.",
+    "name": "Jeans Ruth a gamba dritta",
+    "price": 89.4,
+    "publicId": "42c9ed1c-e739-4d4c-9226-5760976f0c70",
+    "shippingInfo": "Spedizione 24/72h. Reso entro 14 giorni. Valutazione media cliente: 4.8/5.",
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-03-08T15:42:02.702467",
+    "variants": [
+      {
+        "colorCode": "WHT",
+        "colorHex": "#FFFFFF",
+        "colorId": 2,
+        "colorName": "BIANCO",
+        "colorRgb": "255,255,255",
+        "createdAt": "2026-03-08T14:54:53.653944",
+        "enabled": true,
+        "id": 28,
+        "images": [
+          {
+            "altText": "JEANS-002-WHT",
+            "id": 65,
+            "imageUrl": "/uploads/variants/75f1b120-8379-4de8-ac03-f03c9d7d5e2f.jpg",
+            "sortOrder": 1
+          },
+          {
+            "altText": "JEANS-002-WHT",
+            "id": 66,
+            "imageUrl": "/uploads/variants/be9d602a-cda1-4629-9d39-f3ba8db05b10.jpg",
+            "sortOrder": 2
+          },
+          {
+            "altText": "JEANS-002-WHT",
+            "id": 67,
+            "imageUrl": "/uploads/variants/e04d68f1-cefd-4da0-95fb-8f41e74f7e93.jpg",
+            "sortOrder": 3
+          }
+        ],
+        "mainImage": "/uploads/variants/4d1dd74f-7c1f-45c0-a6ce-765d617dfdc9.jpg",
+        "price": 89.4,
+        "sizeCode": "S",
+        "sizeId": 4,
+        "sizeName": "S",
+        "stockQty": 10,
+        "updatedAt": "2026-03-08T20:15:38.60215",
+        "variantCode": "JEANS-002-WHT-S"
+      },
+      {
+        "colorCode": "WHT",
+        "colorHex": "#FFFFFF",
+        "colorId": 2,
+        "colorName": "BIANCO",
+        "colorRgb": "255,255,255",
+        "createdAt": "2026-03-08T14:54:53.655875",
+        "enabled": true,
+        "id": 29,
+        "images": [
+          {
+            "altText": "JEANS-002-WHT",
+            "id": 71,
+            "imageUrl": "/uploads/variants/75f1b120-8379-4de8-ac03-f03c9d7d5e2f.jpg",
+            "sortOrder": 1
+          },
+          {
+            "altText": "JEANS-002-WHT",
+            "id": 72,
+            "imageUrl": "/uploads/variants/be9d602a-cda1-4629-9d39-f3ba8db05b10.jpg",
+            "sortOrder": 2
+          },
+          {
+            "altText": "JEANS-002-WHT",
+            "id": 73,
+            "imageUrl": "/uploads/variants/e04d68f1-cefd-4da0-95fb-8f41e74f7e93.jpg",
+            "sortOrder": 3
+          }
+        ],
+        "mainImage": "/uploads/variants/4d1dd74f-7c1f-45c0-a6ce-765d617dfdc9.jpg",
+        "price": 89.4,
+        "sizeCode": "M",
+        "sizeId": 5,
+        "sizeName": "M",
+        "stockQty": 50,
+        "updatedAt": "2026-03-08T20:15:11.701858",
+        "variantCode": "JEANS-002-WHT-M"
+      },
+      {
+        "colorCode": "WHT",
+        "colorHex": "#FFFFFF",
+        "colorId": 2,
+        "colorName": "BIANCO",
+        "colorRgb": "255,255,255",
+        "createdAt": "2026-03-08T14:54:53.655875",
+        "enabled": true,
+        "id": 30,
+        "images": [
+          {
+            "altText": "JEANS-002-WHT",
+            "id": 68,
+            "imageUrl": "/uploads/variants/75f1b120-8379-4de8-ac03-f03c9d7d5e2f.jpg",
+            "sortOrder": 1
+          },
+          {
+            "altText": "JEANS-002-WHT",
+            "id": 69,
+            "imageUrl": "/uploads/variants/be9d602a-cda1-4629-9d39-f3ba8db05b10.jpg",
+            "sortOrder": 2
+          },
+          {
+            "altText": "JEANS-002-WHT",
+            "id": 70,
+            "imageUrl": "/uploads/variants/e04d68f1-cefd-4da0-95fb-8f41e74f7e93.jpg",
+            "sortOrder": 3
+          }
+        ],
+        "mainImage": "/uploads/variants/4d1dd74f-7c1f-45c0-a6ce-765d617dfdc9.jpg",
+        "price": 89.4,
+        "sizeCode": "L",
+        "sizeId": 6,
+        "sizeName": "L",
+        "stockQty": 50,
+        "updatedAt": "2026-03-08T20:13:40.488812",
+        "variantCode": "JEANS-002-WHT-L"
+      },
+      {
+        "colorCode": "BLK",
+        "colorHex": "#000000",
+        "colorId": 1,
+        "colorName": "NERO",
+        "colorRgb": "0,0,0",
+        "createdAt": "2026-03-08T14:54:53.655875",
+        "enabled": true,
+        "id": 31,
+        "images": [
+          {
+            "altText": "JEANS-002-BLK",
+            "id": 58,
+            "imageUrl": "/uploads/variants/96dc07c3-ccff-4c87-a493-2b7c6818c93a.jpg",
+            "sortOrder": 1
+          },
+          {
+            "altText": "JEANS-002-BLK",
+            "id": 59,
+            "imageUrl": "/uploads/variants/72748759-9a41-42d5-a6cb-f40f2dc13209.jpg",
+            "sortOrder": 2
+          },
+          {
+            "altText": "JEANS-002-BLK",
+            "id": 60,
+            "imageUrl": "/uploads/variants/784bcd2e-685e-4322-998e-956e62dcd3ea.jpg",
+            "sortOrder": 3
+          },
+          {
+            "altText": "JEANS-002-BLK",
+            "id": 61,
+            "imageUrl": "/uploads/variants/b2f5039d-5471-4cf8-841b-46f8b69e1051.jpg",
+            "sortOrder": 4
+          }
+        ],
+        "mainImage": "/uploads/variants/e0e656a2-4210-4fc2-aa04-9f10eb477f2b.jpg",
+        "price": 89.4,
+        "sizeCode": "S",
+        "sizeId": 4,
+        "sizeName": "S",
+        "stockQty": 50,
+        "updatedAt": "2026-03-08T14:58:32.231128",
+        "variantCode": "JEANS-002-BLK-S"
+      },
+      {
+        "colorCode": "BLK",
+        "colorHex": "#000000",
+        "colorId": 1,
+        "colorName": "NERO",
+        "colorRgb": "0,0,0",
+        "createdAt": "2026-03-08T14:54:53.655875",
+        "enabled": true,
+        "id": 32,
+        "images": [
+          {
+            "altText": "JEANS-002-BLK",
+            "id": 44,
+            "imageUrl": "/uploads/variants/96dc07c3-ccff-4c87-a493-2b7c6818c93a.jpg",
+            "sortOrder": 1
+          },
+          {
+            "altText": "JEANS-002-BLK",
+            "id": 45,
+            "imageUrl": "/uploads/variants/72748759-9a41-42d5-a6cb-f40f2dc13209.jpg",
+            "sortOrder": 2
+          },
+          {
+            "altText": "JEANS-002-BLK",
+            "id": 46,
+            "imageUrl": "/uploads/variants/784bcd2e-685e-4322-998e-956e62dcd3ea.jpg",
+            "sortOrder": 3
+          },
+          {
+            "altText": "JEANS-002-BLK",
+            "id": 47,
+            "imageUrl": "/uploads/variants/b2f5039d-5471-4cf8-841b-46f8b69e1051.jpg",
+            "sortOrder": 4
+          }
+        ],
+        "mainImage": "/uploads/variants/e0e656a2-4210-4fc2-aa04-9f10eb477f2b.jpg",
+        "price": 89.4,
+        "sizeCode": "M",
+        "sizeId": 5,
+        "sizeName": "M",
+        "stockQty": 10,
+        "updatedAt": "2026-03-08T20:14:28.209364",
+        "variantCode": "JEANS-002-BLK-M"
+      },
+      {
+        "colorCode": "BLK",
+        "colorHex": "#000000",
+        "colorId": 1,
+        "colorName": "NERO",
+        "colorRgb": "0,0,0",
+        "createdAt": "2026-03-08T14:54:53.655875",
+        "enabled": true,
+        "id": 33,
+        "images": [
+          {
+            "altText": "JEANS-002-BLK",
+            "id": 54,
+            "imageUrl": "/uploads/variants/96dc07c3-ccff-4c87-a493-2b7c6818c93a.jpg",
+            "sortOrder": 1
+          },
+          {
+            "altText": "JEANS-002-BLK",
+            "id": 55,
+            "imageUrl": "/uploads/variants/72748759-9a41-42d5-a6cb-f40f2dc13209.jpg",
+            "sortOrder": 2
+          },
+          {
+            "altText": "JEANS-002-BLK",
+            "id": 56,
+            "imageUrl": "/uploads/variants/784bcd2e-685e-4322-998e-956e62dcd3ea.jpg",
+            "sortOrder": 3
+          },
+          {
+            "altText": "JEANS-002-BLK",
+            "id": 57,
+            "imageUrl": "/uploads/variants/b2f5039d-5471-4cf8-841b-46f8b69e1051.jpg",
+            "sortOrder": 4
+          }
+        ],
+        "mainImage": "/uploads/variants/e0e656a2-4210-4fc2-aa04-9f10eb477f2b.jpg",
+        "price": 89.4,
+        "sizeCode": "L",
+        "sizeId": 6,
+        "sizeName": "L",
+        "stockQty": 50,
+        "updatedAt": "2026-03-08T14:56:45.67503",
+        "variantCode": "JEANS-002-BLK-L"
+      }
+    ]
+  },
+  {
+    "brandId": null,
+    "categoryCode": "DONNA",
+    "categoryId": 2,
+    "categoryName": "Donna",
+    "codpro": "JEANS-001",
+    "createdAt": "2026-03-07T20:22:46.676469",
+    "description": "Ruth è il jeans a gamba dritta dalla vestibilità perfetta. Reinventato ogni stagione con lavaggi e trattamenti freschi e caratterizzato da un orlo grezzo per facili modifiche, è il tuo jeans più versatile. Ora torna nel classico lavaggio denim indaco con bellissimi alti e bassi.",
+    "groupId": null,
+    "id": 30,
+    "image": "/uploads/products/8b50e7d5b98d4070a55e46bf279b4493.jpg",
+    "images": [
+      {
+        "altText": "Jeans Ruth a gamba dritta",
+        "id": 55,
+        "imageUrl": "/uploads/products/172606634bb14e65a1b5767b80761abd.jpg",
+        "sortOrder": 1
+      },
+      {
+        "altText": "Jeans Ruth a gamba dritta",
+        "id": 56,
+        "imageUrl": "/uploads/products/3fd6ddc319c64293894359f39d0e3d90.jpg",
+        "sortOrder": 2
+      },
+      {
+        "altText": "Jeans Ruth a gamba dritta",
+        "id": 57,
+        "imageUrl": "/uploads/products/a889fa8ba0054fe7b918d5279b34fb97.jpg",
+        "sortOrder": 3
+      }
+    ],
+    "materials": "82% Cotton 17% Polyester 1% Spandex",
+    "name": "Jeans Ruth a gamba dritta",
+    "price": 89.4,
+    "publicId": "4e1f1742-66ce-4021-a3a4-e467b1e409a8",
+    "shippingInfo": "CONDIZIONI DI SPEDIZIONE",
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-03-07T20:27:02.499884",
+    "variants": [
+      {
+        "colorCode": "WHT",
+        "colorHex": "#FFFFFF",
+        "colorId": 2,
+        "colorName": "BIANCO",
+        "colorRgb": "255,255,255",
+        "createdAt": "2026-03-07T20:30:55.920439",
+        "enabled": true,
+        "id": 19,
+        "images": [],
+        "mainImage": null,
+        "price": 89.4,
+        "sizeCode": "S",
+        "sizeId": 4,
+        "sizeName": "S",
+        "stockQty": 10,
+        "updatedAt": "2026-03-07T20:43:12.207287",
+        "variantCode": "JEANS-001-WHT-S"
+      },
+      {
+        "colorCode": "WHT",
+        "colorHex": "#FFFFFF",
+        "colorId": 2,
+        "colorName": "BIANCO",
+        "colorRgb": "255,255,255",
+        "createdAt": "2026-03-07T20:30:55.931241",
+        "enabled": true,
+        "id": 20,
+        "images": [],
+        "mainImage": null,
+        "price": 89.4,
+        "sizeCode": "M",
+        "sizeId": 5,
+        "sizeName": "M",
+        "stockQty": 10,
+        "updatedAt": "2026-03-07T20:42:46.874566",
+        "variantCode": "JEANS-001-WHT-M"
+      },
+      {
+        "colorCode": "WHT",
+        "colorHex": "#FFFFFF",
+        "colorId": 2,
+        "colorName": "BIANCO",
+        "colorRgb": "255,255,255",
+        "createdAt": "2026-03-07T20:30:55.931241",
+        "enabled": true,
+        "id": 21,
+        "images": [
+          {
+            "altText": "JEANS-001-WHT-L",
+            "id": 16,
+            "imageUrl": "/uploads/variants/3bbea3bc-da7b-4925-9e81-3b4ee8b1e152.jpg",
+            "sortOrder": 1
+          },
+          {
+            "altText": "JEANS-001-WHT-L",
+            "id": 17,
+            "imageUrl": "/uploads/variants/52f4b486-27c6-4c7f-866b-192854d03855.jpg",
+            "sortOrder": 2
+          },
+          {
+            "altText": "JEANS-001-WHT-L",
+            "id": 18,
+            "imageUrl": "/uploads/variants/f704d6ea-fe3c-44f1-8e4e-e8fa951f1ef3.jpg",
+            "sortOrder": 3
+          }
+        ],
+        "mainImage": "/uploads/variants/b586a172-774f-469c-8b6f-d485d8ceb83e.jpg",
+        "price": 89.4,
+        "sizeCode": "L",
+        "sizeId": 6,
+        "sizeName": "L",
+        "stockQty": 10,
+        "updatedAt": "2026-03-07T20:36:14.207698",
+        "variantCode": "JEANS-001-WHT-L"
+      },
+      {
+        "colorCode": "BLU",
+        "colorHex": "#0000FF",
+        "colorId": 52,
+        "colorName": "BLU",
+        "colorRgb": "0,0,255",
+        "createdAt": "2026-03-07T20:30:55.931241",
+        "enabled": true,
+        "id": 22,
+        "images": [],
+        "mainImage": null,
+        "price": 89.4,
+        "sizeCode": "S",
+        "sizeId": 4,
+        "sizeName": "S",
+        "stockQty": 10,
+        "updatedAt": "2026-03-07T20:42:19.407903",
+        "variantCode": "JEANS-001-BLU-S"
+      },
+      {
+        "colorCode": "BLU",
+        "colorHex": "#0000FF",
+        "colorId": 52,
+        "colorName": "BLU",
+        "colorRgb": "0,0,255",
+        "createdAt": "2026-03-07T20:30:55.938533",
+        "enabled": true,
+        "id": 23,
+        "images": [],
+        "mainImage": null,
+        "price": 89.4,
+        "sizeCode": "M",
+        "sizeId": 5,
+        "sizeName": "M",
+        "stockQty": 10,
+        "updatedAt": "2026-03-07T20:41:53.346799",
+        "variantCode": "JEANS-001-BLU-M"
+      },
+      {
+        "colorCode": "BLU",
+        "colorHex": "#0000FF",
+        "colorId": 52,
+        "colorName": "BLU",
+        "colorRgb": "0,0,255",
+        "createdAt": "2026-03-07T20:30:55.941879",
+        "enabled": true,
+        "id": 24,
+        "images": [
+          {
+            "altText": "JEANS-001-BLU-L",
+            "id": 12,
+            "imageUrl": "/uploads/variants/dd68b725-e877-4a2c-ad0c-5e720796572c.jpg",
+            "sortOrder": 1
+          },
+          {
+            "altText": "JEANS-001-BLU-L",
+            "id": 13,
+            "imageUrl": "/uploads/variants/1f470789-c2e5-42e4-961c-5ac36dc0aa89.jpg",
+            "sortOrder": 2
+          },
+          {
+            "altText": "JEANS-001-BLU-L",
+            "id": 14,
+            "imageUrl": "/uploads/variants/077e438b-f34e-4455-9372-f67aae5482a8.jpg",
+            "sortOrder": 3
+          },
+          {
+            "altText": "JEANS-001-BLU-L",
+            "id": 15,
+            "imageUrl": "/uploads/variants/f7572aff-1beb-46ae-8002-5252a0289c4d.jpg",
+            "sortOrder": 4
+          }
+        ],
+        "mainImage": "/uploads/variants/08e0b209-28c6-4032-994e-050a8a6719d1.jpg",
+        "price": 89.4,
+        "sizeCode": "L",
+        "sizeId": 6,
+        "sizeName": "L",
+        "stockQty": 10,
+        "updatedAt": "2026-03-07T20:34:55.061126",
+        "variantCode": "JEANS-001-BLU-L"
+      },
+      {
+        "colorCode": "BLK",
+        "colorHex": "#000000",
+        "colorId": 1,
+        "colorName": "NERO",
+        "colorRgb": "0,0,0",
+        "createdAt": "2026-03-07T20:30:55.941879",
+        "enabled": true,
+        "id": 25,
+        "images": [],
+        "mainImage": null,
+        "price": 89.4,
+        "sizeCode": "S",
+        "sizeId": 4,
+        "sizeName": "S",
+        "stockQty": 10,
+        "updatedAt": "2026-03-07T20:41:01.9996",
+        "variantCode": "JEANS-001-BLK-S"
+      },
+      {
+        "colorCode": "BLK",
+        "colorHex": "#000000",
+        "colorId": 1,
+        "colorName": "NERO",
+        "colorRgb": "0,0,0",
+        "createdAt": "2026-03-07T20:30:55.946949",
+        "enabled": true,
+        "id": 26,
+        "images": [],
+        "mainImage": null,
+        "price": 89.4,
+        "sizeCode": "M",
+        "sizeId": 5,
+        "sizeName": "M",
+        "stockQty": 10,
+        "updatedAt": "2026-03-07T20:40:25.295596",
+        "variantCode": "JEANS-001-BLK-M"
+      },
+      {
+        "colorCode": "BLK",
+        "colorHex": "#000000",
+        "colorId": 1,
+        "colorName": "NERO",
+        "colorRgb": "0,0,0",
+        "createdAt": "2026-03-07T20:30:55.946949",
+        "enabled": true,
+        "id": 27,
+        "images": [
+          {
+            "altText": "JEANS-001-BLK-L",
+            "id": 8,
+            "imageUrl": "/uploads/variants/690ed03e-4a1d-422e-9030-5d56741aae33.jpg",
+            "sortOrder": 1
+          },
+          {
+            "altText": "JEANS-001-BLK-L",
+            "id": 9,
+            "imageUrl": "/uploads/variants/676bb98a-7ffa-468a-b13e-d169c4e3a630.jpg",
+            "sortOrder": 2
+          },
+          {
+            "altText": "JEANS-001-BLK-L",
+            "id": 10,
+            "imageUrl": "/uploads/variants/c9e9f820-fe5c-48dd-86d9-f5cf7290068f.jpg",
+            "sortOrder": 3
+          },
+          {
+            "altText": "JEANS-001-BLK-L",
+            "id": 11,
+            "imageUrl": "/uploads/variants/28a26816-9e7f-410d-93e0-abfba9a7efd3.jpg",
+            "sortOrder": 4
+          }
+        ],
+        "mainImage": "/uploads/variants/272bb420-e22e-44f6-bb48-a19ca8a78d8f.jpg",
+        "price": 89.4,
+        "sizeCode": "L",
+        "sizeId": 6,
+        "sizeName": "L",
+        "stockQty": 10,
+        "updatedAt": "2026-03-07T20:32:54.976077",
+        "variantCode": "JEANS-001-BLK-L"
+      }
+    ]
+  },
+  {
+    "brandId": null,
+    "categoryCode": "DONNA",
+    "categoryId": 2,
+    "categoryName": "Donna",
+    "codpro": "PROVA-999",
+    "createdAt": "2026-03-07T10:51:00.759417",
+    "description": "Blazer dal taglio sartoriale con silhouette contemporanea, ideale per outfit eleganti o look smart-casual. Tessuto morbido e dettagli premium.",
+    "groupId": null,
+    "id": 29,
+    "image": "/uploads/products/7c4a2bd1d8324d39b9e61e4a3f1c447a.jpg",
+    "images": [
+      {
+        "altText": "A234567890123456789012345678931 31csratteriA",
+        "id": 53,
+        "imageUrl": "/uploads/products/f38bbc05034e4b299b07ad75d8340bfe.jpg",
+        "sortOrder": 1
+      },
+      {
+        "altText": "A234567890123456789012345678931 31csratteriA",
+        "id": 54,
+        "imageUrl": "/uploads/products/a7389f3227c14ed8a002683848836a21.jpg",
+        "sortOrder": 2
+      }
+    ],
+    "materials": "65% poliestere, 30% viscosa, 5% elastan. Regular fit con taglio sartoriale.",
+    "name": "A234567890123456789012345678931 31csratteriA",
+    "price": 15.5,
+    "publicId": "36d9554a-fe99-4621-9627-e0c4da527626",
+    "shippingInfo": "Spedizione 24/72h. Reso entro 14 giorni. Valutazione media cliente: 4.8/5.",
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-03-07T15:58:41.725675",
+    "variants": [
+      {
+        "colorCode": "APR",
+        "colorHex": "#FBCEB1",
+        "colorId": 36,
+        "colorName": "ALBICOCCA",
+        "colorRgb": "251,206,177",
+        "createdAt": "2026-03-07T10:51:00.952374",
+        "enabled": true,
+        "id": 10,
+        "images": [],
+        "mainImage": null,
+        "price": 10,
+        "sizeCode": "XXS",
+        "sizeId": 2,
+        "sizeName": "XXS",
+        "stockQty": 0,
+        "updatedAt": "2026-03-27T16:51:14.490411",
+        "variantCode": "PROVA-999-APR-XXS"
+      },
+      {
+        "colorCode": "APR",
+        "colorHex": "#FBCEB1",
+        "colorId": 36,
+        "colorName": "ALBICOCCA",
+        "colorRgb": "251,206,177",
+        "createdAt": "2026-03-07T10:51:00.956968",
+        "enabled": true,
+        "id": 11,
+        "images": [],
+        "mainImage": null,
+        "price": 5,
+        "sizeCode": "XS",
+        "sizeId": 3,
+        "sizeName": "XS",
+        "stockQty": 10,
+        "updatedAt": "2026-03-27T16:50:46.003223",
+        "variantCode": "PROVA-999-APR-XS"
+      },
+      {
+        "colorCode": "AMR",
+        "colorHex": "#9F2B68",
+        "colorId": 28,
+        "colorName": "AMARANTO",
+        "colorRgb": "159,43,104",
+        "createdAt": "2026-03-07T10:51:00.959424",
+        "enabled": true,
+        "id": 12,
+        "images": [],
+        "mainImage": null,
+        "price": 15,
+        "sizeCode": "XXS",
+        "sizeId": 2,
+        "sizeName": "XXS",
+        "stockQty": 150,
+        "updatedAt": "2026-03-07T15:52:17.132098",
+        "variantCode": "PROVA-999-AMR-XXS"
+      },
+      {
+        "colorCode": "AMR",
+        "colorHex": "#9F2B68",
+        "colorId": 28,
+        "colorName": "AMARANTO",
+        "colorRgb": "159,43,104",
+        "createdAt": "2026-03-07T10:51:00.960646",
+        "enabled": true,
+        "id": 13,
+        "images": [
+          {
+            "altText": "PROVA-999-AMR-XS",
+            "id": 1,
+            "imageUrl": "/uploads/variants/676c3321-a29c-4b65-a8e8-806143b0bb05.jpg",
+            "sortOrder": 1
+          },
+          {
+            "altText": "PROVA-999-AMR-XS",
+            "id": 2,
+            "imageUrl": "/uploads/variants/be277732-e658-4dcb-b979-c667e70a384c.jpg",
+            "sortOrder": 2
+          },
+          {
+            "altText": "PROVA-999-AMR-XS",
+            "id": 3,
+            "imageUrl": "/uploads/variants/f4dfbaca-f02f-4168-8e26-4797b20a3231.jpg",
+            "sortOrder": 3
+          }
+        ],
+        "mainImage": "/uploads/variants/b6d8a2ca-3dbd-4cbe-a7d0-8625baedb081.jpg",
+        "price": 14.5,
+        "sizeCode": "XS",
+        "sizeId": 3,
+        "sizeName": "XS",
+        "stockQty": 100,
+        "updatedAt": "2026-03-07T12:53:10.95042",
+        "variantCode": "PROVA-999-AMR-XS"
+      },
+      {
+        "colorCode": "AZZ",
+        "colorHex": "#1E90FF",
+        "colorId": 51,
+        "colorName": "AZZURRO",
+        "colorRgb": "30,144,255",
+        "createdAt": "2026-03-07T14:55:02.930744",
+        "enabled": true,
+        "id": 18,
+        "images": [
+          {
+            "altText": "PROVA-999-AZZ-L",
+            "id": 6,
+            "imageUrl": "/uploads/variants/c02633f4-a294-4bd5-b6ad-67d0443d7302.jpg",
+            "sortOrder": 1
+          },
+          {
+            "altText": "PROVA-999-AZZ-L",
+            "id": 7,
+            "imageUrl": "/uploads/variants/4d92bd41-d904-45f1-a8f4-0a535edd3c73.jpg",
+            "sortOrder": 2
+          }
+        ],
+        "mainImage": "/uploads/variants/3b7c9935-7a27-445d-8eb8-99d6eea2ce50.jpg",
+        "price": 50,
+        "sizeCode": "L",
+        "sizeId": 6,
+        "sizeName": "L",
+        "stockQty": 15,
+        "updatedAt": "2026-03-07T14:55:51.381401",
+        "variantCode": "PROVA-999-AZZ-L"
+      }
+    ]
+  },
+  {
+    "brandId": null,
+    "categoryCode": "DONNA",
+    "categoryId": 2,
+    "categoryName": "Donna",
+    "codpro": "NOVI-001",
+    "createdAt": "2026-03-04T23:10:29.951614",
+    "description": "A",
+    "groupId": null,
+    "id": 28,
+    "image": "/uploads/products/2fac48ed613b4fca947250e9b8115821.jpg",
+    "images": [
+      {
+        "altText": "NUOVO PRODOTTO ",
+        "id": 51,
+        "imageUrl": "/uploads/products/caab7cecbe064cb185d7ec7fdcfd772f.jpg",
+        "sortOrder": 1
+      },
+      {
+        "altText": "NUOVO PRODOTTO ",
+        "id": 52,
+        "imageUrl": "/uploads/products/d779254a33354653a8fbf1fc904db6b1.jpg",
+        "sortOrder": 2
+      }
+    ],
+    "materials": "A",
+    "name": "NUOVO PRODOTTO ",
+    "price": 44.99,
+    "publicId": "48407e4c-0b96-4cdc-ac64-e7bf9bb7878d",
+    "shippingInfo": "A",
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-03-04T23:10:29.973086",
+    "variants": []
+  },
+  {
+    "brandId": null,
+    "categoryCode": "UOMO",
+    "categoryId": 1,
+    "categoryName": "Uomo",
+    "codpro": "ART-999",
+    "createdAt": "2026-03-04T19:08:35.405757",
+    "description": "A",
+    "groupId": null,
+    "id": 27,
+    "image": "/uploads/products/e044145022384b6f9c427b462c6c98f3.jpg",
+    "images": [
+      {
+        "altText": "ARTICOLO 9999 CON VARIANTI",
+        "id": 49,
+        "imageUrl": "/uploads/products/48af611d0f8a4c8abf0ae0e36e432b88.jpg",
+        "sortOrder": 1
+      },
+      {
+        "altText": "ARTICOLO 9999 CON VARIANTI",
+        "id": 50,
+        "imageUrl": "/uploads/products/d7801c4eaa81484d8445a16b7c2da35c.jpg",
+        "sortOrder": 2
+      }
+    ],
+    "materials": "A",
+    "name": "ARTICOLO 9999 CON VARIANTI",
+    "price": 44.99,
+    "publicId": "065cd1e9-e347-4e5f-8997-10087a0e92d4",
+    "shippingInfo": "A",
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-03-04T19:08:35.427225",
+    "variants": []
+  },
+  {
+    "brandId": null,
+    "categoryCode": "UOMO",
+    "categoryId": 1,
+    "categoryName": "Uomo",
+    "codpro": "VAR-001",
+    "createdAt": "2026-03-04T18:55:09.36723",
+    "description": "A",
+    "groupId": null,
+    "id": 26,
+    "image": "/uploads/products/c8bfa5e357be43bb98a5ecaff2d92e42.jpg",
+    "images": [
+      {
+        "altText": "VARIANTEARTICOLO",
+        "id": 47,
+        "imageUrl": "/uploads/products/e5e29dea73984eaa8fde27c73e829fff.jpg",
+        "sortOrder": 1
+      },
+      {
+        "altText": "VARIANTEARTICOLO",
+        "id": 48,
+        "imageUrl": "/uploads/products/47effe167e9343808d0d683888a65235.jpg",
+        "sortOrder": 2
+      }
+    ],
+    "materials": "A",
+    "name": "VARIANTEARTICOLO",
+    "price": 44.99,
+    "publicId": "3aa25c12-e0e0-4359-9332-698693756983",
+    "shippingInfo": "A",
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-03-04T18:55:09.391915",
+    "variants": []
+  },
+  {
+    "brandId": null,
+    "categoryCode": "DONNA",
+    "categoryId": 2,
+    "categoryName": "Donna",
+    "codpro": "DRESS-0001",
+    "createdAt": "2026-03-04T18:35:10.382098",
+    "description": "AAAA",
+    "groupId": null,
+    "id": 25,
+    "image": "/uploads/products/a57e2d4e9f8845289ae8efbc4c9086f7.jpg",
+    "images": [
+      {
+        "altText": "ABITO PROVA VARIANTI",
+        "id": 45,
+        "imageUrl": "/uploads/products/f59a92e8b3d7447aa7500da6147836f5.jpg",
+        "sortOrder": 1
+      },
+      {
+        "altText": "ABITO PROVA VARIANTI",
+        "id": 46,
+        "imageUrl": "/uploads/products/9b94271ffb7141929e46390f88a16ffd.jpg",
+        "sortOrder": 2
+      }
+    ],
+    "materials": "BBBBB",
+    "name": "ABITO PROVA VARIANTI",
+    "price": 44.99,
+    "publicId": "ad129586-28f6-478d-9125-9f5ed053d60d",
+    "shippingInfo": "CCCC",
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-03-04T18:35:10.382098",
+    "variants": []
+  },
+  {
+    "brandId": null,
+    "categoryCode": "DONNA",
+    "categoryId": 2,
+    "categoryName": "Donna",
+    "codpro": "SKI-001",
+    "createdAt": "2026-03-04T18:27:17.031329",
+    "description": "",
+    "groupId": null,
+    "id": 23,
+    "image": "/uploads/products/7a3888494d3146dca33fdf191e81cbcb.jpg",
+    "images": [],
+    "materials": "",
+    "name": "PROVA VARIANTI",
+    "price": 15,
+    "publicId": "44b760ad-342b-4850-a915-5e23f9956997",
+    "shippingInfo": "",
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-03-04T18:27:17.042569",
+    "variants": []
+  },
+  {
+    "brandId": null,
+    "categoryCode": "DONNA",
+    "categoryId": 2,
+    "categoryName": "Donna",
+    "codpro": "SKI-00001",
+    "createdAt": "2026-03-04T18:20:16.044777",
+    "description": "AAAAAAAAAAAAA",
+    "groupId": 1,
+    "id": 22,
+    "image": "/uploads/products/0a3ebf4251514af7b693804b8a1fe74a.jpg",
+    "images": [
+      {
+        "altText": "ARTICOLO CON VARIANTI",
+        "id": 43,
+        "imageUrl": "/uploads/products/851053c4b9354289bbeca4aca470b008.jpg",
+        "sortOrder": 1
+      },
+      {
+        "altText": "ARTICOLO CON VARIANTI",
+        "id": 44,
+        "imageUrl": "/uploads/products/24426ae6948a44e388f9b604e3ee3ca7.jpg",
+        "sortOrder": 2
+      }
+    ],
+    "materials": "AAAAAAAAAAAAAAAA",
+    "name": "ARTICOLO CON VARIANTI",
+    "price": 44.99,
+    "publicId": "3c8bc045-782b-4c17-b76a-6a2f822e0194",
+    "shippingInfo": "AAAAAAAAAAAAAAAAAAA",
+    "stockQty": 10,
+    "subgroupId": 15,
+    "updatedAt": "2026-03-04T18:28:54.761726",
+    "variants": []
+  },
+  {
+    "brandId": null,
+    "categoryCode": "DONNA",
+    "categoryId": 2,
+    "categoryName": "Donna",
+    "codpro": "T-SHIRT-001",
+    "createdAt": "2026-03-04T10:36:37.759099",
+    "description": "Abito elegante dalla linea fluida con caduta morbida e silhouette femminile. Perfetto per eventi e serate.",
+    "groupId": null,
+    "id": 21,
+    "image": "/uploads/products/fa555231498d48b1b183be35e911820d.jpg",
+    "images": [],
+    "materials": "Tessuto satinato effetto seta.",
+    "name": "Silk Evening Dress",
+    "price": 44.99,
+    "publicId": "24b75a72-5733-42d0-ad53-8822cc1088a6",
+    "shippingInfo": "Consegna rapida e resi entro 14 giorni.",
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-03-04T10:36:37.759099",
+    "variants": []
+  },
+  {
+    "brandId": null,
+    "categoryCode": "UOMO",
+    "categoryId": 1,
+    "categoryName": "Uomo",
+    "codpro": "prova",
+    "createdAt": "2026-03-04T09:55:10.635132",
+    "description": "",
+    "groupId": null,
+    "id": 20,
+    "image": "/uploads/products/7bd18f8d743a493586da3d39ec42b943.jpg",
+    "images": [],
+    "materials": "",
+    "name": "prova articolo",
+    "price": 44.99,
+    "publicId": "dcf1746a-f19b-4816-9af5-9e0ad93b6093",
+    "shippingInfo": "",
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-03-04T09:55:10.635132",
+    "variants": []
+  },
+  {
+    "brandId": null,
+    "categoryCode": "DONNA",
+    "categoryId": 2,
+    "categoryName": "Donna",
+    "codpro": "TH-A28",
+    "createdAt": "2026-03-03T23:27:01.683961",
+    "description": "Blazer dal taglio sartoriale con silhouette contemporanea, ideale per outfit eleganti o look smart-casual. Tessuto morbido e dettagli premium",
+    "groupId": null,
+    "id": 19,
+    "image": "/uploads/products/160d6d95b00a48908e5ae4f7cd578281.jpg",
+    "images": [],
+    "materials": "65% poliestere, 30% viscosa, 5% elastan. Regular fit con taglio sartoriale.",
+    "name": "Tailored Nude Blazer",
+    "price": 44.99,
+    "publicId": "261bd677-3d35-4139-846d-a53c8fa85654",
+    "shippingInfo": "Spedizione 24/72h. Reso entro 14 giorni. Valutazione media cliente: 4.8/5.",
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-03-03T23:27:01.683961",
+    "variants": []
+  },
+  {
+    "brandId": null,
+    "categoryCode": "DONNA",
+    "categoryId": 2,
+    "categoryName": "Donna",
+    "codpro": "MAXMARA_01",
+    "createdAt": "2026-02-28T13:02:20.789144",
+    "description": "Questa camicia è il capo perfetto per affrontare la stagione calda con eleganza naturale. Realizzata in puro lino, unisce freschezza e traspirabilità a una silhouette ampia e fluida, ideale per l’estate. Il modello presenta collo classico, maniche a tre quarti leggermente scampanate e chiusura frontale con bottoni nascosti, per un look minimal, pulito e sofisticato.\r\nI dettagli raffinati esaltano la femminilità e la versatilità del capo, rendendolo adatto sia a outfit quotidiani che a occasioni più eleganti.",
+    "groupId": null,
+    "id": 18,
+    "image": "/uploads/products/cf336a64578640dd8e367dab66dd4864.jpg",
+    "images": [
+      {
+        "altText": "Camicia boxy color coccio",
+        "id": 39,
+        "imageUrl": "/uploads/products/78f57f30b34e40aca94987106501e168.jpg",
+        "sortOrder": 1
+      },
+      {
+        "altText": "Camicia boxy color coccio",
+        "id": 40,
+        "imageUrl": "/uploads/products/761bf6628eed4960bc42737a523189c0.jpg",
+        "sortOrder": 2
+      }
+    ],
+    "materials": "",
+    "name": "Camicia boxy color coccio MM Max Mara in puro lino con maniche a tre quarti e abbottonatura nascosta",
+    "price": 189,
+    "publicId": "d413d1b2-4d9c-4f70-a787-7a3db9e0e156",
+    "shippingInfo": "",
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-03-10T16:09:30.021139",
+    "variants": [
+      {
+        "colorCode": "NOCLR",
+        "colorHex": "#NULL",
+        "colorId": 69,
+        "colorName": "NESSUN COLORE",
+        "colorRgb": "NULL",
+        "createdAt": "2026-03-10T16:09:30.06914",
+        "enabled": true,
+        "id": 35,
+        "images": [],
+        "mainImage": null,
+        "price": 150,
+        "sizeCode": "TU",
+        "sizeId": 1,
+        "sizeName": "TAGLIA UNICA",
+        "stockQty": 20,
+        "updatedAt": "2026-03-10T16:10:00.182616",
+        "variantCode": "MAXMARA_01-NOCLR-TU"
+      }
+    ]
+  },
+  {
+    "brandId": null,
+    "categoryCode": "DONNA",
+    "categoryId": 2,
+    "categoryName": "Donna",
+    "codpro": "ABI545",
+    "createdAt": "2026-02-26T12:49:43.956298",
+    "description": "Blazer dal taglio sartoriale con silhouette contemporanea, ideale per outfit eleganti o look smart-casual. Tessuto morbido e dettagli premium.",
+    "groupId": null,
+    "id": 17,
+    "image": "/uploads/products/ca8ab43309a8410f995edc7730c66480.jpg",
+    "images": [
+      {
+        "altText": "Tailored Nude Blazer",
+        "id": 35,
+        "imageUrl": "/uploads/products/34d37f4a94b44635b5ea27937da9a7be.jpg",
+        "sortOrder": 1
+      },
+      {
+        "altText": "Tailored Nude Blazer",
+        "id": 36,
+        "imageUrl": "/uploads/products/c5a1ba4ba48a4856aa45a7697677f8fd.jpg",
+        "sortOrder": 2
+      },
+      {
+        "altText": "Tailored Nude Blazer",
+        "id": 37,
+        "imageUrl": "/uploads/products/429a1c13f9e44e739483d9024a03f4e0.jpg",
+        "sortOrder": 3
+      },
+      {
+        "altText": "Tailored Nude Blazer",
+        "id": 38,
+        "imageUrl": "/uploads/products/42895f10438547fa963efaad6a549dc6.jpg",
+        "sortOrder": 4
+      }
+    ],
+    "materials": null,
+    "name": "Tailored Nude Blazer",
+    "price": 129,
+    "publicId": "ba14ea44-6789-46e3-b158-cf56f51973fa",
+    "shippingInfo": null,
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-02-26T12:49:44.002203",
+    "variants": []
+  },
+  {
+    "brandId": null,
+    "categoryCode": "UOMO",
+    "categoryId": 1,
+    "categoryName": "Uomo",
+    "codpro": "SNICK_01",
+    "createdAt": "2026-02-26T11:36:56.874714",
+    "description": "Sneakers versatili con linee pulite e comfort quotidiano. Perfette per look streetwear o smart-casual.",
+    "groupId": null,
+    "id": 16,
+    "image": "/uploads/products/f06826f60fc140ec9a24d94b6f413d89.jpg",
+    "images": [],
+    "materials": "",
+    "name": "Sneakers",
+    "price": 189,
+    "publicId": "49530e7c-eddc-4854-a709-a8a4fda3ffc5",
+    "shippingInfo": "",
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-03-14T20:40:32.279322",
+    "variants": [
+      {
+        "colorCode": "WHT",
+        "colorHex": "#FFFFFF",
+        "colorId": 2,
+        "colorName": "BIANCO",
+        "colorRgb": "255,255,255",
+        "createdAt": "2026-03-14T20:40:32.400518",
+        "enabled": true,
+        "id": 36,
+        "images": [],
+        "mainImage": null,
+        "price": null,
+        "sizeCode": "40",
+        "sizeId": 14,
+        "sizeName": "40",
+        "stockQty": 0,
+        "updatedAt": "2026-03-14T20:40:32.400518",
+        "variantCode": "SNICK_01-WHT-40"
+      },
+      {
+        "colorCode": "WHT",
+        "colorHex": "#FFFFFF",
+        "colorId": 2,
+        "colorName": "BIANCO",
+        "colorRgb": "255,255,255",
+        "createdAt": "2026-03-14T20:40:32.400518",
+        "enabled": true,
+        "id": 37,
+        "images": [],
+        "mainImage": null,
+        "price": null,
+        "sizeCode": "42",
+        "sizeId": 15,
+        "sizeName": "42",
+        "stockQty": 0,
+        "updatedAt": "2026-03-14T20:40:32.400518",
+        "variantCode": "SNICK_01-WHT-42"
+      },
+      {
+        "colorCode": "WHT",
+        "colorHex": "#FFFFFF",
+        "colorId": 2,
+        "colorName": "BIANCO",
+        "colorRgb": "255,255,255",
+        "createdAt": "2026-03-14T20:40:32.400518",
+        "enabled": true,
+        "id": 38,
+        "images": [],
+        "mainImage": null,
+        "price": null,
+        "sizeCode": "44",
+        "sizeId": 16,
+        "sizeName": "44",
+        "stockQty": 0,
+        "updatedAt": "2026-03-14T20:40:32.400518",
+        "variantCode": "SNICK_01-WHT-44"
+      },
+      {
+        "colorCode": "BRW",
+        "colorHex": "#8B4513",
+        "colorId": 17,
+        "colorName": "MARRONE",
+        "colorRgb": "139,69,19",
+        "createdAt": "2026-03-14T20:40:32.400518",
+        "enabled": true,
+        "id": 39,
+        "images": [],
+        "mainImage": null,
+        "price": null,
+        "sizeCode": "40",
+        "sizeId": 14,
+        "sizeName": "40",
+        "stockQty": 0,
+        "updatedAt": "2026-03-14T20:40:32.400518",
+        "variantCode": "SNICK_01-BRW-40"
+      },
+      {
+        "colorCode": "BRW",
+        "colorHex": "#8B4513",
+        "colorId": 17,
+        "colorName": "MARRONE",
+        "colorRgb": "139,69,19",
+        "createdAt": "2026-03-14T20:40:32.400518",
+        "enabled": true,
+        "id": 40,
+        "images": [],
+        "mainImage": null,
+        "price": null,
+        "sizeCode": "42",
+        "sizeId": 15,
+        "sizeName": "42",
+        "stockQty": 0,
+        "updatedAt": "2026-03-14T20:40:32.400518",
+        "variantCode": "SNICK_01-BRW-42"
+      },
+      {
+        "colorCode": "BRW",
+        "colorHex": "#8B4513",
+        "colorId": 17,
+        "colorName": "MARRONE",
+        "colorRgb": "139,69,19",
+        "createdAt": "2026-03-14T20:40:32.421305",
+        "enabled": true,
+        "id": 41,
+        "images": [],
+        "mainImage": null,
+        "price": null,
+        "sizeCode": "44",
+        "sizeId": 16,
+        "sizeName": "44",
+        "stockQty": 0,
+        "updatedAt": "2026-03-14T20:40:32.421305",
+        "variantCode": "SNICK_01-BRW-44"
+      },
+      {
+        "colorCode": "BLK",
+        "colorHex": "#000000",
+        "colorId": 1,
+        "colorName": "NERO",
+        "colorRgb": "0,0,0",
+        "createdAt": "2026-03-14T20:40:32.422967",
+        "enabled": true,
+        "id": 42,
+        "images": [],
+        "mainImage": null,
+        "price": 189,
+        "sizeCode": "40",
+        "sizeId": 14,
+        "sizeName": "40",
+        "stockQty": 10,
+        "updatedAt": "2026-03-14T20:42:27.517329",
+        "variantCode": "SNICK_01-BLK-40"
+      },
+      {
+        "colorCode": "BLK",
+        "colorHex": "#000000",
+        "colorId": 1,
+        "colorName": "NERO",
+        "colorRgb": "0,0,0",
+        "createdAt": "2026-03-14T20:40:32.425059",
+        "enabled": true,
+        "id": 43,
+        "images": [],
+        "mainImage": null,
+        "price": 189,
+        "sizeCode": "42",
+        "sizeId": 15,
+        "sizeName": "42",
+        "stockQty": 10,
+        "updatedAt": "2026-03-14T20:43:29.006011",
+        "variantCode": "SNICK_01-BLK-42"
+      },
+      {
+        "colorCode": "BLK",
+        "colorHex": "#000000",
+        "colorId": 1,
+        "colorName": "NERO",
+        "colorRgb": "0,0,0",
+        "createdAt": "2026-03-14T20:40:32.427032",
+        "enabled": true,
+        "id": 44,
+        "images": [],
+        "mainImage": null,
+        "price": null,
+        "sizeCode": "44",
+        "sizeId": 16,
+        "sizeName": "44",
+        "stockQty": 0,
+        "updatedAt": "2026-03-14T20:40:32.427032",
+        "variantCode": "SNICK_01-BLK-44"
+      }
+    ]
+  },
+  {
+    "brandId": null,
+    "categoryCode": "DONNA",
+    "categoryId": 2,
+    "categoryName": "Donna",
+    "codpro": "GIAC_01",
+    "createdAt": "2026-02-12T16:42:41.749541",
+    "description": "Blazer a doppio bottone in jersey di lyocell e cotone lavorato a punto Milano. Scollo a rever e taschino sul petto e tasche a filetto con patta sul davanti. Spacco centrale sul fondo posteriore. Foderato.AGGIUNTA MODIFICA",
+    "groupId": null,
+    "id": 15,
+    "image": "/uploads/products/5438a0b4c58c4ba99b1d01163bfe1025.png",
+    "images": [
+      {
+        "altText": "Blazer beige Weekend over in jersey in lyocell e cotone",
+        "id": 34,
+        "imageUrl": "/uploads/products/9fd0ae5275d34b1f86ba8c3d95832fa2.png",
+        "sortOrder": 1
+      }
+    ],
+    "materials": "",
+    "name": "Blazer beige Weekend over in jersey in lyocell e cotone",
+    "price": 181.3,
+    "publicId": "60c1a95f-5970-4ee0-8c2e-3b219c34b9ce",
+    "shippingInfo": "",
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-03-04T21:18:03.393714",
+    "variants": []
+  },
+  {
+    "brandId": null,
+    "categoryCode": "DONNA",
+    "categoryId": 2,
+    "categoryName": "Donna",
+    "codpro": "PANT_044",
+    "createdAt": "2026-02-11T15:58:28.738358",
+    "description": "",
+    "groupId": null,
+    "id": 14,
+    "image": "/uploads/products/0642c3db28ee42a6af4c189a71a314f6.png",
+    "images": [
+      {
+        "altText": "Pantalone blu a palazzo Emme Marella in twill stampato",
+        "id": 31,
+        "imageUrl": "/uploads/products/4ba6808974b542f183f1a1aac9860bd8.png",
+        "sortOrder": 1
+      },
+      {
+        "altText": "Pantalone blu a palazzo Emme Marella in twill stampato",
+        "id": 32,
+        "imageUrl": "/uploads/products/7732542da6914c14b655b2f540c90629.png",
+        "sortOrder": 2
+      },
+      {
+        "altText": "Pantalone blu a palazzo Emme Marella in twill stampato",
+        "id": 33,
+        "imageUrl": "/uploads/products/a3b2a74bbb2c4c958b77d9586fcd2751.png",
+        "sortOrder": 3
+      }
+    ],
+    "materials": "",
+    "name": "Pantalone blu a palazzo Emme Marella in twill stampato",
+    "price": 99.9,
+    "publicId": "e0648ffc-e910-4dfa-8e32-696e383846b1",
+    "shippingInfo": "",
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-03-10T09:27:59.860999",
+    "variants": [
+      {
+        "colorCode": "NOCLR",
+        "colorHex": "#NULL",
+        "colorId": 69,
+        "colorName": "NESSUN COLORE",
+        "colorRgb": "NULL",
+        "createdAt": "2026-03-10T09:27:59.914602",
+        "enabled": true,
+        "id": 34,
+        "images": [],
+        "mainImage": null,
+        "price": 55.7,
+        "sizeCode": "TU",
+        "sizeId": 1,
+        "sizeName": "TAGLIA UNICA",
+        "stockQty": 10,
+        "updatedAt": "2026-03-10T09:28:28.283526",
+        "variantCode": "PANT_044-NOCLR-TU"
+      }
+    ]
+  },
+  {
+    "brandId": null,
+    "categoryCode": "DONNA",
+    "categoryId": 2,
+    "categoryName": "Donna",
+    "codpro": "CAP_015",
+    "createdAt": "2026-02-11T15:55:07.039427",
+    "description": null,
+    "groupId": null,
+    "id": 13,
+    "image": "/uploads/products/6c88ed115b5b4ec6a06072a55ab51f3d.png",
+    "images": [
+      {
+        "altText": "Cappotto nero doppiopetto Weekend Max Mara",
+        "id": 29,
+        "imageUrl": "/uploads/products/b489f3f125b44058b08c5fd548256fe9.png",
+        "sortOrder": 1
+      },
+      {
+        "altText": "Cappotto nero doppiopetto Weekend Max Mara",
+        "id": 30,
+        "imageUrl": "/uploads/products/cbf4a6804bfa4999ac3dee99861a060e.png",
+        "sortOrder": 2
+      }
+    ],
+    "materials": null,
+    "name": "Cappotto nero doppiopetto Weekend Max Mara",
+    "price": 384,
+    "publicId": "76c14a85-b485-4002-bbad-47ce6b97d342",
+    "shippingInfo": null,
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-02-11T15:55:07.131008",
+    "variants": []
+  },
+  {
+    "brandId": null,
+    "categoryCode": "UOMO",
+    "categoryId": 1,
+    "categoryName": "Uomo",
+    "codpro": "ART13",
+    "createdAt": "2026-01-23T12:44:28.309065",
+    "description": "",
+    "groupId": 1,
+    "id": 12,
+    "image": "/uploads/products/72baaca120064fe783f40572b49d943c.jpg",
+    "images": [
+      {
+        "altText": "ARTICOLO 13",
+        "id": 27,
+        "imageUrl": "/uploads/products/3ff94d90005c47fd9c9382b9b77d49f4.jpg",
+        "sortOrder": 2
+      },
+      {
+        "altText": "ARTICOLO 13",
+        "id": 28,
+        "imageUrl": "/uploads/products/e58655225ff147c5be8740653bf22134.jpg",
+        "sortOrder": 3
+      },
+      {
+        "altText": "A234567890123456789012345678931 31csratteriA",
+        "id": 41,
+        "imageUrl": "/uploads/products/459308229ea347789684db592ab5d3c1.jpg",
+        "sortOrder": 3
+      },
+      {
+        "altText": "A234567890123456789012345678931 31csratteriA",
+        "id": 42,
+        "imageUrl": "/uploads/products/725032e6a92248158f9860b757dff4bb.jpg",
+        "sortOrder": 4
+      }
+    ],
+    "materials": "",
+    "name": "A234567890123456789012345678931 31csratteriA",
+    "price": 25.5,
+    "publicId": "15834a89-efdf-4e90-932b-078c9e10ec41",
+    "shippingInfo": "",
+    "stockQty": 10,
+    "subgroupId": 15,
+    "updatedAt": "2026-03-07T12:58:12.126271",
+    "variants": [
+      {
+        "colorCode": "YLW",
+        "colorHex": "#FFFF00",
+        "colorId": 37,
+        "colorName": "GIALLO",
+        "colorRgb": "255,255,0",
+        "createdAt": "2026-03-07T12:58:12.19546",
+        "enabled": true,
+        "id": 14,
+        "images": [],
+        "mainImage": null,
+        "price": null,
+        "sizeCode": "S",
+        "sizeId": 4,
+        "sizeName": "S",
+        "stockQty": 0,
+        "updatedAt": "2026-03-07T12:58:12.19546",
+        "variantCode": "ART13-YLW-S"
+      },
+      {
+        "colorCode": "YLW",
+        "colorHex": "#FFFF00",
+        "colorId": 37,
+        "colorName": "GIALLO",
+        "colorRgb": "255,255,0",
+        "createdAt": "2026-03-07T12:58:12.198483",
+        "enabled": true,
+        "id": 15,
+        "images": [],
+        "mainImage": null,
+        "price": null,
+        "sizeCode": "M",
+        "sizeId": 5,
+        "sizeName": "M",
+        "stockQty": 0,
+        "updatedAt": "2026-03-07T12:58:12.198483",
+        "variantCode": "ART13-YLW-M"
+      },
+      {
+        "colorCode": "GRY",
+        "colorHex": "#808080",
+        "colorId": 12,
+        "colorName": "GRIGIO",
+        "colorRgb": "128,128,128",
+        "createdAt": "2026-03-07T12:58:12.2005",
+        "enabled": true,
+        "id": 16,
+        "images": [],
+        "mainImage": null,
+        "price": null,
+        "sizeCode": "S",
+        "sizeId": 4,
+        "sizeName": "S",
+        "stockQty": 0,
+        "updatedAt": "2026-03-07T12:58:12.2005",
+        "variantCode": "ART13-GRY-S"
+      },
+      {
+        "colorCode": "GRY",
+        "colorHex": "#808080",
+        "colorId": 12,
+        "colorName": "GRIGIO",
+        "colorRgb": "128,128,128",
+        "createdAt": "2026-03-07T12:58:12.203208",
+        "enabled": true,
+        "id": 17,
+        "images": [
+          {
+            "altText": "ART13-GRY-M",
+            "id": 4,
+            "imageUrl": "/uploads/variants/1465c1b2-3dcc-4129-8e59-6cb7f24cc5c0.jpg",
+            "sortOrder": 1
+          },
+          {
+            "altText": "ART13-GRY-M",
+            "id": 5,
+            "imageUrl": "/uploads/variants/9146a436-29d8-4ae8-a34c-d746f61ec59a.jpg",
+            "sortOrder": 2
+          }
+        ],
+        "mainImage": "/uploads/variants/a0db1425-8388-478b-b435-82487c6b97bf.jpg",
+        "price": 44.5,
+        "sizeCode": "M",
+        "sizeId": 5,
+        "sizeName": "M",
+        "stockQty": 100,
+        "updatedAt": "2026-03-07T12:59:32.538901",
+        "variantCode": "ART13-GRY-M"
+      }
+    ]
+  },
+  {
+    "brandId": null,
+    "categoryCode": "UOMO",
+    "categoryId": 1,
+    "categoryName": "Uomo",
+    "codpro": "ART11",
+    "createdAt": "2026-01-23T05:59:36.372064",
+    "description": null,
+    "groupId": null,
+    "id": 11,
+    "image": "/uploads/products/7c103e8dfa5542bd9915a6ce02a74b3b.webp",
+    "images": [
+      {
+        "altText": "UNDICESIMO ARTICOLO",
+        "id": 23,
+        "imageUrl": "/uploads/products/2c29d11370d5405198e64b83a7a6fa96.jpg",
+        "sortOrder": 1
+      },
+      {
+        "altText": "UNDICESIMO ARTICOLO",
+        "id": 24,
+        "imageUrl": "/uploads/products/ffc47eb531474ddca8da3cb0242e1607.jpg",
+        "sortOrder": 2
+      },
+      {
+        "altText": "UNDICESIMO ARTICOLO",
+        "id": 25,
+        "imageUrl": "/uploads/products/c993d692a49948c4894184c7f7a99339.jpg",
+        "sortOrder": 3
+      }
+    ],
+    "materials": null,
+    "name": "UNDICESIMO ARTICOLO",
+    "price": 25.5,
+    "publicId": "362d8071-baf3-4fd4-b1ec-5ce8a181a3dd",
+    "shippingInfo": null,
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-01-23T06:46:43.807728",
+    "variants": []
+  },
+  {
+    "brandId": null,
+    "categoryCode": "DONNA",
+    "categoryId": 2,
+    "categoryName": "Donna",
+    "codpro": "ART10",
+    "createdAt": "2026-01-23T05:47:30.734713",
+    "description": null,
+    "groupId": null,
+    "id": 10,
+    "image": "/uploads/products/423305c576d54df1bfcec376f5c9bdaf.jpg",
+    "images": [
+      {
+        "altText": "DECIMO ARTICOLO",
+        "id": 19,
+        "imageUrl": "/uploads/products/726bb6a13e164641824a0738cd1764a3.jpg",
+        "sortOrder": 1
+      },
+      {
+        "altText": "DECIMO ARTICOLO",
+        "id": 20,
+        "imageUrl": "/uploads/products/eaf47f6d159945da9f053c066f535693.jpg",
+        "sortOrder": 2
+      },
+      {
+        "altText": "DECIMO ARTICOLO",
+        "id": 22,
+        "imageUrl": "/uploads/products/c3d708c2fe294249934cb0421dab12fb.jpg",
+        "sortOrder": 4
+      }
+    ],
+    "materials": null,
+    "name": "DECIMO ARTICOLO",
+    "price": 50,
+    "publicId": "9d24e2b3-e553-4b2b-9f50-470811b80023",
+    "shippingInfo": null,
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-01-23T05:47:30.764718",
+    "variants": []
+  },
+  {
+    "brandId": null,
+    "categoryCode": "DONNA",
+    "categoryId": 2,
+    "categoryName": "Donna",
+    "codpro": "ART09",
+    "createdAt": "2026-01-23T05:15:55.728739",
+    "description": null,
+    "groupId": null,
+    "id": 9,
+    "image": "/uploads/products/304bb4a1b1594df3922af6483640476b.jpg",
+    "images": [
+      {
+        "altText": "nono articolo",
+        "id": 16,
+        "imageUrl": "/uploads/products/eda08db683a449a8bd2485bb3448ee71.jpg",
+        "sortOrder": 1
+      },
+      {
+        "altText": "nono articolo",
+        "id": 17,
+        "imageUrl": "/uploads/products/8c2f7cd2ac1545899d4c4016e7194228.jpg",
+        "sortOrder": 2
+      },
+      {
+        "altText": "nono articolo",
+        "id": 18,
+        "imageUrl": "/uploads/products/1deef3b729bb4339934951b2c3db00ad.jpg",
+        "sortOrder": 3
+      }
+    ],
+    "materials": null,
+    "name": "nono articolo",
+    "price": 25.5,
+    "publicId": "4c1bf8af-85f3-4e22-9788-96607deb5164",
+    "shippingInfo": null,
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-01-23T05:18:16.819007",
+    "variants": []
+  },
+  {
+    "brandId": null,
+    "categoryCode": "DONNA",
+    "categoryId": 2,
+    "categoryName": "Donna",
+    "codpro": "ART08",
+    "createdAt": "2026-01-23T05:00:54.69472",
+    "description": null,
+    "groupId": null,
+    "id": 8,
+    "image": "/uploads/products/da8be9b5b23c4fb9af7919624b21de17.jpg",
+    "images": [
+      {
+        "altText": "OTTAVO ARTICOLO",
+        "id": 12,
+        "imageUrl": "/uploads/products/21dae7d1c1e142bca2461a5f93b00dac.jpg",
+        "sortOrder": 1
+      },
+      {
+        "altText": "OTTAVO ARTICOLO",
+        "id": 13,
+        "imageUrl": "/uploads/products/c55b7fe30b47455798e9b7751a76df3b.jpg",
+        "sortOrder": 2
+      },
+      {
+        "altText": "OTTAVO ARTICOLO",
+        "id": 14,
+        "imageUrl": "/uploads/products/92ddc4bb07774320b5c55ed96a6827fb.jpg",
+        "sortOrder": 3
+      },
+      {
+        "altText": "OTTAVO ARTICOLO",
+        "id": 15,
+        "imageUrl": "/uploads/products/02bdfa4dd49e4a4f926b1597c3a82a70.jpg",
+        "sortOrder": 4
+      }
+    ],
+    "materials": null,
+    "name": "OTTAVO ARTICOLO",
+    "price": 25.5,
+    "publicId": "0d71983d-d4e5-4ae4-ab02-048d8ae6c5f3",
+    "shippingInfo": null,
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-01-23T05:14:56.912975",
+    "variants": []
+  },
+  {
+    "brandId": null,
+    "categoryCode": "DONNA",
+    "categoryId": 2,
+    "categoryName": "Donna",
+    "codpro": "ART07",
+    "createdAt": "2026-01-23T04:53:37.035291",
+    "description": null,
+    "groupId": null,
+    "id": 7,
+    "image": "/uploads/products/6b5f608b0bdb4cc48d5240dd6ba3ad24.jpg",
+    "images": [
+      {
+        "altText": "settimo ARTICOLO",
+        "id": 10,
+        "imageUrl": "/uploads/products/26df97751a8e4167ac17576f1f75d893.jpg",
+        "sortOrder": 1
+      },
+      {
+        "altText": "settimo ARTICOLO",
+        "id": 11,
+        "imageUrl": "/uploads/products/4a83acb91a8443c589619518191a6b4a.jpg",
+        "sortOrder": 2
+      }
+    ],
+    "materials": null,
+    "name": "settimo ARTICOLO",
+    "price": 10,
+    "publicId": "31f43177-d1e9-4a28-8249-9f666c9ed997",
+    "shippingInfo": null,
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-01-23T04:54:52.306869",
+    "variants": []
+  },
+  {
+    "brandId": null,
+    "categoryCode": "DONNA",
+    "categoryId": 2,
+    "categoryName": "Donna",
+    "codpro": "ART04",
+    "createdAt": "2026-01-22T20:09:04.974671",
+    "description": null,
+    "groupId": null,
+    "id": 5,
+    "image": "/uploads/products/2cef46ddd7b74614b5403718a4e3467d.jpg",
+    "images": [],
+    "materials": null,
+    "name": "QUARTO ARTICOLO",
+    "price": 15,
+    "publicId": "786ad086-8c88-44e1-ad8a-3d8b37be2f33",
+    "shippingInfo": null,
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-01-22T20:09:05.060412",
+    "variants": []
+  },
+  {
+    "brandId": null,
+    "categoryCode": "UOMO",
+    "categoryId": 1,
+    "categoryName": "Uomo",
+    "codpro": "ART03",
+    "createdAt": "2026-01-22T19:33:07.206506",
+    "description": "prororor",
+    "groupId": null,
+    "id": 4,
+    "image": "/uploads/products/f6697cc6be11441eb4d83e605f4f78cc.jpg",
+    "images": [
+      {
+        "altText": "TERZO ARTICOLO",
+        "id": 6,
+        "imageUrl": "/uploads/products/255d636d132d4631b609338a34d94b72.jpg",
+        "sortOrder": 2
+      },
+      {
+        "altText": "TERZO ARTICOLO",
+        "id": 7,
+        "imageUrl": "/uploads/products/be3d5263ac234a19b2c5dd2d921f9835.jpg",
+        "sortOrder": 2
+      },
+      {
+        "altText": "TERZO ARTICOLO",
+        "id": 8,
+        "imageUrl": "/uploads/products/dc0d11d6666f4995810c41131ccd74b0.jpg",
+        "sortOrder": 3
+      }
+    ],
+    "materials": "prprprpr",
+    "name": "TERZO ARTICOLO",
+    "price": 15,
+    "publicId": "5dffe747-4bdc-4269-aea8-e8fd2271e476",
+    "shippingInfo": "pepepepe",
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-03-05T10:02:04.369005",
+    "variants": [
+      {
+        "colorCode": "WHT",
+        "colorHex": "#FFFFFF",
+        "colorId": 2,
+        "colorName": "BIANCO",
+        "colorRgb": "255,255,255",
+        "createdAt": "2026-03-05T10:02:04.461447",
+        "enabled": true,
+        "id": 1,
+        "images": [],
+        "mainImage": null,
+        "price": null,
+        "sizeCode": "S",
+        "sizeId": 4,
+        "sizeName": "S",
+        "stockQty": 0,
+        "updatedAt": "2026-03-05T10:02:04.461447",
+        "variantCode": "ART03-WHT-S"
+      },
+      {
+        "colorCode": "WHT",
+        "colorHex": "#FFFFFF",
+        "colorId": 2,
+        "colorName": "BIANCO",
+        "colorRgb": "255,255,255",
+        "createdAt": "2026-03-05T10:02:04.489701",
+        "enabled": true,
+        "id": 2,
+        "images": [],
+        "mainImage": null,
+        "price": null,
+        "sizeCode": "M",
+        "sizeId": 5,
+        "sizeName": "M",
+        "stockQty": 0,
+        "updatedAt": "2026-03-05T10:02:04.489701",
+        "variantCode": "ART03-WHT-M"
+      },
+      {
+        "colorCode": "WHT",
+        "colorHex": "#FFFFFF",
+        "colorId": 2,
+        "colorName": "BIANCO",
+        "colorRgb": "255,255,255",
+        "createdAt": "2026-03-05T10:02:04.492833",
+        "enabled": true,
+        "id": 3,
+        "images": [],
+        "mainImage": null,
+        "price": null,
+        "sizeCode": "L",
+        "sizeId": 6,
+        "sizeName": "L",
+        "stockQty": 0,
+        "updatedAt": "2026-03-05T10:02:04.492833",
+        "variantCode": "ART03-WHT-L"
+      },
+      {
+        "colorCode": "GRY",
+        "colorHex": "#808080",
+        "colorId": 12,
+        "colorName": "GRIGIO",
+        "colorRgb": "128,128,128",
+        "createdAt": "2026-03-05T10:02:04.494229",
+        "enabled": true,
+        "id": 4,
+        "images": [],
+        "mainImage": null,
+        "price": null,
+        "sizeCode": "S",
+        "sizeId": 4,
+        "sizeName": "S",
+        "stockQty": 0,
+        "updatedAt": "2026-03-05T10:02:04.494229",
+        "variantCode": "ART03-GRY-S"
+      },
+      {
+        "colorCode": "GRY",
+        "colorHex": "#808080",
+        "colorId": 12,
+        "colorName": "GRIGIO",
+        "colorRgb": "128,128,128",
+        "createdAt": "2026-03-05T10:02:04.496315",
+        "enabled": true,
+        "id": 5,
+        "images": [],
+        "mainImage": null,
+        "price": null,
+        "sizeCode": "M",
+        "sizeId": 5,
+        "sizeName": "M",
+        "stockQty": 0,
+        "updatedAt": "2026-03-05T10:02:04.496315",
+        "variantCode": "ART03-GRY-M"
+      },
+      {
+        "colorCode": "GRY",
+        "colorHex": "#808080",
+        "colorId": 12,
+        "colorName": "GRIGIO",
+        "colorRgb": "128,128,128",
+        "createdAt": "2026-03-05T10:02:04.499628",
+        "enabled": true,
+        "id": 6,
+        "images": [],
+        "mainImage": null,
+        "price": null,
+        "sizeCode": "L",
+        "sizeId": 6,
+        "sizeName": "L",
+        "stockQty": 0,
+        "updatedAt": "2026-03-05T10:02:04.499628",
+        "variantCode": "ART03-GRY-L"
+      },
+      {
+        "colorCode": "BLK",
+        "colorHex": "#000000",
+        "colorId": 1,
+        "colorName": "NERO",
+        "colorRgb": "0,0,0",
+        "createdAt": "2026-03-05T10:02:04.50111",
+        "enabled": true,
+        "id": 7,
+        "images": [],
+        "mainImage": null,
+        "price": null,
+        "sizeCode": "S",
+        "sizeId": 4,
+        "sizeName": "S",
+        "stockQty": 0,
+        "updatedAt": "2026-03-05T10:02:04.50111",
+        "variantCode": "ART03-BLK-S"
+      },
+      {
+        "colorCode": "BLK",
+        "colorHex": "#000000",
+        "colorId": 1,
+        "colorName": "NERO",
+        "colorRgb": "0,0,0",
+        "createdAt": "2026-03-05T10:02:04.503116",
+        "enabled": true,
+        "id": 8,
+        "images": [],
+        "mainImage": null,
+        "price": null,
+        "sizeCode": "M",
+        "sizeId": 5,
+        "sizeName": "M",
+        "stockQty": 0,
+        "updatedAt": "2026-03-05T10:02:04.503116",
+        "variantCode": "ART03-BLK-M"
+      },
+      {
+        "colorCode": "BLK",
+        "colorHex": "#000000",
+        "colorId": 1,
+        "colorName": "NERO",
+        "colorRgb": "0,0,0",
+        "createdAt": "2026-03-05T10:02:04.505473",
+        "enabled": true,
+        "id": 9,
+        "images": [],
+        "mainImage": null,
+        "price": null,
+        "sizeCode": "L",
+        "sizeId": 6,
+        "sizeName": "L",
+        "stockQty": 0,
+        "updatedAt": "2026-03-05T10:02:04.505473",
+        "variantCode": "ART03-BLK-L"
+      }
+    ]
+  },
+  {
+    "brandId": null,
+    "categoryCode": "UOMO",
+    "categoryId": 1,
+    "categoryName": "Uomo",
+    "codpro": "ART01",
+    "createdAt": "2026-01-22T18:42:51.034821",
+    "description": null,
+    "groupId": null,
+    "id": 2,
+    "image": "/uploads/products/8aa58b590dc94a0e9ed5463f1968f324.jpg",
+    "images": [
+      {
+        "altText": "PRIMO ARTICOLO",
+        "id": 1,
+        "imageUrl": "/uploads/products/361c10ea1cf44f03a6edb7bda0675788.jpg",
+        "sortOrder": 1
+      },
+      {
+        "altText": "PRIMO ARTICOLO",
+        "id": 2,
+        "imageUrl": "/uploads/products/8ed6173d1f4241658802ad3d814ea6b4.jpg",
+        "sortOrder": 2
+      },
+      {
+        "altText": "PRIMO ARTICOLO",
+        "id": 3,
+        "imageUrl": "/uploads/products/1c491be8fe264f6a9d86c2ea4e5148ed.jpg",
+        "sortOrder": 3
+      },
+      {
+        "altText": "PRIMO ARTICOLO",
+        "id": 4,
+        "imageUrl": "/uploads/products/2580acb5e21c4b3d9729e6649d7c4976.jpg",
+        "sortOrder": 4
+      }
+    ],
+    "materials": null,
+    "name": "PRIMO ARTICOLO",
+    "price": 15,
+    "publicId": "8ca8c800-f268-4348-95c6-c723faa6b6ce",
+    "shippingInfo": null,
+    "stockQty": 10,
+    "subgroupId": null,
+    "updatedAt": "2026-01-22T18:42:51.101028",
+    "variants": []
+  }
+]

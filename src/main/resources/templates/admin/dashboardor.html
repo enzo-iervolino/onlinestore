@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments/head :: head('Admin Dashboard - Online Store')}"></head>
+
+  <body>
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+    <main>
+      <div class="container">
+        <h2 style="margin-bottom: 12px">
+          <i class="bi bi-speedometer2"></i> Admin Dashboard
+        </h2>
+
+        <p>Qui metti gestione ordini, prodotti, utenti, ecc.</p>
+
+        <!-- compatibilità -->
+        <div class="products" style="display: none"></div>
+      </div>
+    </main>
+	<div th:replace="~{fragments/login-modal :: loginModal}"></div>
+    <div th:replace="~{fragments/cart :: cart}"></div>
+    <div th:replace="~{fragments/footer :: footer}"></div>
+  </body>
+</html>

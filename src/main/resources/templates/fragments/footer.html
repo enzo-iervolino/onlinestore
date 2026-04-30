@@ -1,0 +1,25 @@
+<footer th:fragment="footer"
+        class="bg-light border-top mt-5">
+
+    <div class="container py-3">
+        <div class="row align-items-center">
+
+            <div class="col-md-6 small text-muted">
+                &copy;
+                <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2025</span>
+                Delta Store – Tutti i diritti riservati
+            </div>
+
+            <div class="col-md-6 text-md-end small">
+                <a th:href="@{/privacy}" class="text-muted me-3">
+                    Privacy
+                </a>
+                <a th:href="@{/termini}" class="text-muted">
+                    Termini e condizioni
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</footer>

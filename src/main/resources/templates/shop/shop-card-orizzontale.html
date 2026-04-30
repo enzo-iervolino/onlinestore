@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Shop')}"></head>
+
+<body class="shop-page">
+
+<div th:replace="~{fragments/nav :: nav}"></div>
+
+<style>
+   
+
+
+	
+
+ @media (max-width: 768px) {
+        .shop-main .row {
+            --bs-gutter-x: 0.75rem;
+            --bs-gutter-y: 0.75rem;
+        }
+
+        .shop-main .product-card {
+            border-radius: 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            min-height: 185px;
+        }
+
+        .shop-main .product-thumb {
+            display: block;
+            flex: 0 0 48%;
+            width: 48%;
+            max-width: 48%;
+        }
+
+        .shop-main .product-img {
+            width: 100%;
+            height: 100%;
+            min-height: 185px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .shop-main .product-card .card-body {
+            flex: 1 1 auto;
+            width: 55%;
+            padding: 0.8rem !important;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left !important;
+        }
+
+        .shop-main .product-card .small.text-muted {
+            font-size: 0.7rem;
+            margin-bottom: 0.25rem !important;
+        }
+
+        .shop-main .product-title {
+            font-size: 0.92rem;
+            line-height: 1.25;
+            margin-bottom: 0.3rem !important;
+            text-align: left !important;
+        }
+
+        .shop-main .product-price {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.65rem !important;
+            text-align: left !important;
+        }
+
+        .shop-main .product-actions {
+            margin-top: auto !important;
+            gap: 0.4rem !important;
+        }
+
+        .shop-main .product-actions .btn {
+            padding: 0.42rem 0.5rem;
+            font-size: 0.76rem;
+            min-height: 34px;
+        }
+
+        .shop-main .product-actions .btn i {
+            font-size: 0.78rem;
+        }
+
+        .shop-main .product-actions .btn span {
+            display: inline !important;
+        }
+    }
+
+    @media (max-width: 375px) {
+        .shop-main .product-card {
+            min-height: 170px;
+        }
+
+        .shop-main .product-thumb {
+            flex: 0 0 36%;
+            width: 36%;
+            max-width: 36%;
+        }
+
+        .shop-main .product-img {
+            min-height: 170px;
+        }
+
+        .shop-main .product-card .card-body {
+            width: 64%;
+            padding: 0.7rem !important;
+        }
+
+        .shop-main .product-title {
+            font-size: 0.88rem;
+        }
+
+        .shop-main .product-price {
+            font-size: 0.9rem;
+        }
+
+        .shop-main .product-actions .btn {
+            font-size: 0.72rem;
+            padding: 0.38rem 0.4rem;
+        }
+    }
+</style>
+
+<header class="page-hero shop-hero"
+        th:style="|--hero-image:url('@{/assets/img/dress.jpg}');|">
+    <div class="container shop-hero-inner">
+        <div class="content reveal shop-hero-content">
+            <span class="hero-badge mt-2">Shop / Fashion Grid</span>
+            <h1 class="hero-title">Scopri il tuo prossimo look</h1>
+            <p class="hero-sub">
+                Esplora la collezione, filtra per categoria e aggiungi i prodotti al carrello.
+            </p>
+        </div>
+    </div>
+</header>
+
+<section class="shop-category-bar">
+    <div class="container">
+        <div class="shop-categories-wrap">
+            <div class="chip-group shop-chip-group" id="categoryChips">
+                <a th:href="@{/shop}"
+                   class="chip-btn"
+                   th:classappend="${selectedCategoryCode == null} ? ' active' : ''">
+                    Tutti
+                </a>
+
+                <a th:each="category : ${categories}"
+                   th:href="@{/shop(category=${category.code})}"
+                   th:text="${category.name}"
+                   class="chip-btn"
+                   th:classappend="${selectedCategoryCode != null and selectedCategoryCode.equalsIgnoreCase(category.code)} ? ' active' : ''">
+                    Categoria
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<main class="shop-main py-2 py-md-3">
+    <div class="container">
+
+        <div class="shop-selected-category mb-4 text-center" th:if="${selectedCategoryName != null}">
+            <h5 class="mb-0">
+                Categoria selezionata:
+                <span th:text="${selectedCategoryName}">Categoria</span>
+            </h5>
+        </div>
+
+        <div class="row g-3 g-md-4 justify-content-center"
+             th:if="${products != null and !#lists.isEmpty(products)}">
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3"
+                 th:each="product : ${products}">
+
+                <div class="card h-100 border-0 shadow-sm product-card">
+
+                    <a th:href="@{/shop/{id}(id=${product.id})}"
+                       class="product-thumb"
+                       th:with="mediaUrl=${product.image},
+                                mediaUrlLower=${product.image != null ? #strings.toLowerCase(product.image) : ''},
+                                mediaIsVideo=${product.mainMediaType == 'VIDEO'
+                                    or #strings.endsWith(mediaUrlLower, '.webm')
+                                    or #strings.endsWith(mediaUrlLower, '.mp4')
+                                    or #strings.endsWith(mediaUrlLower, '.mov')
+                                    or #strings.endsWith(mediaUrlLower, '.ogg')
+                                    or #strings.endsWith(mediaUrlLower, '.ogv')}">
+                        <img th:if="${!mediaIsVideo}"
+                             th:src="@{${mediaUrl}}"
+                             th:alt="${product.name}"
+                             class="product-img">
+
+                        <video th:if="${mediaIsVideo}"
+                               class="product-img"
+                               muted
+                               playsinline
+                               preload="metadata"
+                               loop
+                               th:poster="${product.mainVideoPoster != null and !#strings.isEmpty(product.mainVideoPoster) ? product.mainVideoPoster : null}">
+                            <source th:src="@{${mediaUrl}}">
+                        </video>
+                    </a>
+
+                    <div class="card-body p-3 d-flex flex-column text-center">
+
+                        <div class="small text-muted mb-1"
+                             th:text="${product.category != null ? product.category.name : 'Senza categoria'}">
+                            Categoria
+                        </div>
+
+                        <h6 class="product-title mb-1" th:text="${product.name}"></h6>
+
+                        <div class="product-price mb-3">
+                            € <span th:text="${#numbers.formatDecimal(product.price,1,2)}"></span>
+                        </div>
+
+                        <div class="product-actions mt-auto d-flex gap-2">
+                            <a th:href="@{/shop/{id}(id=${product.id})}"
+                               class="btn btn-outline-secondary btn-sm flex-fill">
+                                <i class="bi bi-eye"></i>
+                                <span class="d-none d-sm-inline">View</span>
+                            </a>
+					<!--
+                            <button type="button"
+                                    class="btn btn-primary btn-sm flex-fill btn-add-cart"
+                                    th:attr="data-id=${product.id}">
+                                <i class="bi bi-cart-plus"></i>
+                                <span class="d-none d-sm-inline">Aggiungi</span>
+                            </button>
+					-->                       
+							</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center py-5"
+             th:if="${products == null or #lists.isEmpty(products)}">
+            <h5 class="mb-2">Nessun prodotto trovato</h5>
+            <p class="text-muted mb-0">
+                Non ci sono prodotti per la categoria selezionata.
+            </p>
+        </div>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/cart :: cartOffcanvas}"></div>
+<div th:replace="~{fragments/login-modal :: loginModal}"></div>
+<div th:replace="~{fragments/forgot-password-modal :: forgotPasswordModal}"></div>
+<div th:replace="~{fragments/profile-modal :: profileModal}"></div>
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/cart.js}"></script>
+
+</body>
+</html>

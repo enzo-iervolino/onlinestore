@@ -1,0 +1,1953 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Shop')}"></head>
+
+<body>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    html, body {
+        margin: 0;
+        padding: 0;
+        background: #f4f6f8;
+        color: #1f2937;
+    }
+
+    body {
+        line-height: 1.5;
+    }
+
+    :root {
+        --container-max: 1200px;
+        --radius: 18px;
+        --radius-lg: 24px;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        --card-bg: #ffffff;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --text: #111827;
+
+        --desktop-panel-height: 620px;
+
+        --mobile-image-height: 320px;
+        --mobile-thumb-height: 58px;
+        --mobile-gallery-total: 396px;
+    }
+
+    body {
+        background-color: #f4f6f8;
+        color: var(--text);
+    }
+
+    main {
+        background: transparent;
+    }
+
+    .container {
+        max-width: var(--container-max);
+    }
+
+    .product-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 1.5rem;
+        align-items: stretch;
+    }
+
+    .product-gallery-col,
+    .product-info-col {
+        min-width: 0;
+        overflow: visible;
+        height: 100%;
+    }
+
+    .product-gallery-col {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-info-col {
+        display: flex;
+    }
+
+    .mobile-gallery-fixed {
+        position: static;
+        width: 100%;
+        height: 100%;
+        min-height: var(--desktop-panel-height);
+        display: flex;
+    }
+
+    .desktop-gallery-layout {
+        display: flex;
+        align-items: stretch;
+        gap: 1rem;
+        width: 100%;
+        height: 100%;
+        min-height: var(--desktop-panel-height);
+    }
+
+    .main-image-wrapper {
+        position: relative;
+        width: 100%;
+        flex: 1 1 auto;
+        overflow: hidden;
+        border-radius: var(--radius);
+        min-height: var(--desktop-panel-height);
+        height: 100%;
+    }
+
+    .main-product-image,
+    .main-product-video {
+        width: 100%;
+        height: 100%;
+        min-height: var(--desktop-panel-height);
+        object-fit: cover;
+        object-position: center top;
+        display: block;
+        border-radius: var(--radius);
+        background: linear-gradient(135deg, #eef2f7, #dde5ef);
+        transition: 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        border: 1px solid var(--border);
+    }
+
+    .main-product-image {
+        cursor: zoom-in;
+    }
+
+    .main-product-video.d-none,
+    .main-product-image.d-none {
+        display: none !important;
+    }
+
+    .zoom-active {
+        transform: scale(1.2);
+        cursor: zoom-out;
+    }
+
+    .cart-toast-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(17, 24, 39, 0.38);
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity .35s ease, visibility .35s ease;
+        z-index: 25;
+        pointer-events: none;
+    }
+
+    .cart-toast-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .cart-toast-on-image {
+        background: rgba(255, 255, 255, 0.96);
+        color: #111827;
+        border: 1px solid rgba(255,255,255,0.7);
+        border-radius: 18px;
+        padding: 1rem 1.25rem;
+        min-width: 260px;
+        max-width: 82%;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, .22);
+        transform: translateY(10px) scale(.96);
+        opacity: 0;
+        transition: opacity .35s ease, transform .35s ease;
+        font-weight: 600;
+    }
+
+    .cart-toast-overlay.show .cart-toast-on-image {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    .cart-toast-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: #fff;
+        font-size: 1.4rem;
+        box-shadow: 0 10px 20px rgba(34, 197, 94, .28);
+        margin-bottom: .7rem;
+    }
+
+    .cart-toast-title {
+        font-size: 1rem;
+        font-weight: 800;
+        margin-bottom: .2rem;
+    }
+
+    .cart-toast-text {
+        font-size: .93rem;
+        color: #4b5563;
+        margin: 0;
+    }
+
+    .thumb-grid {
+        margin-top: .75rem;
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: .75rem;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        padding-right: .25rem;
+        background: transparent;
+        width: 110px;
+        min-width: 110px;
+        height: 100%;
+        max-height: var(--desktop-panel-height);
+        flex: 0 0 110px;
+    }
+
+    .thumb-btn {
+        position: relative;
+        flex: 0 0 auto;
+        width: 100%;
+        border: 1px solid var(--border);
+        background: #ffffff;
+        padding: 0;
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .thumb-btn:hover {
+        transform: translateY(-2px);
+        border-color: #cbd5e1;
+    }
+
+    .thumb-btn img,
+    .thumb-btn video {
+        width: 100%;
+        height: 84px;
+        object-fit: cover;
+        display: block;
+        opacity: .9;
+        transition: .2s ease;
+        background: #eef2f7;
+    }
+
+    .thumb-btn .video-thumb-badge {
+        position: absolute;
+        right: 8px;
+        bottom: 8px;
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(17, 24, 39, 0.72);
+        color: #fff;
+        pointer-events: none;
+        box-shadow: 0 6px 14px rgba(0,0,0,.18);
+        z-index: 2;
+    }
+
+    .thumb-btn.active {
+        border-color: #111827;
+        box-shadow: 0 0 0 2px rgba(17, 24, 39, .08) inset;
+    }
+
+    .thumb-btn.active img,
+    .thumb-btn:hover img {
+        opacity: 1;
+    }
+
+    .card-soft.product-info {
+        background: var(--card-bg);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem;
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        min-height: var(--desktop-panel-height);
+        height: 100%;
+    }
+
+    .product-info-content {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+
+    .product-actions-bottom {
+        margin-top: auto;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+        background: linear-gradient(to bottom, rgba(248,250,252,0.35), rgba(248,250,252,0.9));
+        border-radius: 18px;
+    }
+
+    .product-actions-bottom .mobile-add-cart-sticky {
+        padding-top: .25rem;
+    }
+
+    .label {
+        display: block;
+        font-size: .88rem;
+        color: var(--muted);
+        margin-bottom: .45rem;
+    }
+
+    .stars {
+        color: #f59e0b;
+        font-size: 1.05rem;
+        letter-spacing: 1px;
+    }
+
+    .review-link {
+        color: var(--muted);
+        text-decoration: none;
+        font-size: .95rem;
+    }
+
+    .review-link:hover {
+        text-decoration: underline;
+    }
+
+    .price-row {
+        display: flex;
+        align-items: baseline;
+        gap: .75rem;
+        flex-wrap: wrap;
+        margin: .8rem 0;
+    }
+
+    .price-old-hero {
+        text-decoration: line-through;
+        color: #9ca3af;
+        font-size: 1rem;
+    }
+
+    .save-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: .35rem .7rem;
+        border-radius: 999px;
+        background: #dcfce7;
+        border: 1px solid #bbf7d0;
+        color: #166534;
+        font-size: .84rem;
+        font-weight: 700;
+    }
+
+    .sep {
+        border-top: 1px solid var(--border);
+        margin: 1rem 0;
+    }
+
+    .size-group,
+    .color-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .75rem;
+        align-items: center;
+        min-height: 40px;
+    }
+
+    .size-btn {
+        min-width: 48px;
+        height: 40px;
+        border-radius: 999px;
+        border: 1px solid #d1d5db;
+        background: #ffffff;
+        color: #111827;
+        font-size: .85rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .2s ease;
+        padding: 0 14px;
+    }
+
+    .size-btn:hover {
+        background: #f8fafc;
+    }
+
+    .size-btn.active {
+        background: #111827;
+        color: #ffffff;
+        border-color: #111827;
+    }
+
+    .size-btn.disabled {
+        opacity: .35;
+        cursor: not-allowed;
+    }
+
+    .color-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 2px solid #d1d5db;
+        cursor: pointer;
+        transition: .2s ease;
+        padding: 0;
+        display: inline-block;
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08);
+    }
+
+    .color-btn:hover {
+        transform: translateY(-1px) scale(1.05);
+        filter: brightness(1.03);
+    }
+
+    .color-btn.active {
+        border-color: #111827;
+        box-shadow:
+            0 0 0 3px rgba(17, 17, 17, .12),
+            inset 0 0 0 1px rgba(0, 0, 0, .10);
+    }
+
+    .color-btn.disabled {
+        opacity: .35;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    .color-label {
+        font-size: .95rem;
+        color: #555555;
+        margin-top: .6rem;
+        font-weight: 600;
+        min-height: 24px;
+    }
+
+    .qty-row {
+        display: flex;
+        align-items: center;
+        gap: .9rem;
+        flex-wrap: wrap;
+    }
+
+    .qty-box {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        overflow: hidden;
+        background: #ffffff;
+    }
+
+    .qty-btn {
+        width: 44px;
+        height: 46px;
+        border: 0;
+        background: transparent;
+        color: #111111;
+        font-size: 1.25rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .18s ease;
+    }
+
+    .qty-btn:hover {
+        background: #f8f9fa;
+    }
+
+    .qty-input {
+        width: 64px;
+        height: 46px;
+        border: 0;
+        background: transparent;
+        color: #111111;
+        text-align: center;
+        font-weight: 700;
+        outline: none;
+    }
+
+    .stock-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .45rem .85rem;
+        border-radius: 999px;
+        border: 1px solid #ced4da;
+        background: #ffffff;
+        color: #111111;
+    }
+
+    .stock-pill.in-stock {
+        color: #15803d;
+        border-color: rgba(34, 197, 94, 0.25);
+        background: rgba(34, 197, 94, 0.10);
+    }
+
+    .stock-pill.out-stock {
+        color: #dc2626;
+        border-color: rgba(239, 68, 68, 0.25);
+        background: rgba(239, 68, 68, 0.10);
+    }
+
+    .variant-note {
+        font-size: .9rem;
+        color: var(--muted);
+        min-height: 21px;
+    }
+
+    .btn-add-cart,
+    .btn-outline-secondary {
+        border-radius: 12px;
+        font-weight: 700;
+        min-height: 50px;
+    }
+
+    .acc-soft {
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 16px !important;
+        overflow: hidden;
+        margin-bottom: .75rem;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+    }
+
+    .acc-btn {
+        background: #ffffff !important;
+        color: #111111 !important;
+        box-shadow: none !important;
+        padding: .95rem 1rem !important;
+        font-size: .95rem;
+        min-height: auto;
+        font-weight: 600;
+    }
+
+    .acc-btn:not(.collapsed) {
+        background: #f8fafc !important;
+        color: #111111 !important;
+    }
+
+    .acc-btn::after {
+        filter: none;
+        transform: scale(.9);
+    }
+
+    .acc-body {
+        background: #ffffff;
+        color: #333333;
+        padding: .95rem 1rem 1rem !important;
+        font-size: .95rem;
+        line-height: 1.6;
+    }
+
+    .details-card-compact {
+        padding: 1rem !important;
+        background: #ffffff;
+        color: #111111;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow);
+    }
+
+    @media (max-width: 992px) {
+        .product-layout {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            align-items: start;
+        }
+
+        .product-gallery-col,
+        .product-info-col,
+        .mobile-gallery-fixed,
+        .desktop-gallery-layout,
+        .main-image-wrapper {
+            height: auto;
+            min-height: auto;
+        }
+
+        .product-info-col {
+            display: block;
+        }
+
+        .card-soft.product-info {
+            min-height: auto;
+            height: auto;
+        }
+
+        .product-actions-bottom {
+            margin-top: 1rem;
+            background: transparent;
+            border-top: 1px solid var(--border);
+            border-radius: 0;
+        }
+
+        .desktop-gallery-layout {
+            display: block;
+        }
+
+        .thumb-grid {
+            margin-top: .9rem;
+            width: 100%;
+            min-width: 0;
+            max-height: none;
+            height: auto;
+            flex: none;
+        }
+
+        .thumb-btn {
+            width: 110px;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        html, body {
+            overflow-x: hidden;
+        }
+
+        main.py-5 {
+            padding-top: 0 !important;
+            padding-bottom: 1rem !important;
+        }
+
+        .container {
+            padding-left: 0;
+            padding-right: 0;
+            max-width: 100%;
+        }
+
+        .product-layout {
+            display: block;
+        }
+
+        .product-gallery-col,
+        .product-info-col {
+            width: 100%;
+            height: auto;
+        }
+
+        .mobile-gallery-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 40;
+            background: #ffffff;
+            padding: 0 0 .5rem 0;
+            box-shadow: 0 8px 22px rgba(0,0,0,.08);
+        }
+
+        .desktop-gallery-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        #mainProductImage {
+            order: 1;
+        }
+
+        #thumbGrid {
+            order: 2;
+        }
+
+        .main-image-wrapper {
+            border-radius: 10;
+        }
+
+        .main-product-image,
+        .main-product-video {
+            height: var(--mobile-image-height);
+            min-height: var(--mobile-image-height);
+            cursor: default;
+            border-radius: 0;
+            border: 0;
+            box-shadow: none;
+            width: 100%;
+        }
+
+        .thumb-grid {
+            margin-top: .5rem;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            gap: .35rem;
+            padding: 0 .75rem .5rem .75rem;
+            width: 100%;
+            min-width: 0;
+            max-height: none;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            background: #ffffff;
+        }
+
+        .thumb-btn {
+            flex: 0 0 auto;
+            width: 72px;
+            min-width: 72px;
+            border-radius: 8px;
+        }
+
+        .thumb-btn img,
+        .thumb-btn video {
+            width: 100%;
+            height: 58px;
+            object-fit: cover;
+        }
+
+        .product-gallery-col {
+            padding: calc(var(--mobile-gallery-total) + 0.75rem) .75rem 0 .75rem;
+        }
+
+        .product-info-col {
+            padding: 0 .75rem 0 .75rem;
+            margin-top: 0;
+        }
+
+        .card-soft.product-info {
+            background: #fff !important;
+            border: 0 !important;
+            border-radius: 22px 22px 0 0 !important;
+            box-shadow: none !important;
+            padding: 1rem !important;
+            margin-top: 0 !important;
+            position: relative;
+            z-index: 2;
+            overflow: visible !important;
+            min-height: auto;
+            height: auto;
+        }
+
+        .details-card-compact {
+            border-radius: 0 !important;
+            border-left: 0 !important;
+            border-right: 0 !important;
+            box-shadow: none !important;
+            margin-top: 1rem !important;
+            padding: 1rem .75rem !important;
+        }
+
+        .price-row,
+        .qty-row,
+        .size-group,
+        .color-group {
+            gap: .5rem;
+        }
+
+        .color-btn {
+            width: 38px;
+            height: 38px;
+        }
+
+        .mobile-add-cart-sticky {
+            position: sticky;
+            top: calc(var(--mobile-gallery-total) + .5rem);
+            z-index: 30;
+            display: block !important;
+            background: #ffffff;
+            padding-top: .5rem;
+            padding-bottom: .5rem;
+        }
+
+        .mobile-add-cart-sticky .btn-add-cart {
+            display: block;
+            width: 100%;
+            min-height: 52px;
+        }
+
+        .mobile-add-cart-sticky .btn-outline-secondary {
+            display: none !important;
+        }
+
+        .cart-toast-on-image {
+            min-width: unset;
+            width: calc(100% - 24px);
+            max-width: 340px;
+            padding: .95rem 1rem;
+        }
+
+        .cart-toast-icon {
+            width: 46px;
+            height: 46px;
+            font-size: 1.2rem;
+            margin-bottom: .55rem;
+        }
+
+        .cart-toast-title {
+            font-size: .95rem;
+        }
+
+        .cart-toast-text {
+            font-size: .87rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .thumb-btn img,
+        .thumb-btn video {
+            height: 68px;
+        }
+
+        .qty-row {
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<div th:replace="~{fragments/nav :: nav}"></div>
+
+<main class="py-5">
+    <div class="container mt-2">
+
+        <div class="product-layout">
+
+            <section class="product-gallery-col">
+                <div class="mobile-gallery-fixed">
+                    <div class="desktop-gallery-layout">
+
+                        <div id="thumbGrid" class="thumb-grid">
+                            <button type="button"
+                                    class="thumb-btn gallery-thumb-wrapper active"
+                                    th:attr="aria-label=${detail.mainMediaType == 'VIDEO' ? 'Video principale' : 'Immagine principale'}">
+
+                                <th:block th:if="${detail.mainMediaType == 'VIDEO'}">
+                                    <video th:if="${detail.mainVideoPoster == null or #strings.isEmpty(detail.mainVideoPoster)}"
+                                           class="gallery-media-item"
+                                           data-main="true"
+                                           data-type="VIDEO"
+                                           muted
+                                           playsinline
+                                           preload="metadata"
+                                           th:attr="data-full=${detail.mainImage},data-poster=${detail.mainVideoPoster != null ? detail.mainVideoPoster : ''}">
+                                        <source th:src="@{${detail.mainImage}}" >
+                                    </video>
+
+                                    <img th:if="${detail.mainVideoPoster != null and !#strings.isEmpty(detail.mainVideoPoster)}"
+                                         th:src="@{${detail.mainVideoPoster}}"
+                                         class="gallery-media-item"
+                                         data-main="true"
+                                         data-type="VIDEO"
+                                         th:attr="data-full=${detail.mainImage},data-poster=${detail.mainVideoPoster}"
+                                         alt="Video principale">
+
+                                    <span class="video-thumb-badge"><i class="bi bi-play-fill"></i></span>
+                                </th:block>
+
+                                <th:block th:if="${detail.mainMediaType == null or detail.mainMediaType == 'IMAGE'}">
+                                    <img th:src="@{${detail.mainImage}}"
+                                         class="gallery-media-item"
+                                         data-main="true"
+                                         data-type="IMAGE"
+                                         th:attr="data-full=${detail.mainImage}"
+                                         alt="Immagine principale">
+                                </th:block>
+                            </button>
+
+                            <button th:each="img : ${detail.images}"
+                                    type="button"
+                                    class="thumb-btn gallery-thumb-wrapper"
+                                    th:attr="aria-label=${img.altText}">
+                                <th:block th:if="${img.mediaType == null or img.mediaType == 'IMAGE'}">
+                                    <img th:src="@{${img.imageUrl}}"
+                                         th:alt="${img.altText}"
+                                         class="gallery-media-item"
+                                         data-type="IMAGE"
+                                         th:attr="data-full=${img.imageUrl}">
+                                </th:block>
+                                <th:block th:if="${img.mediaType == 'VIDEO'}">
+                                    <img th:src="@{${img.posterUrl != null ? img.posterUrl : detail.mainImage}}"
+                                         th:alt="${img.altText}"
+                                         class="gallery-media-item"
+                                         data-type="VIDEO"
+                                         th:attr="data-full=${img.imageUrl},data-poster=${img.posterUrl != null ? img.posterUrl : detail.mainImage}">
+                                    <span class="video-thumb-badge"><i class="bi bi-play-fill"></i></span>
+                                </th:block>
+                            </button>
+                        </div>
+
+                        <div class="main-image-wrapper">
+                            <img th:src="@{${detail.mainMediaType == 'VIDEO' and detail.mainVideoPoster != null and !#strings.isEmpty(detail.mainVideoPoster) ? detail.mainVideoPoster : detail.mainImage}}"
+                                 id="mainProductImage"
+                                 th:attr="
+                                    data-original=${detail.mainImage},
+                                    data-original-type=${detail.mainMediaType != null ? detail.mainMediaType : 'IMAGE'},
+                                    data-original-poster=${detail.mainVideoPoster != null ? detail.mainVideoPoster : ''}"
+                                 th:classappend="${detail.mainMediaType == 'VIDEO'} ? ' d-none'"
+                                 class="main-product-image zoomable"
+                                 alt="Immagine prodotto">
+
+                            <video id="mainProductVideo"
+                                   th:classappend="${detail.mainMediaType != 'VIDEO'} ? ' d-none'"
+                                   class="main-product-video"
+                                   controls
+                                   playsinline
+                                   preload="metadata"
+                                   th:poster="${detail.mainVideoPoster != null ? detail.mainVideoPoster : null}">
+                                <source id="mainProductVideoSource"
+                                        th:src="${detail.mainMediaType == 'VIDEO' ? detail.mainImage : ''}"
+                                        >
+                            </video>
+
+                            <div id="cart-toast-overlay" class="cart-toast-overlay">
+                                <div id="cart-toast" class="cart-toast-on-image">
+                                    <div class="cart-toast-icon">
+                                        <i class="bi bi-check-lg"></i>
+                                    </div>
+                                    <div class="cart-toast-title">Aggiunto al carrello</div>
+                                    <p class="cart-toast-text">Il prodotto è stato inserito correttamente.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="product-info-col">
+                <div class="card-soft product-info">
+                    <div class="product-info-content">
+                        <h4 class="fw-bold mb-3" th:text="${detail.name}"></h4>
+
+                        <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+                            <div id="productStars" class="stars">★★★★★</div>
+                            <a id="reviewLink" href="#detailsAcc" class="review-link"></a>
+                        </div>
+
+                        <div class="price-row">
+                            <div>
+                                <h3 class="fw-bold mb-2">
+                                    € <span id="productPrice"
+                                            th:text="${#numbers.formatDecimal(detail.basePrice, 1, 2)}"></span>
+                                </h3>
+                            </div>
+
+                            <div id="priceOld" class="price-old-hero d-none">€0</div>
+                            <div id="savePill" class="save-pill d-none">Risparmi €0</div>
+                        </div>
+
+                        <div class="mt-2 mb-3 d-none">
+                            <p class="mb-0"
+                               th:if="${detail.description != null and !#strings.isEmpty(detail.description)}"
+                               th:text="${detail.description}">
+                            </p>
+
+                            <p class="mb-0 text-secondary"
+                               th:if="${detail.description == null or #strings.isEmpty(detail.description)}">
+                                Nessuna descrizione disponibile.
+                            </p>
+                        </div>
+
+                        <div class="sep"
+                             th:if="${detail.showSizeSelector or detail.singleSizeLabel != null}"></div>
+
+                        <div class="mb-3" th:if="${detail.showSizeSelector}">
+                            <label class="label">Taglia</label>
+                            <div id="sizeGroup" class="size-group"></div>
+                        </div>
+
+                        <div class="mb-3"
+                             th:if="${!detail.showSizeSelector and detail.singleSizeLabel != null}">
+                            <label class="label">Taglia</label>
+                            <div class="variant-note" th:text="${detail.singleSizeLabel}">Taglia unica</div>
+                        </div>
+
+                        <div class="sep"
+                             th:if="${detail.showColorSelector or detail.singleColorLabel != null}"></div>
+
+                        <div class="mb-3" th:if="${detail.showColorSelector}">
+                            <label class="label">Colore</label>
+                            <div id="colorGroup" class="color-group"></div>
+                            <div id="selectedColorLabel" class="color-label"></div>
+                        </div>
+
+                        <div class="mb-3"
+                             th:if="${!detail.showColorSelector and detail.singleColorLabel != null}">
+                            <label class="label">Colore</label>
+                            <div class="variant-note" th:text="${detail.singleColorLabel}">Colore unico</div>
+                        </div>
+
+                        <div class="sep"></div>
+
+                        <div class="mb-2">
+                            <label class="label">Quantità</label>
+                            <div class="qty-row">
+                                <div class="qty-box">
+                                    <button id="qtyMinus" class="qty-btn" type="button">−</button>
+                                    <input id="qtyInput" class="qty-input" type="text" readonly value="1">
+                                    <button id="qtyPlus" class="qty-btn" type="button">+</button>
+                                </div>
+                                <span id="stockPill" class="stock-pill">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    <span id="stockText">Disponibile</span>
+                                </span>
+                            </div>
+                            <div id="variantNote" class="variant-note mt-2"></div>
+                        </div>
+
+                        <div id="variantData" class="d-none">
+                            <div th:each="variant : ${detail.variants}"
+                                 class="variant-item"
+                                 th:attr="
+                                    data-variant-id=${variant.id},
+                                    data-size=${variant.sizeCode != null ? variant.sizeCode : ''},
+                                    data-size-name=${variant.sizeName != null ? variant.sizeName : ''},
+                                    data-color=${variant.colorCode != null ? variant.colorCode : ''},
+                                    data-color-name=${variant.colorName != null ? variant.colorName : ''},
+                                    data-color-hex=${variant.colorHex != null ? variant.colorHex : ''},
+                                    data-stock=${variant.stockQty != null ? variant.stockQty : 0},
+                                    data-price=${variant.price != null ? variant.price : detail.basePrice},
+                                    data-image=${variant.mainImage != null ? variant.mainImage : detail.mainImage},
+                                    data-enabled=${variant.enabled}">
+                            </div>
+                        </div>
+
+                        <div id="variantGalleryData" class="d-none">
+                            <div th:each="variant : ${detail.variants}"
+                                 class="variant-gallery"
+                                 th:attr="data-variant-id=${variant.id}">
+
+                                <span th:if="${variant.mainImage != null and !#strings.isEmpty(variant.mainImage)}"
+                                      class="variant-gallery-media"
+                                      th:attr="
+                                        data-url=${variant.mainImage},
+                                        data-type=${variant.mainMediaType != null ? variant.mainMediaType : 'IMAGE'},
+                                        data-poster=${variant.mainVideoPoster != null ? variant.mainVideoPoster : ''}">
+                                </span>
+
+                                <span th:each="img : ${variant.images}"
+                                      th:if="${img.imageUrl != null and !#strings.isEmpty(img.imageUrl)}"
+                                      class="variant-gallery-media"
+                                      th:attr="
+                                        data-url=${img.imageUrl},
+                                        data-type=${img.mediaType != null ? img.mediaType : 'IMAGE'},
+                                        data-poster=${img.posterUrl != null ? img.posterUrl : ''}">
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="product-actions-bottom">
+                        <div class="d-grid gap-2 mobile-add-cart-sticky">
+                            <button type="button"
+                                    id="addToCartBtn"
+                                    class="btn btn-primary btn-lg btn-add-cart"
+                                    th:attr="
+                                        data-product-id=${detail.productId},
+                                        data-product-code=${detail.productCode},
+                                        data-default-variant-id=${detail.defaultVariantId}">
+                                <i class="bi bi-cart-plus me-2"></i>
+                                Aggiungi al carrello
+                            </button>
+
+                            <a th:href="@{/shop}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                Torna allo shop
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        </div>
+
+        <div class="mt-4">
+            <div class="col-12">
+                <div class="card-soft details-card-compact" id="detailsAcc">
+                    <div class="accordion" id="accordionDettagli">
+
+                        <div class="accordion-item acc-soft">
+                            <h2 class="accordion-header" id="headingDesc">
+                                <button class="accordion-button collapsed acc-btn"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#collapseDesc"
+                                        aria-expanded="false"
+                                        aria-controls="collapseDesc">
+                                    <i class="bi bi-card-text me-2"></i>
+                                    Descrizione
+                                </button>
+                            </h2>
+
+                            <div id="collapseDesc"
+                                 class="accordion-collapse collapse"
+                                 aria-labelledby="headingDesc"
+                                 data-bs-parent="#accordionDettagli">
+                                <div class="accordion-body acc-body">
+                                    <p class="mb-0"
+                                       th:if="${detail.description != null and !#strings.isEmpty(detail.description)}"
+                                       th:text="${detail.description}">
+                                    </p>
+
+                                    <p class="mb-0 text-secondary"
+                                       th:if="${detail.description == null or #strings.isEmpty(detail.description)}">
+                                        Nessuna descrizione disponibile.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item acc-soft">
+                            <h2 class="accordion-header" id="headingMaterials">
+                                <button class="accordion-button collapsed acc-btn"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#collapseMaterials"
+                                        aria-expanded="false"
+                                        aria-controls="collapseMaterials">
+                                    <i class="bi bi-tags me-2"></i>
+                                    Materiali
+                                </button>
+                            </h2>
+
+                            <div id="collapseMaterials"
+                                 class="accordion-collapse collapse"
+                                 aria-labelledby="headingMaterials"
+                                 data-bs-parent="#accordionDettagli">
+                                <div class="accordion-body acc-body">
+                                    <p class="mb-0"
+                                       th:if="${detail.materials != null and !#strings.isEmpty(detail.materials)}"
+                                       th:text="${detail.materials}">
+                                    </p>
+
+                                    <p class="mb-0 text-secondary"
+                                       th:if="${detail.materials == null or #strings.isEmpty(detail.materials)}">
+                                        Nessuna informazione sui materiali disponibile.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item acc-soft">
+                            <h2 class="accordion-header" id="headingShipping">
+                                <button class="accordion-button collapsed acc-btn"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#collapseShipping"
+                                        aria-expanded="false"
+                                        aria-controls="collapseShipping">
+                                    <i class="bi bi-truck me-2"></i>
+                                    Shipping
+                                </button>
+                            </h2>
+
+                            <div id="collapseShipping"
+                                 class="accordion-collapse collapse"
+                                 aria-labelledby="headingShipping"
+                                 data-bs-parent="#accordionDettagli">
+                                <div class="accordion-body acc-body">
+                                    <p class="mb-0"
+                                       th:if="${detail.shippingInfo != null and !#strings.isEmpty(detail.shippingInfo)}"
+                                       th:text="${detail.shippingInfo}">
+                                    </p>
+
+                                    <p class="mb-0 text-secondary"
+                                       th:if="${detail.shippingInfo == null or #strings.isEmpty(detail.shippingInfo)}">
+                                        Nessuna informazione sulla spedizione disponibile.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/cart :: cartOffcanvas}"></div>
+<div th:replace="~{fragments/login-modal :: loginModal}"></div>
+<div th:replace="~{fragments/forgot-password-modal :: forgotPasswordModal}"></div>
+<div th:replace="~{fragments/profile-modal :: profileModal}"></div>
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/cart.js}"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const ONE_SIZE_CODE = "TU";
+        const ONE_COLOR_CODE = "ONE_COLOR";
+
+        const mainImage = document.getElementById("mainProductImage");
+        const mainVideo = document.getElementById("mainProductVideo");
+        const mainVideoSource = document.getElementById("mainProductVideoSource");
+        const thumbGrid = document.getElementById("thumbGrid");
+        const originalSrc = mainImage ? mainImage.getAttribute("data-original") : null;
+        const originalType = mainImage ? (mainImage.getAttribute("data-original-type") || "IMAGE").toUpperCase() : "IMAGE";
+        const originalPoster = mainImage ? (mainImage.getAttribute("data-original-poster") || "") : "";
+
+        const baseGalleryItems = (() => {
+            const items = [];
+
+            if (originalSrc) {
+                items.push({
+                    type: originalType,
+                    url: originalSrc,
+                    poster: originalPoster
+                });
+            }
+
+            document.querySelectorAll("#thumbGrid .gallery-media-item[data-full]").forEach(media => {
+                const url = (media.getAttribute("data-full") || "").trim();
+                const type = (media.getAttribute("data-type") || "IMAGE").trim().toUpperCase();
+                const poster = (media.getAttribute("data-poster") || "").trim();
+                if (url) {
+                    items.push({ type, url, poster });
+                }
+            });
+
+            const unique = [];
+            const seen = new Set();
+            items.forEach(item => {
+                const key = `${item.type}|${item.url}|${item.poster || ""}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    unique.push(item);
+                }
+            });
+            return unique;
+        })();
+
+        function getVideoMimeType(url) {
+            const lower = (url || "").toLowerCase();
+            if (lower.endsWith(".webm")) return "video/webm";
+            if (lower.endsWith(".ogv") || lower.endsWith(".ogg")) return "video/ogg";
+            return "video/mp4";
+        }
+
+        function setMainMedia(item) {
+            if (!item) return;
+
+            const type = (item.type || "IMAGE").toUpperCase();
+            const url = item.url || "";
+            const poster = item.poster || originalPoster || "";
+
+            if (type === "VIDEO") {
+                if (mainImage) {
+                    mainImage.classList.add("d-none");
+                    mainImage.classList.remove("zoom-active");
+                }
+                if (mainVideo && mainVideoSource) {
+                    mainVideoSource.src = url;
+                    mainVideoSource.setAttribute("type", getVideoMimeType(url));
+                    if (poster) {
+                        mainVideo.setAttribute("poster", poster);
+                    } else {
+                        mainVideo.removeAttribute("poster");
+                    }
+                    mainVideo.load();
+                    mainVideo.classList.remove("d-none");
+
+                    mainVideo.play().catch(function () {
+                        // Alcuni browser possono bloccare la riproduzione automatica se il video ha audio.
+                    });
+                }
+                return;
+            }
+
+            if (mainVideo) {
+                mainVideo.pause();
+                mainVideo.classList.add("d-none");
+            }
+            if (mainImage && url) {
+                mainImage.setAttribute("src", url);
+                mainImage.classList.remove("d-none");
+                mainImage.classList.remove("zoom-active");
+            }
+        }
+
+        function bindGalleryThumbEvents() {
+            const thumbs = document.querySelectorAll(".gallery-thumb-wrapper");
+
+            thumbs.forEach(thumb => {
+                thumb.addEventListener("click", function () {
+                    const media = this.querySelector(".gallery-media-item[data-full]");
+                    if (!media) return;
+
+                    setMainMedia({
+                        type: media.getAttribute("data-type") || "IMAGE",
+                        url: media.getAttribute("data-full") || "",
+                        poster: media.getAttribute("data-poster") || ""
+                    });
+
+                    document.querySelectorAll(".gallery-thumb-wrapper")
+                        .forEach(el => el.classList.remove("active"));
+
+                    this.classList.add("active");
+                });
+            });
+        }
+
+        function escapeHtml(value) {
+            if (!value) return "";
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function renderGallery(items) {
+            if (!thumbGrid || !mainImage) return;
+
+            const validItems = [];
+            const seen = new Set();
+            (items || []).forEach(item => {
+                if (!item || !item.url) return;
+                const type = (item.type || "IMAGE").toUpperCase();
+                const poster = item.poster || "";
+                const key = `${type}|${item.url}|${poster}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    validItems.push({ type, url: item.url, poster });
+                }
+            });
+
+            if (validItems.length === 0) {
+                if (!originalSrc) return;
+
+                thumbGrid.innerHTML = `
+                    <button type="button"
+                            class="thumb-btn gallery-thumb-wrapper active"
+                            aria-label="Immagine principale">
+                        <img src="${escapeHtml(originalSrc)}"
+                             class="gallery-media-item"
+                             data-main="true"
+                             data-type="IMAGE"
+                             data-full="${escapeHtml(originalSrc)}"
+                             alt="Immagine principale">
+                    </button>
+                `;
+                setMainMedia({ type: originalType, url: originalSrc, poster: originalPoster });
+                bindGalleryThumbEvents();
+                return;
+            }
+
+            thumbGrid.innerHTML = validItems.map((item, index) => {
+                if (item.type === "VIDEO") {
+                    const poster = item.poster || "";
+                    const thumbMarkup = poster
+                        ? `<img src="${escapeHtml(poster)}"
+                                class="gallery-media-item"
+                                data-type="VIDEO"
+                                data-full="${escapeHtml(item.url)}"
+                                data-poster="${escapeHtml(poster)}"
+                                alt="Video ${index + 1}">`
+                        : `<video class="gallery-media-item"
+                                  data-type="VIDEO"
+                                  data-full="${escapeHtml(item.url)}"
+                                  data-poster=""
+                                  muted
+                                  playsinline
+                                  preload="metadata">
+                               <source src="${escapeHtml(item.url)}" >
+                           </video>`;
+
+                    return `
+                        <button type="button"
+                                class="thumb-btn gallery-thumb-wrapper ${index === 0 ? "active" : ""}"
+                                aria-label="Video ${index + 1}">
+                            ${thumbMarkup}
+                            <span class="video-thumb-badge"><i class="bi bi-play-fill"></i></span>
+                        </button>
+                    `;
+                }
+
+                return `
+                    <button type="button"
+                            class="thumb-btn gallery-thumb-wrapper ${index === 0 ? "active" : ""}"
+                            aria-label="Immagine ${index + 1}">
+                        <img src="${escapeHtml(item.url)}"
+                             class="gallery-media-item"
+                             data-type="IMAGE"
+                             data-full="${escapeHtml(item.url)}"
+                             alt="Immagine ${index + 1}">
+                    </button>
+                `;
+            }).join("");
+
+            setMainMedia(validItems[0]);
+            bindGalleryThumbEvents();
+        }
+
+        function renderBaseGallery() {
+            renderGallery(baseGalleryItems);
+        }
+
+        function getVariantGallery(variantId, fallbackImage) {
+            const container = document.querySelector('.variant-gallery[data-variant-id="' + variantId + '"]');
+
+            if (!container) {
+                return fallbackImage ? [{ type: "IMAGE", url: fallbackImage, poster: "" }] : [];
+            }
+
+            const mediaItems = Array.from(container.querySelectorAll(".variant-gallery-media"))
+                .map(el => ({
+                    type: (el.dataset.type || "IMAGE").trim().toUpperCase(),
+                    url: (el.dataset.url || "").trim(),
+                    poster: (el.dataset.poster || "").trim()
+                }))
+                .filter(item => item.url);
+
+            if (mediaItems.length === 0 && fallbackImage) {
+                return [{ type: "IMAGE", url: fallbackImage, poster: "" }];
+            }
+
+            return mediaItems;
+        }
+
+        bindGalleryThumbEvents();
+
+        if (mainImage) {
+            mainImage.addEventListener("click", function () {
+                if (window.innerWidth > 575.98 && !mainImage.classList.contains("d-none")) {
+                    this.classList.toggle("zoom-active");
+                }
+            });
+        }
+
+        const variantElements = document.querySelectorAll("#variantData .variant-item");
+        const sizeGroup = document.getElementById("sizeGroup");
+        const colorGroup = document.getElementById("colorGroup");
+        const selectedColorLabel = document.getElementById("selectedColorLabel");
+        const stockPill = document.getElementById("stockPill");
+        const stockText = document.getElementById("stockText");
+        const variantNote = document.getElementById("variantNote");
+        const productPrice = document.getElementById("productPrice");
+        const addToCartBtn = document.getElementById("addToCartBtn");
+        const priceOld = document.getElementById("priceOld");
+        const savePill = document.getElementById("savePill");
+
+        const productId = addToCartBtn ? addToCartBtn.dataset.productId : null;
+        const productCode = addToCartBtn ? addToCartBtn.dataset.productCode : null;
+        const defaultVariantId = addToCartBtn ? addToCartBtn.dataset.defaultVariantId : null;
+
+        const basePrice = productPrice ? parseFloat((productPrice.textContent || "0").replace(",", ".")) : 0;
+
+        function normalizeValue(value) {
+            return (value || "").trim();
+        }
+
+        function normalizeSize(value) {
+            const normalized = normalizeValue(value).toUpperCase();
+            return normalized === "" ? ONE_SIZE_CODE : normalized;
+        }
+
+        function normalizeColor(value) {
+            const normalized = normalizeValue(value).toUpperCase();
+            return normalized === "" ? ONE_COLOR_CODE : normalized;
+        }
+
+        const variants = Array.from(variantElements).map(el => ({
+            id: el.dataset.variantId,
+            size: normalizeSize(el.dataset.size),
+            sizeName: normalizeValue(el.dataset.sizeName),
+            color: normalizeColor(el.dataset.color),
+            colorName: normalizeValue(el.dataset.colorName),
+            colorHex: normalizeValue(el.dataset.colorHex),
+            stock: parseInt(el.dataset.stock || "0", 10),
+            price: parseFloat((el.dataset.price || "0").replace(",", ".")),
+            image: el.dataset.image || "",
+            enabled: el.dataset.enabled === "true"
+        })).filter(v => v.enabled);
+
+        let selectedSize = null;
+        let selectedColor = null;
+
+        function uniqueValues(values) {
+            return [...new Set(values.filter(v => v && v.trim() !== ""))];
+        }
+
+        function getRealSizes() {
+            return uniqueValues(variants.map(v => v.size)).filter(v => v !== ONE_SIZE_CODE);
+        }
+
+        function getRealColors() {
+            return uniqueValues(variants.map(v => v.color)).filter(v => v !== ONE_COLOR_CODE);
+        }
+
+        function getAllSizes() {
+            const sizes = uniqueValues(variants.map(v => v.size));
+            return sizes.length === 0 ? [ONE_SIZE_CODE] : sizes;
+        }
+
+        function getAllColors() {
+            const colors = uniqueValues(variants.map(v => v.color));
+            return colors.length === 0 ? [ONE_COLOR_CODE] : colors;
+        }
+
+        function getColorsForSize(size) {
+            if (!size) return [];
+            return uniqueValues(
+                variants
+                    .filter(v => v.size === size)
+                    .map(v => v.color)
+            );
+        }
+
+        function getSizesForColor(color) {
+            if (!color) return [];
+            return uniqueValues(
+                variants
+                    .filter(v => v.color === color)
+                    .map(v => v.size)
+            );
+        }
+
+        function hasVariant(size, color) {
+            return variants.some(v => v.size === size && v.color === color);
+        }
+
+        function findMatchingVariant() {
+            if (variants.length === 0) return null;
+
+            return variants.find(v => {
+                const sizeOk = selectedSize == null || v.size === selectedSize;
+                const colorOk = selectedColor == null || v.color === selectedColor;
+                return sizeOk && colorOk;
+            }) || null;
+        }
+
+        function getColorInfo(colorCode) {
+            const variant = variants.find(v => v.color === colorCode);
+
+            if (colorCode === ONE_COLOR_CODE) {
+                return {
+                    code: ONE_COLOR_CODE,
+                    name: "Colore unico",
+                    hex: ""
+                };
+            }
+
+            if (!variant) {
+                return {
+                    code: colorCode || "",
+                    name: colorCode || "",
+                    hex: ""
+                };
+            }
+
+            return {
+                code: variant.color,
+                name: variant.colorName || variant.color,
+                hex: variant.colorHex || ""
+            };
+        }
+
+        function normalizeHex(hex) {
+            if (!hex) return "";
+            const value = hex.trim();
+            return value.startsWith("#") ? value : "#" + value;
+        }
+
+        function getColorBackground(hex, colorCode) {
+            const normalizedHex = normalizeHex(hex);
+            if (normalizedHex) {
+                return normalizedHex;
+            }
+
+            const map = {
+                "ROSSO": "#dc3545",
+                "RED": "#dc3545",
+                "BIANCO": "#ffffff",
+                "WHITE": "#ffffff",
+                "VERDE": "#198754",
+                "GREEN": "#198754",
+                "NERO": "#212529",
+                "BLACK": "#212529",
+                "BLU": "#0d6efd",
+                "BLUE": "#0d6efd",
+                "GIALLO": "#ffc107",
+                "YELLOW": "#ffc107",
+                "GRIGIO": "#6c757d",
+                "GREY": "#6c757d",
+                "GRAY": "#6c757d",
+                "ROSA": "#e83e8c",
+                "PINK": "#e83e8c",
+                "BEIGE": "#d2b48c",
+                "MARRONE": "#8b5e3c",
+                "BROWN": "#8b5e3c",
+                "ARANCIONE": "#fd7e14",
+                "ORANGE": "#fd7e14",
+                "VIOLA": "#6f42c1",
+                "PURPLE": "#6f42c1"
+            };
+
+            const key = normalizeValue(colorCode).toUpperCase();
+            return map[key] || "#6c757d";
+        }
+
+        function formatPrice(value) {
+            return Number(value).toFixed(2).replace(".", ",");
+        }
+
+        function updateComparePrice(currentPrice) {
+            if (!priceOld || !savePill) return;
+
+            const current = Number(currentPrice || 0);
+            if (!current || !basePrice || current >= basePrice) {
+                priceOld.classList.add("d-none");
+                savePill.classList.add("d-none");
+                return;
+            }
+
+            const save = (basePrice - current).toFixed(2).replace(".", ",");
+            priceOld.textContent = "€" + formatPrice(basePrice);
+            savePill.textContent = "Risparmi €" + save;
+            priceOld.classList.remove("d-none");
+            savePill.classList.remove("d-none");
+        }
+
+        function renderSizes() {
+            if (!sizeGroup) return;
+
+            const sizes = getAllSizes().filter(size => size !== ONE_SIZE_CODE);
+            sizeGroup.innerHTML = "";
+
+            sizes.forEach(size => {
+                const variant = variants.find(v => v.size === size);
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "size-btn";
+                btn.textContent = variant?.sizeName || size;
+                btn.dataset.size = size;
+
+                if (selectedSize === size) {
+                    btn.classList.add("active");
+                }
+
+                btn.addEventListener("click", function () {
+                    selectedSize = size;
+
+                    const colorsForSelectedSize = getColorsForSize(size);
+                    if (selectedColor && !colorsForSelectedSize.includes(selectedColor)) {
+                        selectedColor = null;
+                    }
+
+                    if (colorsForSelectedSize.length === 1) {
+                        selectedColor = colorsForSelectedSize[0];
+                    }
+
+                    renderSizes();
+                    renderColors();
+                    updateVariantView();
+                });
+
+                sizeGroup.appendChild(btn);
+            });
+        }
+
+        function renderColors() {
+            if (!colorGroup) return;
+
+            const realColors = getRealColors();
+            colorGroup.innerHTML = "";
+
+            let colorsToRender = realColors;
+            if (selectedSize) {
+                colorsToRender = getColorsForSize(selectedSize).filter(c => c !== ONE_COLOR_CODE);
+            }
+
+            colorsToRender.forEach(colorCode => {
+                const info = getColorInfo(colorCode);
+                const background = getColorBackground(info.hex, info.name || info.code);
+                const available = !selectedSize || hasVariant(selectedSize, colorCode);
+
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "color-btn";
+                btn.dataset.color = colorCode;
+                btn.title = info.name || info.code || "";
+                btn.setAttribute("aria-label", info.name || info.code || "Colore");
+
+                btn.style.background = background;
+
+                if (background.toLowerCase() === "#ffffff" || background.toLowerCase() === "#f8f9fa") {
+                    btn.style.borderColor = "rgba(0,0,0,.25)";
+                    btn.style.boxShadow = "inset 0 0 0 1px rgba(0,0,0,.08)";
+                }
+
+                if (!available) {
+                    btn.classList.add("disabled");
+                    btn.disabled = true;
+                }
+
+                if (selectedColor === colorCode) {
+                    btn.classList.add("active");
+                }
+
+                btn.addEventListener("click", function () {
+                    if (!available) return;
+
+                    selectedColor = colorCode;
+
+                    const sizesForSelectedColor = getSizesForColor(colorCode);
+                    if (selectedSize && !sizesForSelectedColor.includes(selectedSize)) {
+                        selectedSize = null;
+                    }
+
+                    if (!selectedSize && sizesForSelectedColor.length === 1 && sizesForSelectedColor[0] !== ONE_SIZE_CODE) {
+                        selectedSize = sizesForSelectedColor[0];
+                    }
+
+                    renderSizes();
+                    renderColors();
+                    updateVariantView();
+                });
+
+                colorGroup.appendChild(btn);
+            });
+
+            if (selectedColorLabel) {
+                if (selectedColor && selectedColor !== ONE_COLOR_CODE) {
+                    const selectedInfo = getColorInfo(selectedColor);
+                    selectedColorLabel.textContent = "Colore: " + (selectedInfo.name || selectedInfo.code || "");
+                } else {
+                    selectedColorLabel.textContent = "";
+                }
+            }
+        }
+
+        function renderBaseProductView() {
+            renderBaseGallery();
+
+            if (productPrice && basePrice) {
+                productPrice.textContent = formatPrice(basePrice);
+            }
+
+            updateComparePrice(basePrice);
+
+            if (stockText) {
+                if (variants.length === 0) {
+                    stockText.textContent = "Disponibile";
+                } else if (getRealSizes().length > 1 && !selectedSize) {
+                    stockText.textContent = getRealColors().length > 1
+                        ? "Seleziona taglia e colore"
+                        : "Seleziona una taglia";
+                } else if (getRealColors().length > 1 && !selectedColor) {
+                    stockText.textContent = "Seleziona un colore";
+                } else {
+                    stockText.textContent = "Seleziona la variante";
+                }
+            }
+
+            if (stockPill) {
+                stockPill.classList.remove("in-stock", "out-stock");
+            }
+
+            if (variantNote) {
+                if (variants.length === 0) {
+                    variantNote.textContent = productCode
+                        ? "Articolo singolo: " + productCode
+                        : "Articolo singolo senza varianti";
+                } else if (getRealSizes().length > 1 && getRealColors().length > 1) {
+                    variantNote.textContent = "Seleziona taglia e colore per aggiungere al carrello.";
+                } else if (getRealSizes().length > 1) {
+                    variantNote.textContent = "Seleziona una taglia per aggiungere al carrello.";
+                } else if (getRealColors().length > 1) {
+                    variantNote.textContent = "Seleziona un colore per aggiungere al carrello.";
+                } else {
+                    variantNote.textContent = "Variante disponibile.";
+                }
+            }
+
+            if (addToCartBtn) {
+                addToCartBtn.removeAttribute("data-variant-id");
+
+                if (variants.length === 0) {
+                    addToCartBtn.disabled = false;
+                } else if (variants.length === 1 && getRealSizes().length === 0 && getRealColors().length === 0) {
+                    addToCartBtn.dataset.variantId = variants[0].id;
+                    addToCartBtn.disabled = variants[0].stock <= 0;
+                } else {
+                    addToCartBtn.disabled = true;
+                }
+            }
+        }
+
+        function updateVariantView() {
+            const variant = findMatchingVariant();
+
+            if (!variant) {
+                renderBaseProductView();
+                return;
+            }
+
+            if (productPrice && variant.price) {
+                productPrice.textContent = formatPrice(variant.price);
+            }
+
+            updateComparePrice(variant.price);
+
+            const variantGallery = getVariantGallery(variant.id, variant.image);
+            renderGallery(variantGallery);
+
+            if (variant.stock > 0) {
+                if (stockText) stockText.textContent = "Disponibile";
+                if (stockPill) {
+                    stockPill.classList.remove("out-stock");
+                    stockPill.classList.add("in-stock");
+                }
+                if (addToCartBtn) {
+                    addToCartBtn.disabled = false;
+                    addToCartBtn.dataset.variantId = variant.id;
+                }
+            } else {
+                if (stockText) stockText.textContent = "Non disponibile";
+                if (stockPill) {
+                    stockPill.classList.remove("in-stock");
+                    stockPill.classList.add("out-stock");
+                }
+                if (addToCartBtn) {
+                    addToCartBtn.disabled = true;
+                    addToCartBtn.dataset.variantId = variant.id;
+                }
+            }
+
+            if (variantNote) {
+                const parts = [];
+                if (variant.size && variant.size !== ONE_SIZE_CODE) {
+                    parts.push("Taglia " + (variant.sizeName || variant.size));
+                }
+                if (variant.color && variant.color !== ONE_COLOR_CODE) {
+                    parts.push("Colore: " + (variant.colorName || variant.color));
+                }
+
+                variantNote.textContent = parts.length > 0
+                    ? "Selezione: " + parts.join(" - ")
+                    : "Articolo pronto per l'acquisto";
+            }
+        }
+
+        function initSelection() {
+            if (variants.length === 0) {
+                renderBaseProductView();
+                return;
+            }
+
+            const defaultVariant = variants.find(v => String(v.id) === String(defaultVariantId)) || variants[0];
+
+            if (getRealSizes().length > 1) {
+                selectedSize = defaultVariant.size !== ONE_SIZE_CODE ? defaultVariant.size : null;
+            } else if (getRealSizes().length === 1) {
+                selectedSize = getRealSizes()[0];
+            } else {
+                selectedSize = defaultVariant.size;
+            }
+
+            if (getRealColors().length > 1) {
+                selectedColor = defaultVariant.color !== ONE_COLOR_CODE ? defaultVariant.color : null;
+            } else if (getRealColors().length === 1) {
+                selectedColor = getRealColors()[0];
+            } else {
+                selectedColor = defaultVariant.color;
+            }
+
+            if (sizeGroup) {
+                renderSizes();
+            }
+            if (colorGroup) {
+                renderColors();
+            }
+
+            if (variants.length === 1 && getRealSizes().length === 0 && getRealColors().length === 0) {
+                selectedSize = variants[0].size;
+                selectedColor = variants[0].color;
+            }
+
+            updateVariantView();
+        }
+
+        initSelection();
+
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener("click", function () {
+                if (this.disabled) {
+                    return;
+                }
+
+                const variantId = this.dataset.variantId;
+                const qty = qtyInput ? parseInt(qtyInput.value || "1", 10) : 1;
+
+                const params = new URLSearchParams({
+                    qty: isNaN(qty) || qty < 1 ? 1 : qty
+                });
+
+                if (variantId) {
+                    params.append("variantId", variantId);
+                } else if (productId) {
+                    params.append("productId", productId);
+                } else {
+                    alert("Prodotto non valido");
+                    return;
+                }
+
+                fetch("/cart/add", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+                    },
+                    body: params
+                })
+                .then(async response => {
+                    if (!response.ok) {
+                        const text = await response.text();
+                        throw new Error(text || "Errore durante aggiunta al carrello");
+                    }
+                    return response.json();
+                })
+                .then(async () => {
+                    const overlay = document.getElementById("cart-toast-overlay");
+                    const isMobile = window.matchMedia("(max-width: 575.98px)").matches;
+
+                    if (overlay) {
+                        if (isMobile) {
+                            overlay.style.position = "fixed";
+                            overlay.style.inset = "0";
+                            overlay.style.zIndex = "9999";
+                            overlay.style.pointerEvents = "none";
+                        }
+
+                        overlay.classList.add("show");
+                    }
+
+                    if (isMobile) {
+                        setTimeout(function () {
+                            window.location.href = "/shop";
+                        }, 1200);
+                        return;
+                    }
+
+                    if (overlay) {
+                        setTimeout(() => overlay.classList.remove("show"), 1800);
+                    }
+
+                    await window.refreshCartOffcanvas?.();
+                })
+                .catch(error => {
+                    console.error("Errore add to cart:", error);
+                    alert("Impossibile aggiungere il prodotto al carrello.");
+                });
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

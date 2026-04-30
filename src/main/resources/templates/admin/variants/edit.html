@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Modifica Variante</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <style>
+        .thumb,
+        .video-thumb {
+            width: 110px;
+            height: 110px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background: #fff;
+        }
+
+        .gallery-card {
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px;
+            background: #fff;
+        }
+
+        .media-wrap {
+            position: relative;
+            display: inline-block;
+        }
+
+        .media-badge {
+            position: absolute;
+            left: 8px;
+            bottom: 8px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, .72);
+            color: #fff;
+            font-size: .72rem;
+            font-weight: 700;
+        }
+
+        .helper-text {
+            font-size: .875rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h2 class="mb-0">Modifica Variante</h2>
+        <a href="javascript:history.back()" class="btn btn-outline-secondary">Indietro</a>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form th:action="@{'/admin/variants/' + ${variant.id} + '/edit'}" method="post" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Codice variante</label>
+                        <input type="text" name="variantCode" class="form-control"
+                               th:value="${variant.variantCode}" required>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Prezzo</label>
+                        <input type="number" step="0.01" name="price" class="form-control"
+                               th:value="${variant.price}">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Stock</label>
+                        <input type="number" name="stockQty" class="form-control"
+                               th:value="${variant.stockQty}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Colore</label>
+                        <input type="text" class="form-control"
+                               th:value="${variant.color != null ? variant.color.nameIt : ''}" readonly>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Taglia</label>
+                        <input type="text" class="form-control"
+                               th:value="${variant.size != null ? variant.size.nameIt : ''}" readonly>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" name="enabled" value="true"
+                                   th:checked="${variant.enabled}" id="enabledCheck">
+                            <label class="form-check-label" for="enabledCheck">
+                                Variante attiva
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Media principale</label>
+                        <input type="file"
+                               name="mainImageFile"
+                               id="mainImageFile"
+                               class="form-control"
+                               accept="image/*,video/mp4,video/webm,video/ogg,video/quicktime">
+                        <div class="helper-text mt-2">
+                            Puoi sostituire il media principale con un'immagine o un video.
+                            Se carichi una foto puoi generare automaticamente un file WEBM.
+                        </div>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="checkbox" id="generateMainWebmFromImage" name="generateMainWebmFromImage" value="true">
+                            <label class="form-check-label" for="generateMainWebmFromImage">
+                                Genera automaticamente un video WEBM dalla foto caricata
+                            </label>
+                            <div class="form-text">Valido solo se il nuovo media principale è un’immagine. La foto resterà come poster del video.</div>
+                        </div>
+
+                        <div class="mt-3" th:if="${variant.mainImage != null and !#strings.isEmpty(variant.mainImage)}">
+                            <p class="mb-2 fw-semibold">Media principale attuale</p>
+
+                            <div class="media-wrap" th:if="${variant.mainMediaType == 'VIDEO'}">
+                                <video th:src="@{${variant.mainImage}}"
+                                       th:poster="${variant.mainVideoPoster}"
+                                       class="video-thumb"
+                                       controls
+                                       muted
+                                       playsinline>
+                                </video>
+                                <span class="media-badge">VIDEO</span>
+                            </div>
+
+                            <div class="media-wrap" th:if="${variant.mainMediaType == null or variant.mainMediaType == 'IMAGE'}">
+                                <img th:src="@{${variant.mainImage}}" alt="Media principale" class="thumb">
+                                <span class="media-badge">IMG</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Aggiungi media galleria</label>
+                        <input type="file" name="galleryFiles" class="form-control" accept="image/*,video/mp4,video/webm,video/ogg,video/quicktime" multiple>
+                        <div class="form-text">I file verranno salvati in uploads/variants. Puoi caricare immagini e video.</div>
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <h5>Galleria attuale</h5>
+                        <div class="row g-3" th:if="${variant.images != null and !variant.images.isEmpty()}">
+                            <div class="col-md-3" th:each="img : ${variant.images}">
+                                <div class="gallery-card h-100">
+                                    <div class="media-wrap mb-2" th:if="${img.mediaType == 'VIDEO'}">
+                                        <video th:src="@{${img.imageUrl}}"
+                                               th:poster="${img.posterUrl}"
+                                               class="video-thumb"
+                                               controls
+                                               muted
+                                               playsinline>
+                                        </video>
+                                        <span class="media-badge">VIDEO</span>
+                                    </div>
+
+                                    <div class="media-wrap mb-2" th:if="${img.mediaType == null or img.mediaType == 'IMAGE'}">
+                                        <img th:src="@{${img.imageUrl}}" class="thumb" alt="gallery image">
+                                        <span class="media-badge">IMG</span>
+                                    </div>
+
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               name="removeImageIds"
+                                               th:value="${img.id}"
+                                               th:id="'remove_' + ${img.id}">
+                                        <label class="form-check-label" th:for="'remove_' + ${img.id}">
+                                            Elimina media
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-secondary"
+                             th:if="${variant.images == null or variant.images.isEmpty()}">
+                            Nessun media in galleria per questa variante.
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            Salva variante
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
