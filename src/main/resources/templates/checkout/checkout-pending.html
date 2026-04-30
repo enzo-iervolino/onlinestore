@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+	
+<head th:replace="~{fragments/head :: head('checkout-success')}"></head>
+
+<body>
+
+    <!-- ================= NAV ================= -->
+    <div th:replace="~{fragments/nav :: nav}"></div>
+
+ 
+	
+	<div class="container py-5">
+	    <div class="row justify-content-center">
+	        <div class="col-md-8 col-lg-6">
+
+	            <div class="card shadow-sm border-0">
+	                <div class="card-body text-center p-5">
+
+	                    <h1 class="h3 mb-3">Pagamento in elaborazione</h1>
+
+	                    <p class="text-muted mb-4">
+	                        Stiamo verificando il pagamento. Può richiedere qualche istante.
+	                    </p>
+
+	                    <div class="alert alert-info">
+	                        Se il pagamento è stato completato, riceverai la conferma dell’ordine.
+	                    </div>
+
+	                    <div class="d-grid gap-2 mt-4">
+	                        <a th:href="@{/}" class="btn btn-primary">
+	                            Torna alla home
+	                        </a>
+
+	                        <a th:href="@{/shop}" class="btn btn-outline-secondary">
+	                            Continua lo shopping
+	                        </a>
+	                    </div>
+
+	                </div>
+	            </div>
+
+	        </div>
+	    </div>
+	</div>
+
+	<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+	</body>
+	</html>
