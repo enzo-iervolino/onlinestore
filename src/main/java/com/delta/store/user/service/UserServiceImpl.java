@@ -17,7 +17,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
@@ -42,6 +41,7 @@ public class UserServiceImpl implements UserService {
         if (email == null || email.isBlank()) {
             return null;
         }
+
         return userRepository
                 .findByEmail(email.trim().toLowerCase())
                 .orElse(null);
@@ -56,6 +56,7 @@ public class UserServiceImpl implements UserService {
         if (id == null) {
             return Optional.empty();
         }
+
         return userRepository.findById(id);
     }
 
@@ -67,6 +68,11 @@ public class UserServiceImpl implements UserService {
         if (user.getEmail() != null && !user.getEmail().isBlank()) {
             user.setEmail(user.getEmail().trim().toLowerCase());
         }
+
+        if (user.getPhone() != null && !user.getPhone().isBlank()) {
+            user.setPhone(normalizePhone(user.getPhone()));
+        }
+
         return userRepository.save(user);
     }
 
@@ -79,7 +85,21 @@ public class UserServiceImpl implements UserService {
         if (email == null || email.isBlank()) {
             return false;
         }
+
         return userRepository.existsByEmail(email.trim().toLowerCase());
+    }
+
+    // =========================================
+    // EXISTS BY PHONE
+    // =========================================
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existsByPhone(String phone) {
+        if (phone == null || phone.isBlank()) {
+            return false;
+        }
+
+        return userRepository.existsByPhone(normalizePhone(phone));
     }
 
     // =========================================
@@ -142,7 +162,7 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Numero non valido");
         }
 
-        String normalizedPhone = newPhone.trim();
+        String normalizedPhone = normalizePhone(newPhone);
 
         if (userRepository.existsByPhone(normalizedPhone)) {
             throw new IllegalStateException("Numero di telefono già utilizzato");
@@ -236,5 +256,9 @@ public class UserServiceImpl implements UserService {
 
     private String normalize(String value) {
         return value == null ? "" : value.trim().toLowerCase();
+    }
+
+    private String normalizePhone(String phone) {
+        return phone == null ? null : phone.trim().replaceAll("\\s+", "");
     }
 }

@@ -30,6 +30,11 @@ public interface UserService {
      */
     boolean existsByEmail(String email);
 
+    /**
+     * Verifica se esiste già un utente con lo stesso numero di telefono.
+     */
+    boolean existsByPhone(String phone);
+
     // =========================
     // PROFILO UTENTE
     // =========================

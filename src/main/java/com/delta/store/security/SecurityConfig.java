@@ -75,7 +75,15 @@ public class SecurityConfig {
 
                     // REGISTRAZIONE
                     "/register",
-
+                   
+                    "/register/check-email",
+                    "/register/check-phone",
+                   
+                    
+                    
+                    
+                    
+                    
                     // LOGIN OAUTH2 GOOGLE
                     "/oauth2/**",
                     "/login/oauth2/**",
