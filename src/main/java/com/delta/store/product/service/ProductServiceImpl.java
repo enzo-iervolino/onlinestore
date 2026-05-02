@@ -9,6 +9,7 @@ import com.delta.store.product.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -108,5 +109,62 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public List<ProductDTO> searchDto(ProductCategory category, String text) {
         return ProductMapper.toDtoList(search(category, text));
+    }
+
+    // =========================
+    // IMPORT
+    // =========================
+
+    @Override
+    public Product importProduct(ProductDTO dto) {
+        if (dto == null) {
+            throw new IllegalArgumentException("DTO prodotto non valido");
+        }
+
+        String codpro = dto.getCodpro() != null ? dto.getCodpro().trim() : null;
+        String name = dto.getName() != null ? dto.getName().trim() : null;
+
+        if (codpro == null || codpro.isBlank()) {
+            throw new IllegalArgumentException("Codice prodotto obbligatorio");
+        }
+
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Nome prodotto obbligatorio");
+        }
+
+        if (dto.getCategoryId() == null) {
+            throw new IllegalArgumentException("Categoria prodotto obbligatoria");
+        }
+
+        if (dto.getPrice() == null) {
+            throw new IllegalArgumentException("Prezzo prodotto obbligatorio");
+        }
+
+        if (dto.getPrice().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Prezzo prodotto non può essere negativo");
+        }
+
+        if (dto.getStockQty() != null && dto.getStockQty() < 0) {
+            throw new IllegalArgumentException("Stock prodotto non può essere negativo");
+        }
+
+        ProductCategory category = productCategoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Categoria non trovata con ID: " + dto.getCategoryId()
+                ));
+
+        Product product = productRepository.findByCodpro(codpro)
+                .orElseGet(Product::new);
+
+        product.setCodpro(codpro);
+        product.setName(name);
+        product.setCategory(category);
+        product.setStockQty(dto.getStockQty());
+        product.setDescription(dto.getDescription());
+        product.setMaterials(dto.getMaterials());
+        product.setShippingInfo(dto.getShippingInfo());
+        product.setPrice(dto.getPrice());
+
+        return productRepository.save(product);
     }
 }

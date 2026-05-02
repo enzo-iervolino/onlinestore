@@ -36,4 +36,10 @@ public interface ProductService {
     Optional<ProductDTO> findWithImagesByIdDto(Long id);
 
     List<ProductDTO> searchDto(ProductCategory category, String text);
+
+    // =========================
+    // IMPORT
+    // =========================
+
+    Product importProduct(ProductDTO dto);
 }

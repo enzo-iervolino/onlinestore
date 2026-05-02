@@ -193,7 +193,18 @@
                 </a>
 
                 <ul class="collapse" id="proveMenu">
-                    <li>
+                    
+					
+					
+					<li>
+					                        <a th:if="${isAdmin}" th:href="@{/admin/import}">
+					                            <i class="bi bi-table"></i>
+					                            <span>Importa file</span>
+					                        </a>
+					                    </li>
+					
+					
+					<li>
                         <a th:if="${isAdmin}" th:href="@{/admin/prove}">
                             <i class="bi bi-table"></i>
                             <span>Tabella cartitemDto</span>

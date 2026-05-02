@@ -303,7 +303,15 @@
               Buoni Sconto
             </a>
 
-            <a th:if="${isAdmin}"
+			<a th:if="${isAdmin}"
+			               th:href="@{/admin/import}"
+			               class="nav-user-menu-item">
+			              Importazione file
+			            </a>
+			
+			
+			
+			<a th:if="${isAdmin}"
                th:href="@{/admin/colors}"
                class="nav-user-menu-item">
               Tabella colori
