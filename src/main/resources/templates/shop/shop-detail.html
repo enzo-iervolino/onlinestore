@@ -1433,6 +1433,55 @@
         const addToCartBtn = document.getElementById("addToCartBtn");
         const priceOld = document.getElementById("priceOld");
         const savePill = document.getElementById("savePill");
+        const qtyMinus = document.getElementById("qtyMinus");
+        const qtyPlus = document.getElementById("qtyPlus");
+        const qtyInput = document.getElementById("qtyInput");
+
+        function getCurrentMaxQty() {
+            const variant = findMatchingVariant();
+
+            if (variant && variant.stock > 0) {
+                return variant.stock;
+            }
+
+            return 99;
+        }
+
+        function normalizeQty(value) {
+            let qty = parseInt(value || "1", 10);
+
+            if (isNaN(qty) || qty < 1) {
+                qty = 1;
+            }
+
+            const maxQty = getCurrentMaxQty();
+
+            if (maxQty > 0 && qty > maxQty) {
+                qty = maxQty;
+            }
+
+            return qty;
+        }
+
+        function setQty(value) {
+            if (!qtyInput) return;
+
+            qtyInput.value = normalizeQty(value);
+        }
+
+        if (qtyMinus && qtyInput) {
+            qtyMinus.addEventListener("click", function () {
+                const currentQty = normalizeQty(qtyInput.value);
+                setQty(currentQty - 1);
+            });
+        }
+
+        if (qtyPlus && qtyInput) {
+            qtyPlus.addEventListener("click", function () {
+                const currentQty = normalizeQty(qtyInput.value);
+                setQty(currentQty + 1);
+            });
+        }
 
         const productId = addToCartBtn ? addToCartBtn.dataset.productId : null;
         const productCode = addToCartBtn ? addToCartBtn.dataset.productCode : null;
@@ -1799,6 +1848,8 @@
             renderGallery(variantGallery);
 
             if (variant.stock > 0) {
+                setQty(qtyInput ? qtyInput.value : 1);
+
                 if (stockText) stockText.textContent = "Disponibile";
                 if (stockPill) {
                     stockPill.classList.remove("out-stock");
@@ -1809,6 +1860,8 @@
                     addToCartBtn.dataset.variantId = variant.id;
                 }
             } else {
+                setQty(1);
+
                 if (stockText) stockText.textContent = "Non disponibile";
                 if (stockPill) {
                     stockPill.classList.remove("in-stock");
