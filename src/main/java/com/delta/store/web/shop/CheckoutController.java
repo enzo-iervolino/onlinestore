@@ -122,6 +122,7 @@ public class CheckoutController {
 
     @PostMapping("/salva-spedizione")
     public String saveShipping(@ModelAttribute CheckoutShippingForm form,
+                               @RequestParam(name = "paymentMethod", required = false) String paymentMethod,
                                HttpSession session,
                                RedirectAttributes ra,
                                Authentication authentication) {
@@ -140,6 +141,8 @@ public class CheckoutController {
             form.normalize();
             session.setAttribute(CheckoutSession.SHIPPING, form);
         }
+
+        normalizeAndSavePaymentMethod(paymentMethod, session);
 
         return "forward:/checkout/paga";
     }
@@ -340,12 +343,7 @@ public class CheckoutController {
     public String selectPaymentMethod(@RequestParam String paymentMethod,
                                       HttpSession session) {
 
-        if (paymentMethod == null || paymentMethod.isBlank()) {
-            return "ERROR";
-        }
-
-        session.setAttribute(CheckoutSession.PAYMENT_METHOD, paymentMethod.trim().toUpperCase());
-        return "OK";
+        return normalizeAndSavePaymentMethod(paymentMethod, session) ? "OK" : "ERROR";
     }
 
     @GetMapping("/success")
@@ -360,6 +358,21 @@ public class CheckoutController {
     @GetMapping("/cancel")
     public String cancel() {
         return VIEW_CHECKOUT_CANCEL;
+    }
+
+
+    private boolean normalizeAndSavePaymentMethod(String paymentMethod, HttpSession session) {
+        if (paymentMethod == null || paymentMethod.isBlank()) {
+            return false;
+        }
+
+        try {
+            PaymentMethod method = PaymentMethod.fromSessionValue(paymentMethod);
+            session.setAttribute(CheckoutSession.PAYMENT_METHOD, method.name());
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
     }
 
     private OrderTempData buildOrderTempData(Cart cart,

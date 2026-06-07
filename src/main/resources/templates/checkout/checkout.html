@@ -975,6 +975,24 @@
 
 <main class="checkout-page container">
 
+    <div class="alert alert-danger rounded-4 shadow-sm mb-3"
+         th:if="${error != null}">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <span th:text="${error}">Errore checkout</span>
+    </div>
+
+    <div class="alert alert-info rounded-4 shadow-sm mb-3"
+         th:if="${info != null}">
+        <i class="bi bi-info-circle me-2"></i>
+        <span th:text="${info}">Informazione checkout</span>
+    </div>
+
+    <div class="alert alert-success rounded-4 shadow-sm mb-3"
+         th:if="${success != null}">
+        <i class="bi bi-check-circle me-2"></i>
+        <span th:text="${success}">Operazione completata</span>
+    </div>
+
     <div class="row g-4">
 
         <div class="col-lg-7">
@@ -1910,7 +1928,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const shippingTopBtn = document.getElementById('shippingTopBtn');
     const paymentTopBtn = document.getElementById('paymentTopBtn');
 
-    let pmSavedOk = false;
+    let pmSavedOk = !!document.querySelector('input[name="paymentMethod"]:checked');
 
     function closeModal(modalId) {
         const modalElement = document.getElementById(modalId);
@@ -1999,7 +2017,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function updateBtn() {
         const validShipping = updateShippingStatus();
         const selectedPm = getSelectedPm();
-        const ok = validShipping && !!selectedPm && pmSavedOk;
+        const ok = validShipping && !!selectedPm;
 
         if (btn) btn.disabled = !ok;
         if (hint) hint.style.display = ok ? 'none' : 'block';
@@ -2049,7 +2067,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const btnConfirmPaymentModal = document.getElementById('btnConfirmPaymentModal');
     if (btnConfirmPaymentModal) {
-        btnConfirmPaymentModal.addEventListener('click', function() {
+        btnConfirmPaymentModal.addEventListener('click', async function() {
+            const pm = getSelectedPm();
+            if (pmHidden) pmHidden.value = pm ? pm : '';
+            if (pm) {
+                pmSavedOk = await savePaymentMethod(pm);
+            }
             refreshPmUI();
             updateBtn();
             closeModal('paymentModal');
@@ -2065,8 +2088,14 @@ document.addEventListener("DOMContentLoaded", function() {
             pmHidden.value = pm ? pm : '';
         }
 
-        pmSavedOk = pm ? await savePaymentMethod(pm) : false;
+        pmSavedOk = !!pm;
         updateBtn();
+
+        if (pm) {
+            savePaymentMethod(pm).then(ok => {
+                pmSavedOk = ok;
+            });
+        }
     })();
 
 });
