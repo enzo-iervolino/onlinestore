@@ -94,12 +94,15 @@ public class SecurityConfig {
 
                     "/error",
                     "/favicon.ico",
+                    "/manifest.json",
+                    "/service-worker.js",
 
                     // STATIC
                     "/css/**",
                     "/js/**",
                     "/assets/**",
                     "/images/**",
+                    "/icons/**",
                     "/uploads/**"
                 ).permitAll()
                 .anyRequest().authenticated()
