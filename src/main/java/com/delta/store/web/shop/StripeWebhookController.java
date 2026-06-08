@@ -61,7 +61,7 @@ public class StripeWebhookController {
             @RequestHeader(name = "Stripe-Signature", required = false) String sigHeader
     ) {
 
-        if (cleanSecret(webhookSecret).isBlank()) {
+        if (webhookSecret == null || webhookSecret.isBlank()) {
             log.error("Webhook Stripe: manca stripe.webhook.secret / stripe.webhook-secret.");
             return ResponseEntity.internalServerError().body("webhook secret missing");
         }
@@ -70,16 +70,16 @@ public class StripeWebhookController {
         }
 
         try {
-            Event event = Webhook.constructEvent(payload, sigHeader, cleanSecret(webhookSecret));
+            Event event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
 
             if (!"checkout.session.completed".equals(event.getType())) {
                 return ResponseEntity.ok("ok");
             }
 
-            if (cleanSecret(stripeSecretKey).isBlank()) {
+            if (stripeSecretKey == null || stripeSecretKey.isBlank()) {
                 return ResponseEntity.internalServerError().body("stripe key missing");
             }
-            Stripe.apiKey = cleanSecret(stripeSecretKey);
+            Stripe.apiKey = stripeSecretKey;
 
             String sessionId = extractSessionFromEvent(event).map(Session::getId).orElse(null);
             if (sessionId == null || sessionId.isBlank()) {
@@ -179,21 +179,5 @@ public class StripeWebhookController {
         if (cents == null) return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
         return BigDecimal.valueOf(cents)
                 .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-    }
-
-    private String cleanSecret(String value) {
-        if (value == null) {
-            return "";
-        }
-
-        String cleaned = value.trim();
-
-        if (cleaned.length() >= 2
-                && ((cleaned.startsWith("\"") && cleaned.endsWith("\""))
-                || (cleaned.startsWith("'") && cleaned.endsWith("'")))) {
-            cleaned = cleaned.substring(1, cleaned.length() - 1).trim();
-        }
-
-        return cleaned.replace("\r", "").replace("\n", "").trim();
     }
 }

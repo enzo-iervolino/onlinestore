@@ -56,7 +56,7 @@ public class OrderNotificationService {
 
     private void startEmailThread(Order order) {
         Thread emailThread = new Thread(() -> sendEmailSafely(order), "order-email-" + order.getId());
-        // Non daemon: in produzione evita che il processo chiuda/rilasci il thread prima del tentativo SMTP.
+        emailThread.setDaemon(true);
         emailThread.start();
     }
 

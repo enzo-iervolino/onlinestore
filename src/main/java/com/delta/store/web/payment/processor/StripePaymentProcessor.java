@@ -51,7 +51,7 @@ public class StripePaymentProcessor implements PaymentProcessor {
     @Override
     public String start(CheckoutPaymentContext ctx, RedirectAttributes ra) {
 
-        if (cleanSecret(stripeSecretKey).isBlank()) {
+        if (stripeSecretKey == null || stripeSecretKey.isBlank()) {
             ra.addFlashAttribute("error", "Stripe secret key mancante (stripe.secret-key / STRIPE_SECRET_KEY).");
             return "redirect:/checkout";
         }
@@ -84,7 +84,7 @@ public class StripePaymentProcessor implements PaymentProcessor {
         httpSession.setAttribute(CheckoutSession.TEMP_DATA, data);
 
         try {
-            Stripe.apiKey = cleanSecret(stripeSecretKey);
+            Stripe.apiKey = stripeSecretKey.trim();
 
             long amountCents = eurToCents(total);
 
@@ -167,7 +167,7 @@ public class StripePaymentProcessor implements PaymentProcessor {
     }
 
     private String normalizeAbsoluteUrl(String configuredValue, String fallbackPath, String propertyName) {
-        String value = cleanValue(configuredValue);
+        String value = configuredValue == null ? "" : configuredValue.trim();
 
         if (value.isBlank()) {
             value = fallbackPath;
@@ -217,27 +217,7 @@ public class StripePaymentProcessor implements PaymentProcessor {
         return value != null && (value.startsWith("http://") || value.startsWith("https://"));
     }
 
-    private String cleanSecret(String value) {
-        return cleanValue(value).replace("\r", "").replace("\n", "").trim();
-    }
-
-    private String cleanValue(String value) {
-        if (value == null) {
-            return "";
-        }
-
-        String cleaned = value.trim();
-
-        if (cleaned.length() >= 2
-                && ((cleaned.startsWith("\"") && cleaned.endsWith("\""))
-                || (cleaned.startsWith("'") && cleaned.endsWith("'")))) {
-            cleaned = cleaned.substring(1, cleaned.length() - 1).trim();
-        }
-
-        return cleaned;
-    }
-
     private String safeTrim(String value) {
-        return cleanValue(value);
+        return value == null ? "" : value.trim();
     }
 }

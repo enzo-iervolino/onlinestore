@@ -347,26 +347,9 @@ public class CheckoutController {
     }
 
     @GetMapping("/success")
-    public String success(@RequestParam(name = "orderId", required = false) Long orderId,
-                          Model model,
-                          RedirectAttributes ra) {
+    public String success(@RequestParam Long orderId, Model model) {
 
-        if (orderId == null) {
-            ra.addFlashAttribute("error", "Ordine non confermato: identificativo ordine mancante.");
-            return "redirect:/checkout";
-        }
-
-        Order order = orderRepository.findByIdWithItems(orderId).orElse(null);
-        if (order == null) {
-            ra.addFlashAttribute("error", "Ordine non trovato. Se hai appena pagato, controlla la tua email o contatta l'assistenza.");
-            return "redirect:/checkout";
-        }
-
-        if (order.getStatus() == null || !order.getStatus().toUpperCase().contains("PAGATO")) {
-            ra.addFlashAttribute("error", "Ordine non ancora pagato/confermato. Riprova dal checkout.");
-            return "redirect:/checkout";
-        }
-
+        Order order = orderRepository.findByIdWithItems(orderId).orElseThrow();
         model.addAttribute("order", order);
 
         return VIEW_CHECKOUT_SUCCESS;

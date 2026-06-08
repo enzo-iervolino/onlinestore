@@ -1,5 +1,6 @@
 package com.delta.store.order.service;
 
+import com.delta.store.email.BrevoApiEmailClient;
 import com.delta.store.order.model.Order;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -15,6 +16,7 @@ import java.io.UnsupportedEncodingException;
 public class OrderEmailServiceImpl implements OrderEmailService {
 
     private final JavaMailSender mailSender;
+    private final BrevoApiEmailClient brevoApiEmailClient;
 
     @Value("${spring.mail.username:}")
     private String mailUsername;
@@ -25,8 +27,10 @@ public class OrderEmailServiceImpl implements OrderEmailService {
     @Value("${app.mail.from-name:${MAIL_FROM_NAME:Online Store}}")
     private String configuredFromName;
 
-    public OrderEmailServiceImpl(JavaMailSender mailSender) {
+    public OrderEmailServiceImpl(JavaMailSender mailSender,
+                                 BrevoApiEmailClient brevoApiEmailClient) {
         this.mailSender = mailSender;
+        this.brevoApiEmailClient = brevoApiEmailClient;
     }
 
     @Override
@@ -38,16 +42,24 @@ public class OrderEmailServiceImpl implements OrderEmailService {
             throw new MessagingException("Ordine mancante");
         }
 
+        String subject = "Conferma ordine #" + order.getId() + " – Online Store";
+        String html = buildHtml(order);
+        String filename = "scontrino-ordine-" + order.getId() + ".pdf";
+
+        if (brevoApiEmailClient.isEnabled()) {
+            brevoApiEmailClient.sendHtmlEmail(to.trim(), subject, html, receiptPdf, filename);
+            return;
+        }
+
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
         applyFrom(helper);
         helper.setTo(to.trim());
-        helper.setSubject("Conferma ordine #" + order.getId() + " – Online Store");
-        helper.setText(buildHtml(order), true);
+        helper.setSubject(subject);
+        helper.setText(html, true);
 
         if (receiptPdf != null && receiptPdf.length > 0) {
-            String filename = "scontrino-ordine-" + order.getId() + ".pdf";
             helper.addAttachment(filename, new ByteArrayResource(receiptPdf));
         }
 
@@ -60,7 +72,7 @@ public class OrderEmailServiceImpl implements OrderEmailService {
             return;
         }
 
-        String fromName = cleanValue(configuredFromName);
+        String fromName = configuredFromName == null ? "" : configuredFromName.trim();
         if (fromName.isBlank()) {
             helper.setFrom(from);
             return;
@@ -74,33 +86,13 @@ public class OrderEmailServiceImpl implements OrderEmailService {
     }
 
     private String resolveFromAddress() {
-        String from = cleanValue(configuredFrom);
-        if (!from.isBlank()) {
-            return from;
+        if (configuredFrom != null && !configuredFrom.isBlank()) {
+            return configuredFrom.trim();
         }
-
-        String username = cleanValue(mailUsername);
-        if (!username.isBlank()) {
-            return username;
+        if (mailUsername != null && !mailUsername.isBlank()) {
+            return mailUsername.trim();
         }
-
         return null;
-    }
-
-    private String cleanValue(String value) {
-        if (value == null) {
-            return "";
-        }
-
-        String cleaned = value.trim();
-
-        if (cleaned.length() >= 2
-                && ((cleaned.startsWith("\"") && cleaned.endsWith("\""))
-                || (cleaned.startsWith("'") && cleaned.endsWith("'")))) {
-            cleaned = cleaned.substring(1, cleaned.length() - 1).trim();
-        }
-
-        return cleaned.replace("\r", "").replace("\n", "").trim();
     }
 
     private String buildHtml(Order order) {

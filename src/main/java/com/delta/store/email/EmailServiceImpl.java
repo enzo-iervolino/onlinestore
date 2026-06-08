@@ -14,6 +14,7 @@ import java.io.UnsupportedEncodingException;
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
+    private final BrevoApiEmailClient brevoApiEmailClient;
 
     @Value("${spring.mail.username:}")
     private String mailUsername;
@@ -24,8 +25,10 @@ public class EmailServiceImpl implements EmailService {
     @Value("${app.mail.from-name:${MAIL_FROM_NAME:Online Store}}")
     private String configuredFromName;
 
-    public EmailServiceImpl(JavaMailSender mailSender) {
+    public EmailServiceImpl(JavaMailSender mailSender,
+                            BrevoApiEmailClient brevoApiEmailClient) {
         this.mailSender = mailSender;
+        this.brevoApiEmailClient = brevoApiEmailClient;
     }
 
     @Override
@@ -34,13 +37,21 @@ public class EmailServiceImpl implements EmailService {
             throw new MessagingException("Email destinatario mancante");
         }
 
+        String subject = "Recupero password – Online Store";
+        String html = buildResetHtml(resetLink);
+
+        if (brevoApiEmailClient.isEnabled()) {
+            brevoApiEmailClient.sendHtmlEmail(to.trim(), subject, html);
+            return;
+        }
+
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
         applyFrom(helper);
         helper.setTo(to.trim());
-        helper.setSubject("Recupero password – Online Store");
-        helper.setText(buildResetHtml(resetLink), true);
+        helper.setSubject(subject);
+        helper.setText(html, true);
 
         mailSender.send(message);
     }
@@ -55,19 +66,25 @@ public class EmailServiceImpl implements EmailService {
             throw new MessagingException("Email destinatario mancante");
         }
 
+        String subject = "Conferma Ordine #" + safe(orderNumber);
+        String html = buildOrderHtml(orderNumber, total, paymentMethod);
+        String filename = "scontrino-" + safe(orderNumber) + ".pdf";
+
+        if (brevoApiEmailClient.isEnabled()) {
+            brevoApiEmailClient.sendHtmlEmail(to.trim(), subject, html, pdfAttachment, filename);
+            return;
+        }
+
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
         applyFrom(helper);
         helper.setTo(to.trim());
-        helper.setSubject("Conferma Ordine #" + safe(orderNumber));
-        helper.setText(buildOrderHtml(orderNumber, total, paymentMethod), true);
+        helper.setSubject(subject);
+        helper.setText(html, true);
 
         if (pdfAttachment != null && pdfAttachment.length > 0) {
-            helper.addAttachment(
-                    "scontrino-" + safe(orderNumber) + ".pdf",
-                    new ByteArrayResource(pdfAttachment)
-            );
+            helper.addAttachment(filename, new ByteArrayResource(pdfAttachment));
         }
 
         mailSender.send(message);
@@ -79,7 +96,7 @@ public class EmailServiceImpl implements EmailService {
             return;
         }
 
-        String fromName = cleanValue(configuredFromName);
+        String fromName = configuredFromName == null ? "" : configuredFromName.trim();
         if (fromName.isBlank()) {
             helper.setFrom(from);
             return;
@@ -93,33 +110,13 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private String resolveFromAddress() {
-        String from = cleanValue(configuredFrom);
-        if (!from.isBlank()) {
-            return from;
+        if (configuredFrom != null && !configuredFrom.isBlank()) {
+            return configuredFrom.trim();
         }
-
-        String username = cleanValue(mailUsername);
-        if (!username.isBlank()) {
-            return username;
+        if (mailUsername != null && !mailUsername.isBlank()) {
+            return mailUsername.trim();
         }
-
         return null;
-    }
-
-    private String cleanValue(String value) {
-        if (value == null) {
-            return "";
-        }
-
-        String cleaned = value.trim();
-
-        if (cleaned.length() >= 2
-                && ((cleaned.startsWith("\"") && cleaned.endsWith("\""))
-                || (cleaned.startsWith("'") && cleaned.endsWith("'")))) {
-            cleaned = cleaned.substring(1, cleaned.length() - 1).trim();
-        }
-
-        return cleaned.replace("\r", "").replace("\n", "").trim();
     }
 
     private String buildResetHtml(String resetLink) {

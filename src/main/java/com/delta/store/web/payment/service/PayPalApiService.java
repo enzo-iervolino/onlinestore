@@ -54,9 +54,6 @@ public class PayPalApiService {
     @Value("${paypal.currency:EUR}")
     private String currency;
 
-    @Value("${paypal.mode:${PAYPAL_MODE:sandbox}}")
-    private String mode;
-
     private volatile String cachedToken;
     private volatile Instant cachedTokenExpiresAt;
 
@@ -68,8 +65,9 @@ public class PayPalApiService {
     }
 
     public boolean isConfigured() {
-        return !cleanSecret(clientId).isBlank()
-                && !cleanSecret(clientSecret).isBlank();
+        return clientId != null && !clientId.isBlank()
+                && clientSecret != null && !clientSecret.isBlank()
+                && apiBaseUrl != null && !apiBaseUrl.isBlank();
     }
 
     public record CreateOrderResult(String orderId, String approveUrl) {
@@ -242,7 +240,7 @@ public class PayPalApiService {
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
         String basic = Base64.getEncoder().encodeToString(
-                (cleanSecret(clientId) + ":" + cleanSecret(clientSecret)).getBytes(StandardCharsets.UTF_8)
+                (clientId.trim() + ":" + clientSecret.trim()).getBytes(StandardCharsets.UTF_8)
         );
 
         headers.set("Authorization", "Basic " + basic);
@@ -365,11 +363,11 @@ public class PayPalApiService {
     private String normalizedApiBaseUrl() {
         String value = safeTrim(apiBaseUrl);
 
-        if (value.isBlank() || value.contains("${PAYPAL_API_URL}")) {
-            value = "live".equalsIgnoreCase(safeTrim(mode))
-                    ? "https://api-m.paypal.com"
-                    : "https://api-m.sandbox.paypal.com";
+        if (value.isBlank()) {
+            throw new IllegalStateException("paypal.api.url mancante. Imposta PAYPAL_API_URL=https://api-m.sandbox.paypal.com oppure https://api-m.paypal.com");
         }
+
+        value = value.replace("${PAYPAL_API_URL}", "").trim();
 
         if (value.startsWith("//")) {
             value = "https:" + value;
@@ -551,23 +549,7 @@ public class PayPalApiService {
         }
     }
 
-    private String cleanSecret(String value) {
-        return safeTrim(value).replace("\r", "").replace("\n", "").trim();
-    }
-
     private String safeTrim(String value) {
-        if (value == null) {
-            return "";
-        }
-
-        String cleaned = value.trim();
-
-        if (cleaned.length() >= 2
-                && ((cleaned.startsWith("\"") && cleaned.endsWith("\""))
-                || (cleaned.startsWith("'") && cleaned.endsWith("'")))) {
-            cleaned = cleaned.substring(1, cleaned.length() - 1).trim();
-        }
-
-        return cleaned;
+        return value == null ? "" : value.trim();
     }
 }
