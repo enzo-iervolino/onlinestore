@@ -13,11 +13,22 @@ STRIPE_SECRET_KEY=sk_live_o_sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
+> Nota: `APP_BASE_URL` deve essere assoluta e deve iniziare con `https://` quando l'app è online.
+
 ## Stripe
+
+Puoi anche non impostare queste due variabili: se mancano, l'app le costruisce da `APP_BASE_URL`.
 
 ```env
 APP_PAYMENT_SUCCESS_URL=${APP_BASE_URL}/checkout/stripe/success?session_id={CHECKOUT_SESSION_ID}
 APP_PAYMENT_CANCEL_URL=${APP_BASE_URL}/checkout/stripe/cancel
+```
+
+Sono accettati anche URL completi, ad esempio:
+
+```env
+APP_PAYMENT_SUCCESS_URL=https://tuo-dominio.up.railway.app/checkout/stripe/success?session_id={CHECKOUT_SESSION_ID}
+APP_PAYMENT_CANCEL_URL=https://tuo-dominio.up.railway.app/checkout/stripe/cancel
 ```
 
 Nel pannello Stripe, il webhook deve puntare a:
@@ -36,7 +47,14 @@ PAYPAL_CLIENT_ID=...
 PAYPAL_CLIENT_SECRET=...
 PAYPAL_CURRENCY=EUR
 PAYPAL_RETURN_URL=${APP_BASE_URL}/paypal/success
-PAYPAL_CANCEL_URL=${APP_BASE_URL}/paypal/cancel
+PAYPAL_CANCEL_URL=${APP_BASE_URL}/checkout?error=paypal_cancel
+```
+
+Sono accettati anche URL completi:
+
+```env
+PAYPAL_RETURN_URL=https://tuo-dominio.up.railway.app/paypal/success
+PAYPAL_CANCEL_URL=https://tuo-dominio.up.railway.app/checkout?error=paypal_cancel
 ```
 
 Live:
@@ -47,7 +65,7 @@ PAYPAL_API_URL=https://api-m.paypal.com
 
 ## Railway / porta
 
-Railway imposta automaticamente `PORT`. Il progetto ora legge:
+Railway imposta automaticamente `PORT`. Il progetto legge:
 
 ```properties
 server.port=${PORT:${SERVER_PORT:8081}}
@@ -55,6 +73,16 @@ server.port=${PORT:${SERVER_PORT:8081}}
 
 Non impostare manualmente una porta fissa su Railway se non necessario.
 
+## Service worker
+
+Il service worker è stato disattivato perché non deve intercettare pagine dinamiche come checkout, carrello, login, Stripe e PayPal.
+
+La nuova versione di `pwa.js` rimuove eventuali vecchi service worker e cache già installati nei browser. Questo evita l'errore console:
+
+```text
+Failed to convert value to 'Response'
+```
+
 ## Nota sul problema checkout
 
-La pagina checkout ora non dipende più solo dalla chiamata AJAX `/checkout/seleziona-metodo-pagamento`: il metodo di pagamento viene inviato anche con il submit finale `/checkout/salva-spedizione`. Inoltre gli errori generali vengono mostrati in pagina, quindi eventuali variabili mancanti non risultano più come pagina apparentemente bloccata.
+La pagina checkout non dipende solo dalla chiamata AJAX `/checkout/seleziona-metodo-pagamento`: il metodo di pagamento viene inviato anche con il submit finale `/checkout/salva-spedizione`. Inoltre gli errori generali vengono mostrati in pagina, quindi eventuali variabili mancanti non risultano più come pagina apparentemente bloccata.

@@ -42,6 +42,9 @@ public class PayPalApiService {
     @Value("${paypal.client.secret:}")
     private String clientSecret;
 
+    @Value("${app.base-url:http://localhost:8081}")
+    private String appBaseUrl;
+
     @Value("${paypal.return.url:http://localhost:8081/paypal/success}")
     private String returnUrl;
 
@@ -84,9 +87,11 @@ public class PayPalApiService {
             throw new IllegalArgumentException("Importo PayPal non valido: " + normalizedAmount);
         }
 
-        validateRedirectUrls();
+        String normalizedApiBaseUrl = normalizedApiBaseUrl();
+        String normalizedReturnUrl = normalizeRedirectUrl(returnUrl, "/paypal/success", "paypal.return.url");
+        String normalizedCancelUrl = normalizeRedirectUrl(cancelUrl, "/checkout?error=paypal_cancel", "paypal.cancel.url");
 
-        String token = getAccessToken();
+        String token = getAccessToken(normalizedApiBaseUrl);
 
         Map<String, Object> amountObject = new LinkedHashMap<>();
         amountObject.put("currency_code", normalizeCurrency(currency));
@@ -96,8 +101,8 @@ public class PayPalApiService {
         purchaseUnit.put("amount", amountObject);
 
         Map<String, Object> applicationContext = new LinkedHashMap<>();
-        applicationContext.put("return_url", returnUrl);
-        applicationContext.put("cancel_url", cancelUrl);
+        applicationContext.put("return_url", normalizedReturnUrl);
+        applicationContext.put("cancel_url", normalizedCancelUrl);
         applicationContext.put("user_action", "PAY_NOW");
         applicationContext.put("shipping_preference", "NO_SHIPPING");
 
@@ -111,14 +116,14 @@ public class PayPalApiService {
         headers.setBearerAuth(token);
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
-        String url = join(apiBaseUrl, "/v2/checkout/orders");
+        String url = join(normalizedApiBaseUrl, "/v2/checkout/orders");
 
         log.debug("Creazione ordine PayPal - apiBaseUrl={}, amount={}, currency={}, returnUrl={}, cancelUrl={}",
-                apiBaseUrl,
+                normalizedApiBaseUrl,
                 normalizedAmount,
                 normalizeCurrency(currency),
-                returnUrl,
-                cancelUrl);
+                normalizedReturnUrl,
+                normalizedCancelUrl);
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, request, Map.class);
@@ -137,6 +142,10 @@ public class PayPalApiService {
 
             if (approveUrl == null || approveUrl.isBlank()) {
                 throw new IllegalStateException("PayPal create order: approveUrl mancante nella risposta");
+            }
+
+            if (!isAbsoluteHttpUrl(approveUrl)) {
+                throw new IllegalStateException("PayPal create order: approveUrl non assoluta ricevuta da PayPal: " + approveUrl);
             }
 
             log.debug("Ordine PayPal creato correttamente - orderId={}", orderId);
@@ -158,14 +167,15 @@ public class PayPalApiService {
             throw new IllegalArgumentException("orderId PayPal mancante");
         }
 
-        String token = getAccessToken();
+        String normalizedApiBaseUrl = normalizedApiBaseUrl();
+        String token = getAccessToken(normalizedApiBaseUrl);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(token);
 
         HttpEntity<String> request = new HttpEntity<>("{}", headers);
-        String url = join(apiBaseUrl, "/v2/checkout/orders/" + orderId + "/capture");
+        String url = join(normalizedApiBaseUrl, "/v2/checkout/orders/" + orderId + "/capture");
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, request, Map.class);
@@ -194,14 +204,15 @@ public class PayPalApiService {
             throw new IllegalArgumentException("orderId PayPal mancante");
         }
 
-        String token = getAccessToken();
+        String normalizedApiBaseUrl = normalizedApiBaseUrl();
+        String token = getAccessToken(normalizedApiBaseUrl);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
         HttpEntity<Void> request = new HttpEntity<>(headers);
-        String url = join(apiBaseUrl, "/v2/checkout/orders/" + orderId);
+        String url = join(normalizedApiBaseUrl, "/v2/checkout/orders/" + orderId);
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, request, Map.class);
@@ -212,20 +223,20 @@ public class PayPalApiService {
         }
     }
 
-    private String getAccessToken() {
+    private String getAccessToken(String normalizedApiBaseUrl) {
         if (cachedToken != null && cachedTokenExpiresAt != null
                 && Instant.now().isBefore(cachedTokenExpiresAt.minusSeconds(60))) {
             return cachedToken;
         }
 
-        String url = join(apiBaseUrl, "/v1/oauth2/token");
+        String url = join(normalizedApiBaseUrl, "/v1/oauth2/token");
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
         String basic = Base64.getEncoder().encodeToString(
-                (clientId + ":" + clientSecret).getBytes(StandardCharsets.UTF_8)
+                (clientId.trim() + ":" + clientSecret.trim()).getBytes(StandardCharsets.UTF_8)
         );
 
         headers.set("Authorization", "Basic " + basic);
@@ -337,41 +348,103 @@ public class PayPalApiService {
             }
 
             if ("approve".equalsIgnoreCase(rel) || "payer-action".equalsIgnoreCase(rel)) {
-                return href;
+                return href.trim();
             }
         }
 
         return null;
     }
 
-    private void validateRedirectUrls() {
-        if (returnUrl == null || returnUrl.isBlank()) {
-            throw new IllegalStateException("paypal.return.url mancante");
+    private String normalizedApiBaseUrl() {
+        String value = safeTrim(apiBaseUrl);
+
+        if (value.isBlank()) {
+            throw new IllegalStateException("paypal.api.url mancante. Imposta PAYPAL_API_URL=https://api-m.sandbox.paypal.com oppure https://api-m.paypal.com");
         }
 
-        if (cancelUrl == null || cancelUrl.isBlank()) {
-            throw new IllegalStateException("paypal.cancel.url mancante");
+        value = value.replace("${PAYPAL_API_URL}", "").trim();
+
+        if (value.startsWith("//")) {
+            value = "https:" + value;
         }
 
-        if (!startsWithHttp(returnUrl)) {
-            throw new IllegalStateException("paypal.return.url non valido: deve iniziare con http:// oppure https://");
+        if (!isAbsoluteHttpUrl(value) && value.contains("paypal.com")) {
+            value = "https://" + value;
         }
 
-        if (!startsWithHttp(cancelUrl)) {
-            throw new IllegalStateException("paypal.cancel.url non valido: deve iniziare con http:// oppure https://");
+        if (!isAbsoluteHttpUrl(value)) {
+            throw new IllegalStateException("paypal.api.url non valido: deve iniziare con http:// oppure https://. Valore attuale: " + value);
         }
 
-        if (isLocalhost(returnUrl) || isLocalhost(cancelUrl)) {
+        if (value.endsWith("/")) {
+            value = value.substring(0, value.length() - 1);
+        }
+
+        return value;
+    }
+
+    private String normalizeRedirectUrl(String configuredValue, String fallbackPath, String propertyName) {
+        String value = configuredValue == null ? "" : configuredValue.trim();
+
+        if (value.isBlank()) {
+            value = fallbackPath;
+        }
+
+        value = replaceBaseUrlPlaceholder(value);
+
+        if (value.startsWith("//")) {
+            value = "https:" + value;
+        }
+
+        if (isAbsoluteHttpUrl(value)) {
+            warnIfLocalhost(value);
+            return value;
+        }
+
+        if (value.startsWith("/")) {
+            String base = normalizedAppBaseUrl(propertyName);
+            String absolute = base + value;
+            warnIfLocalhost(absolute);
+            return absolute;
+        }
+
+        throw new IllegalStateException(propertyName + " non valido: deve essere una URL assoluta https://... oppure un path che inizia con /. Valore attuale: " + value);
+    }
+
+    private String replaceBaseUrlPlaceholder(String value) {
+        String base = safeTrim(appBaseUrl);
+        return value
+                .replace("${APP_BASE_URL}", base)
+                .replace("${app.base-url}", base)
+                .replace("${app.base.url}", base);
+    }
+
+    private String normalizedAppBaseUrl(String propertyName) {
+        String base = replaceBaseUrlPlaceholder(safeTrim(appBaseUrl));
+
+        if (base.endsWith("/")) {
+            base = base.substring(0, base.length() - 1);
+        }
+
+        if (!isAbsoluteHttpUrl(base)) {
+            throw new IllegalStateException(propertyName + " è relativo ma app.base-url / APP_BASE_URL non è assoluto. Imposta APP_BASE_URL=https://dominio-pubblico");
+        }
+
+        return base;
+    }
+
+    private void warnIfLocalhost(String value) {
+        if (isLocalhost(value)) {
             log.warn("URL PayPal ancora su localhost. Va bene solo in locale. Online imposta APP_BASE_URL o PAYPAL_RETURN_URL/PAYPAL_CANCEL_URL.");
         }
     }
 
-    private boolean startsWithHttp(String value) {
-        return value.startsWith("http://") || value.startsWith("https://");
+    private boolean isAbsoluteHttpUrl(String value) {
+        return value != null && (value.startsWith("http://") || value.startsWith("https://"));
     }
 
     private boolean isLocalhost(String value) {
-        return value.contains("localhost") || value.contains("127.0.0.1");
+        return value != null && (value.contains("localhost") || value.contains("127.0.0.1"));
     }
 
     private String shortBody(HttpClientErrorException e) {
@@ -443,5 +516,9 @@ public class PayPalApiService {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private String safeTrim(String value) {
+        return value == null ? "" : value.trim();
     }
 }

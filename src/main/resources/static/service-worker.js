@@ -1,29 +1,12 @@
-const CACHE_NAME = "online-store-pwa-v20260607-1";
-const APP_SHELL = [
-    "/",
-    "/css/bootstrap.min.css",
-    "/css/navbar.css",
-    "/css/style.css",
-    "/css/home.css",
-    "/css/shop.css",
-    "/js/bootstrap.bundle.min.js",
-    "/js/cart.js",
-    "/js/pwa.js?v=20260607-1",
-    "/icons/icon-192.png",
-    "/icons/icon-512.png",
-    "/manifest.json"
-];
-
-self.addEventListener("install", function (event) {
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(function (cache) {
-                return cache.addAll(APP_SHELL);
-            })
-            .then(function () {
-                return self.skipWaiting();
-            })
-    );
+/*
+ * Service worker di dismissione.
+ *
+ * Non registra cache e non intercetta le pagine dinamiche del checkout.
+ * Serve solo a sostituire la vecchia versione già pubblicata, eliminare le cache
+ * PWA e deregistrarsi dai browser che l'avevano installato.
+ */
+self.addEventListener("install", function () {
+    self.skipWaiting();
 });
 
 self.addEventListener("activate", function (event) {
@@ -31,44 +14,35 @@ self.addEventListener("activate", function (event) {
         caches.keys()
             .then(function (cacheNames) {
                 return Promise.all(
-                    cacheNames
-                        .filter(function (cacheName) {
-                            return cacheName !== CACHE_NAME;
-                        })
-                        .map(function (cacheName) {
-                            return caches.delete(cacheName);
-                        })
+                    cacheNames.map(function (cacheName) {
+                        return caches.delete(cacheName);
+                    })
                 );
             })
             .then(function () {
-                return self.clients.claim();
+                return self.registration.unregister();
+            })
+            .then(function () {
+                return self.clients.matchAll({ type: "window" });
+            })
+            .then(function (clients) {
+                clients.forEach(function (client) {
+                    client.navigate(client.url);
+                });
             })
     );
 });
 
 self.addEventListener("fetch", function (event) {
-    if (event.request.method !== "GET") {
-        return;
-    }
-
     event.respondWith(
-        fetch(event.request)
-            .then(function (response) {
-                return response;
-            })
-            .catch(function () {
-                return caches.match(event.request)
-                    .then(function (cachedResponse) {
-                        if (cachedResponse) {
-                            return cachedResponse;
-                        }
-
-                        if (event.request.mode === "navigate") {
-                            return caches.match("/");
-                        }
-
-                        return undefined;
-                    });
-            })
+        fetch(event.request).catch(function () {
+            return new Response("Connessione non disponibile", {
+                status: 503,
+                statusText: "Service Unavailable",
+                headers: {
+                    "Content-Type": "text/plain; charset=UTF-8"
+                }
+            });
+        })
     );
 });

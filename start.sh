@@ -16,8 +16,17 @@ APP_PORT="${PORT:-${SERVER_PORT:-8081}}"
 export SERVER_PORT="${APP_PORT}"
 
 if [ -z "${APP_BASE_URL:-}" ]; then
-  export APP_BASE_URL="http://localhost:${APP_PORT}"
+  if [ -n "${RAILWAY_PUBLIC_DOMAIN:-}" ]; then
+    export APP_BASE_URL="https://${RAILWAY_PUBLIC_DOMAIN}"
+  elif [ -n "${RAILWAY_STATIC_URL:-}" ]; then
+    export APP_BASE_URL="${RAILWAY_STATIC_URL}"
+  else
+    export APP_BASE_URL="http://localhost:${APP_PORT}"
+  fi
 fi
+
+APP_BASE_URL="${APP_BASE_URL%/}"
+export APP_BASE_URL
 
 if [ -z "${APP_PAYMENT_SUCCESS_URL:-}" ]; then
   export APP_PAYMENT_SUCCESS_URL="${APP_BASE_URL}/checkout/stripe/success?session_id={CHECKOUT_SESSION_ID}"
@@ -32,7 +41,7 @@ if [ -z "${PAYPAL_RETURN_URL:-}" ]; then
 fi
 
 if [ -z "${PAYPAL_CANCEL_URL:-}" ]; then
-  export PAYPAL_CANCEL_URL="${APP_BASE_URL}/paypal/cancel"
+  export PAYPAL_CANCEL_URL="${APP_BASE_URL}/checkout?error=paypal_cancel"
 fi
 
 export PAYPAL_API_URL="${PAYPAL_API_URL:-https://api-m.sandbox.paypal.com}"

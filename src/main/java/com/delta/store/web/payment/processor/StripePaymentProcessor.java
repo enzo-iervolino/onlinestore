@@ -26,6 +26,9 @@ public class StripePaymentProcessor implements PaymentProcessor {
     @Value("${stripe.secret-key:${stripe.secret.key:}}")
     private String stripeSecretKey;
 
+    @Value("${app.base-url:http://localhost:8081}")
+    private String appBaseUrl;
+
     @Value("${app.payment.success-url:http://localhost:8081/checkout/stripe/success?session_id={CHECKOUT_SESSION_ID}}")
     private String successUrl;
 
@@ -45,7 +48,7 @@ public class StripePaymentProcessor implements PaymentProcessor {
     public String start(CheckoutPaymentContext ctx, RedirectAttributes ra) {
 
         if (stripeSecretKey == null || stripeSecretKey.isBlank()) {
-            ra.addFlashAttribute("error", "Stripe secret key mancante (stripe.secret-key).");
+            ra.addFlashAttribute("error", "Stripe secret key mancante (stripe.secret-key / STRIPE_SECRET_KEY).");
             return "redirect:/checkout";
         }
 
@@ -61,19 +64,30 @@ public class StripePaymentProcessor implements PaymentProcessor {
             return "redirect:/checkout";
         }
 
+        String normalizedSuccessUrl;
+        String normalizedCancelUrl;
+
+        try {
+            normalizedSuccessUrl = normalizeAbsoluteUrl(successUrl, "/checkout/stripe/success?session_id={CHECKOUT_SESSION_ID}", "app.payment.success-url");
+            normalizedCancelUrl = normalizeAbsoluteUrl(cancelUrl, "/checkout/stripe/cancel", "app.payment.cancel-url");
+        } catch (IllegalStateException e) {
+            ra.addFlashAttribute("error", "Configurazione Stripe non valida: " + e.getMessage());
+            return "redirect:/checkout";
+        }
+
         // salvo anche in sessione (UX/debug)
         HttpSession httpSession = ctx.session();
         httpSession.setAttribute(CheckoutSession.TEMP_DATA, data);
 
         try {
-            Stripe.apiKey = stripeSecretKey;
+            Stripe.apiKey = stripeSecretKey.trim();
 
             long amountCents = eurToCents(total);
 
             SessionCreateParams params = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.PAYMENT)
-                    .setSuccessUrl(successUrl)
-                    .setCancelUrl(cancelUrl)
+                    .setSuccessUrl(normalizedSuccessUrl)
+                    .setCancelUrl(normalizedCancelUrl)
                     .setCustomerEmail(data.getCustomerEmail())
                     .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                     .addLineItem(
@@ -96,7 +110,7 @@ public class StripePaymentProcessor implements PaymentProcessor {
 
             Session stripeSession = Session.create(params);
 
-            // ✅ snapshot DB: il webhook userà questo per creare l’ordine “vero”
+            // snapshot DB: il webhook userà questo per creare l’ordine “vero”
             snapshotService.save(stripeSession.getId(), data);
 
             return "redirect:" + stripeSession.getUrl();
@@ -105,7 +119,7 @@ public class StripePaymentProcessor implements PaymentProcessor {
             ra.addFlashAttribute("error", "Errore Stripe: " + e.getMessage());
             return "redirect:/checkout";
         } catch (Exception e) {
-            ra.addFlashAttribute("error", "Errore imprevisto: " + e.getMessage());
+            ra.addFlashAttribute("error", "Errore imprevisto Stripe: " + e.getMessage());
             return "redirect:/checkout";
         }
     }
@@ -116,5 +130,60 @@ public class StripePaymentProcessor implements PaymentProcessor {
                 .multiply(BigDecimal.valueOf(100))
                 .setScale(0, RoundingMode.HALF_UP)
                 .longValue();
+    }
+
+    private String normalizeAbsoluteUrl(String configuredValue, String fallbackPath, String propertyName) {
+        String value = configuredValue == null ? "" : configuredValue.trim();
+
+        if (value.isBlank()) {
+            value = fallbackPath;
+        }
+
+        value = replaceBaseUrlPlaceholder(value);
+
+        if (value.startsWith("//")) {
+            value = "https:" + value;
+        }
+
+        if (isAbsoluteHttpUrl(value)) {
+            return value;
+        }
+
+        if (value.startsWith("/")) {
+            String base = normalizedAppBaseUrl(propertyName);
+            return base + value;
+        }
+
+        throw new IllegalStateException(propertyName + " deve essere una URL assoluta https://... oppure un path che inizia con /. Valore attuale: " + value);
+    }
+
+    private String replaceBaseUrlPlaceholder(String value) {
+        String base = safeTrim(appBaseUrl);
+        return value
+                .replace("${APP_BASE_URL}", base)
+                .replace("${app.base-url}", base)
+                .replace("${app.base.url}", base);
+    }
+
+    private String normalizedAppBaseUrl(String propertyName) {
+        String base = replaceBaseUrlPlaceholder(safeTrim(appBaseUrl));
+
+        if (base.endsWith("/")) {
+            base = base.substring(0, base.length() - 1);
+        }
+
+        if (!isAbsoluteHttpUrl(base)) {
+            throw new IllegalStateException(propertyName + " è relativo ma app.base-url / APP_BASE_URL non è assoluto. Imposta APP_BASE_URL=https://dominio-pubblico");
+        }
+
+        return base;
+    }
+
+    private boolean isAbsoluteHttpUrl(String value) {
+        return value != null && (value.startsWith("http://") || value.startsWith("https://"));
+    }
+
+    private String safeTrim(String value) {
+        return value == null ? "" : value.trim();
     }
 }
