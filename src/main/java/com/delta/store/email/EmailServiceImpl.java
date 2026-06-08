@@ -79,7 +79,7 @@ public class EmailServiceImpl implements EmailService {
             return;
         }
 
-        String fromName = configuredFromName == null ? "" : configuredFromName.trim();
+        String fromName = cleanValue(configuredFromName);
         if (fromName.isBlank()) {
             helper.setFrom(from);
             return;
@@ -93,13 +93,33 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private String resolveFromAddress() {
-        if (configuredFrom != null && !configuredFrom.isBlank()) {
-            return configuredFrom.trim();
+        String from = cleanValue(configuredFrom);
+        if (!from.isBlank()) {
+            return from;
         }
-        if (mailUsername != null && !mailUsername.isBlank()) {
-            return mailUsername.trim();
+
+        String username = cleanValue(mailUsername);
+        if (!username.isBlank()) {
+            return username;
         }
+
         return null;
+    }
+
+    private String cleanValue(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        String cleaned = value.trim();
+
+        if (cleaned.length() >= 2
+                && ((cleaned.startsWith("\"") && cleaned.endsWith("\""))
+                || (cleaned.startsWith("'") && cleaned.endsWith("'")))) {
+            cleaned = cleaned.substring(1, cleaned.length() - 1).trim();
+        }
+
+        return cleaned.replace("\r", "").replace("\n", "").trim();
     }
 
     private String buildResetHtml(String resetLink) {

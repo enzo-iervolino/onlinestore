@@ -80,7 +80,7 @@ public class StripeCheckoutController {
             return "redirect:/checkout/success?orderId=" + existing.get().getId();
         }
 
-        if (stripeSecretKey == null || stripeSecretKey.isBlank()) {
+        if (cleanSecret(stripeSecretKey).isBlank()) {
             log.error("Stripe success fallback impossibile: manca stripe.secret-key / STRIPE_SECRET_KEY.");
             model.addAttribute("sessionId", sessionId);
             model.addAttribute("error", "Stripe non configurato correttamente: secret key mancante.");
@@ -89,7 +89,7 @@ public class StripeCheckoutController {
 
         Session stripeSession;
         try {
-            Stripe.apiKey = stripeSecretKey.trim();
+            Stripe.apiKey = cleanSecret(stripeSecretKey);
             stripeSession = Session.retrieve(sessionId);
         } catch (Exception e) {
             log.error("Impossibile recuperare sessione Stripe {}", sessionId, e);
@@ -164,5 +164,21 @@ public class StripeCheckoutController {
 
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
+    }
+
+    private String cleanSecret(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        String cleaned = value.trim();
+
+        if (cleaned.length() >= 2
+                && ((cleaned.startsWith("\"") && cleaned.endsWith("\""))
+                || (cleaned.startsWith("'") && cleaned.endsWith("'")))) {
+            cleaned = cleaned.substring(1, cleaned.length() - 1).trim();
+        }
+
+        return cleaned.replace("\r", "").replace("\n", "").trim();
     }
 }
