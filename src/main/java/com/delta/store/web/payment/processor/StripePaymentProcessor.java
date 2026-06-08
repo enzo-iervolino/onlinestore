@@ -84,11 +84,10 @@ public class StripePaymentProcessor implements PaymentProcessor {
 
             long amountCents = eurToCents(total);
 
-            SessionCreateParams params = SessionCreateParams.builder()
+            SessionCreateParams.Builder paramsBuilder = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.PAYMENT)
                     .setSuccessUrl(normalizedSuccessUrl)
                     .setCancelUrl(normalizedCancelUrl)
-                    .setCustomerEmail(data.getCustomerEmail())
                     .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
@@ -105,8 +104,13 @@ public class StripePaymentProcessor implements PaymentProcessor {
                                                     .build()
                                     )
                                     .build()
-                    )
-                    .build();
+                    );
+
+            if (data.getCustomerEmail() != null && !data.getCustomerEmail().isBlank()) {
+                paramsBuilder.setCustomerEmail(data.getCustomerEmail().trim());
+            }
+
+            SessionCreateParams params = paramsBuilder.build();
 
             Session stripeSession = Session.create(params);
 

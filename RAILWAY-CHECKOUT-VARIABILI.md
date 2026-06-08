@@ -37,6 +37,10 @@ Nel pannello Stripe, il webhook deve puntare a:
 https://tuo-dominio.up.railway.app/stripe/webhook
 ```
 
+### Fallback Stripe senza webhook
+
+La rotta `/checkout/stripe/success` ora verifica direttamente la sessione Stripe quando il webhook non ha ancora creato l'ordine. Se `payment_status=paid`, crea ordine, consuma eventuale giftcard, invia email e porta alla pagina `/checkout/success?orderId=...`. Il webhook resta comunque supportato e mantiene l'idempotenza tramite `stripeSessionId`.
+
 ## PayPal
 
 Sandbox:
@@ -62,6 +66,34 @@ Live:
 ```env
 PAYPAL_API_URL=https://api-m.paypal.com
 ```
+
+## Email ordine
+
+Per inviare la conferma ordine dopo pagamento Stripe/PayPal imposta anche le variabili SMTP.
+
+Esempio Gmail con password per app:
+
+```env
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=tuoindirizzo@gmail.com
+MAIL_PASSWORD=password_app_google_senza_spazi
+MAIL_FROM=tuoindirizzo@gmail.com
+MAIL_SMTP_AUTH=true
+MAIL_STARTTLS_ENABLE=true
+MAIL_STARTTLS_REQUIRED=true
+```
+
+Se `MAIL_FROM` manca, l'app usa automaticamente `MAIL_USERNAME` come mittente.
+
+Nei log Railway ora compaiono messaggi espliciti:
+
+```text
+Email conferma ordine #... inviata a ...
+Email conferma ordine #... NON inviata a ...
+```
+
+Quindi, se PayPal crea l'ordine ma non arriva l'email, controlla prima `MAIL_USERNAME`, `MAIL_PASSWORD` e `MAIL_FROM`.
 
 ## Railway / porta
 
