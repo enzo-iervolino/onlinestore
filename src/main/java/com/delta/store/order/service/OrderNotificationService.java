@@ -21,6 +21,14 @@ public class OrderNotificationService {
         this.orderEmailService = orderEmailService;
     }
 
+    /**
+     * Invia la conferma ordine solo DOPO il commit del database.
+     *
+     * Regola importante per checkout Stripe/PayPal:
+     * - la creazione ordine non deve dipendere dall'SMTP;
+     * - se Gmail/Railway rallenta o va in timeout, il pagamento deve comunque chiudersi;
+     * - eventuali errori email vengono solo loggati e non fanno rollback dell'ordine.
+     */
     public void sendOrderConfirmationAfterCommit(Order order) {
         if (order == null) {
             log.warn("Invio email ordine saltato: ordine nullo.");
@@ -32,33 +40,42 @@ public class OrderNotificationService {
             return;
         }
 
-        byte[] pdf = null;
-        try {
-            pdf = receiptPdfService.generateReceipt(order);
-        } catch (Exception e) {
-            log.warn("PDF scontrino non generato per ordine #{}: {}. Procedo comunque con email senza allegato.", order.getId(), e.getMessage(), e);
-        }
-
-        byte[] finalPdf = pdf;
-
-        Runnable sendTask = () -> {
-            try {
-                orderEmailService.sendOrderConfirmation(order.getCustomerEmail(), order, finalPdf);
-                log.info("Email conferma ordine #{} inviata a {}", order.getId(), order.getCustomerEmail());
-            } catch (Exception e) {
-                log.error("Email conferma ordine #{} NON inviata a {}: {}", order.getId(), order.getCustomerEmail(), e.getMessage(), e);
-            }
-        };
+        Runnable afterCommitTask = () -> startEmailThread(order);
 
         if (TransactionSynchronizationManager.isActualTransactionActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void afterCommit() {
-                    sendTask.run();
+                    afterCommitTask.run();
                 }
             });
         } else {
-            sendTask.run();
+            afterCommitTask.run();
+        }
+    }
+
+    private void startEmailThread(Order order) {
+        Thread emailThread = new Thread(() -> sendEmailSafely(order), "order-email-" + order.getId());
+        emailThread.setDaemon(true);
+        emailThread.start();
+    }
+
+    private void sendEmailSafely(Order order) {
+        try {
+            byte[] pdf = null;
+
+            try {
+                pdf = receiptPdfService.generateReceipt(order);
+            } catch (Exception e) {
+                log.warn("PDF scontrino non generato per ordine #{}: {}. Procedo comunque con email senza allegato.",
+                        order.getId(), e.getMessage(), e);
+            }
+
+            orderEmailService.sendOrderConfirmation(order.getCustomerEmail(), order, pdf);
+            log.info("Email conferma ordine #{} inviata a {}", order.getId(), order.getCustomerEmail());
+        } catch (Exception e) {
+            log.error("Email conferma ordine #{} NON inviata a {}: {}",
+                    order.getId(), order.getCustomerEmail(), e.getMessage(), e);
         }
     }
 }

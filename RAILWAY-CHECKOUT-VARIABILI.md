@@ -118,3 +118,26 @@ Failed to convert value to 'Response'
 ## Nota sul problema checkout
 
 La pagina checkout non dipende solo dalla chiamata AJAX `/checkout/seleziona-metodo-pagamento`: il metodo di pagamento viene inviato anche con il submit finale `/checkout/salva-spedizione`. Inoltre gli errori generali vengono mostrati in pagina, quindi eventuali variabili mancanti non risultano più come pagina apparentemente bloccata.
+
+## Nota importante email checkout
+
+L'invio email ordine è asincrono e parte solo dopo il commit dell'ordine nel database.
+Quindi un timeout SMTP non deve bloccare PayPal/Stripe e non deve annullare la creazione dell'ordine.
+
+Variabili consigliate Railway per Gmail SMTP:
+
+```env
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=tuoindirizzo@gmail.com
+MAIL_PASSWORD=password_app_google
+MAIL_FROM=tuoindirizzo@gmail.com
+MAIL_SMTP_AUTH=true
+MAIL_STARTTLS_ENABLE=true
+MAIL_STARTTLS_REQUIRED=true
+MAIL_CONNECTION_TIMEOUT=10000
+MAIL_TIMEOUT=10000
+MAIL_WRITE_TIMEOUT=10000
+```
+
+Se Railway continua a mostrare `Connect timed out` verso `smtp.gmail.com:587`, il problema è la connessione SMTP verso Gmail dal runtime Railway. In quel caso l'ordine resta comunque salvato, ma per inviare email conviene usare un SMTP transazionale come Brevo, SendGrid o Mailgun.
