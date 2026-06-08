@@ -92,8 +92,8 @@ public class PayPalApiService {
         }
 
         String normalizedApiBaseUrl = normalizedApiBaseUrl();
-        String normalizedReturnUrl = normalizeRedirectUrl(returnUrl, "/paypal/success", "paypal.return.url");
-        String normalizedCancelUrl = normalizeRedirectUrl(cancelUrl, "/checkout?error=paypal_cancel", "paypal.cancel.url");
+        String normalizedReturnUrl = normalizePayPalReturnUrl(returnUrl);
+        String normalizedCancelUrl = normalizePayPalCancelUrl(cancelUrl);
 
         String token = getAccessToken(normalizedApiBaseUrl);
 
@@ -386,6 +386,32 @@ public class PayPalApiService {
         }
 
         return value;
+    }
+
+    private String normalizePayPalReturnUrl(String configuredValue) {
+        String fallbackPath = "/paypal/success";
+        String normalized = normalizeRedirectUrl(configuredValue, fallbackPath, "paypal.return.url");
+
+        if (!normalized.contains("/paypal/success")) {
+            String corrected = normalizedAppBaseUrl("paypal.return.url") + fallbackPath;
+            log.warn("Configurazione PayPal return URL non sicura: {}. Uso automaticamente {} per evitare successi falsi senza capture/ordine.", normalized, corrected);
+            return corrected;
+        }
+
+        return normalized;
+    }
+
+    private String normalizePayPalCancelUrl(String configuredValue) {
+        String fallbackPath = "/paypal/cancel";
+        String normalized = normalizeRedirectUrl(configuredValue, fallbackPath, "paypal.cancel.url");
+
+        if (!normalized.contains("/paypal/cancel") && !normalized.contains("/checkout")) {
+            String corrected = normalizedAppBaseUrl("paypal.cancel.url") + fallbackPath;
+            log.warn("Configurazione PayPal cancel URL non sicura: {}. Uso automaticamente {}.", normalized, corrected);
+            return corrected;
+        }
+
+        return normalized;
     }
 
     private String normalizeRedirectUrl(String configuredValue, String fallbackPath, String propertyName) {

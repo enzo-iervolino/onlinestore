@@ -11,6 +11,8 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -20,6 +22,8 @@ import java.math.RoundingMode;
 
 @Service
 public class StripePaymentProcessor implements PaymentProcessor {
+
+    private static final Logger log = LoggerFactory.getLogger(StripePaymentProcessor.class);
 
     private final CheckoutSnapshotService snapshotService;
 
@@ -68,8 +72,8 @@ public class StripePaymentProcessor implements PaymentProcessor {
         String normalizedCancelUrl;
 
         try {
-            normalizedSuccessUrl = normalizeAbsoluteUrl(successUrl, "/checkout/stripe/success?session_id={CHECKOUT_SESSION_ID}", "app.payment.success-url");
-            normalizedCancelUrl = normalizeAbsoluteUrl(cancelUrl, "/checkout/stripe/cancel", "app.payment.cancel-url");
+            normalizedSuccessUrl = normalizeStripeSuccessUrl(successUrl);
+            normalizedCancelUrl = normalizeStripeCancelUrl(cancelUrl);
         } catch (IllegalStateException e) {
             ra.addFlashAttribute("error", "Configurazione Stripe non valida: " + e.getMessage());
             return "redirect:/checkout";
@@ -134,6 +138,32 @@ public class StripePaymentProcessor implements PaymentProcessor {
                 .multiply(BigDecimal.valueOf(100))
                 .setScale(0, RoundingMode.HALF_UP)
                 .longValue();
+    }
+
+    private String normalizeStripeSuccessUrl(String configuredValue) {
+        String fallbackPath = "/checkout/stripe/success?session_id={CHECKOUT_SESSION_ID}";
+        String normalized = normalizeAbsoluteUrl(configuredValue, fallbackPath, "app.payment.success-url");
+
+        if (!normalized.contains("/checkout/stripe/success") || !normalized.contains("{CHECKOUT_SESSION_ID}")) {
+            String corrected = normalizedAppBaseUrl("app.payment.success-url") + fallbackPath;
+            log.warn("Configurazione Stripe success URL non sicura: {}. Uso automaticamente {} per evitare successi falsi senza pagamento/ordine.", normalized, corrected);
+            return corrected;
+        }
+
+        return normalized;
+    }
+
+    private String normalizeStripeCancelUrl(String configuredValue) {
+        String fallbackPath = "/checkout/stripe/cancel";
+        String normalized = normalizeAbsoluteUrl(configuredValue, fallbackPath, "app.payment.cancel-url");
+
+        if (!normalized.contains("/checkout/stripe/cancel")) {
+            String corrected = normalizedAppBaseUrl("app.payment.cancel-url") + fallbackPath;
+            log.warn("Configurazione Stripe cancel URL non sicura: {}. Uso automaticamente {}.", normalized, corrected);
+            return corrected;
+        }
+
+        return normalized;
     }
 
     private String normalizeAbsoluteUrl(String configuredValue, String fallbackPath, String propertyName) {

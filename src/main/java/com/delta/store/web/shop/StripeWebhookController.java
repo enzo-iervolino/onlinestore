@@ -100,8 +100,16 @@ public class StripeWebhookController {
                 return ResponseEntity.ok("ok");
             }
 
-            // ✅ recupero snapshot (dettagli completi)
-            OrderTempData data = snapshotService.load(sessionId).orElseGet(OrderTempData::new);
+            // ✅ recupero snapshot (dettagli completi).
+            // In produzione non dobbiamo creare ordini vuoti se lo snapshot non esiste:
+            // meglio far ritentare il webhook e mostrare pending dal success fallback.
+            Optional<OrderTempData> snapshot = snapshotService.load(sessionId);
+            if (snapshot.isEmpty()) {
+                log.error("Webhook Stripe: pagamento paid ma snapshot checkout mancante. Non creo ordine vuoto. sessionId={}", sessionId);
+                return ResponseEntity.internalServerError().body("checkout snapshot missing");
+            }
+
+            OrderTempData data = snapshot.get();
 
             // sicurezza: imposto sempre questi
             data.setSessionId(sessionId);
