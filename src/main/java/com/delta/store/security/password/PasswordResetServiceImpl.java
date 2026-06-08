@@ -5,6 +5,7 @@ import com.delta.store.user.model.User;
 import com.delta.store.user.repository.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,9 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+
+    @Value("${app.base-url:http://localhost:8081}")
+    private String appBaseUrl;
 
     public PasswordResetServiceImpl(
             PasswordResetTokenRepository tokenRepository,
@@ -58,17 +62,37 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
         tokenRepository.save(resetToken);
 
-        String resetUrl =
-                request.getScheme() + "://" +
-                request.getServerName() + ":" +
-                request.getServerPort() +
-                "/password/reset?token=" + token;
+        String resetUrl = buildResetUrl(request, token);
 
         try {
             emailService.sendPasswordResetEmail(user.getEmail(), resetUrl);
         } catch (MessagingException e) {
             e.printStackTrace();
         }
+    }
+
+
+    private String buildResetUrl(HttpServletRequest request, String token) {
+        String baseUrl = appBaseUrl;
+
+        if (baseUrl == null || baseUrl.isBlank()) {
+            baseUrl = request.getScheme() + "://" + request.getServerName();
+
+            int port = request.getServerPort();
+            boolean standardHttp = "http".equalsIgnoreCase(request.getScheme()) && port == 80;
+            boolean standardHttps = "https".equalsIgnoreCase(request.getScheme()) && port == 443;
+
+            if (!standardHttp && !standardHttps) {
+                baseUrl += ":" + port;
+            }
+        }
+
+        baseUrl = baseUrl.trim();
+        while (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+
+        return baseUrl + "/password/reset?token=" + token;
     }
 
     // ==================================================

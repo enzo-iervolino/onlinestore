@@ -73,7 +73,11 @@ public class PayPalApiService {
     public record CreateOrderResult(String orderId, String approveUrl) {
     }
 
-    public record OrderInfo(String status, BigDecimal capturedAmount, String capturedCurrency, String payerEmail) {
+    public record OrderInfo(String status,
+                            BigDecimal capturedAmount,
+                            String capturedCurrency,
+                            String payerEmail,
+                            String approveUrl) {
     }
 
     public CreateOrderResult createOrder(BigDecimal amount) {
@@ -181,13 +185,13 @@ public class PayPalApiService {
             ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, request, Map.class);
             return toOrderInfo(response.getBody());
         } catch (HttpClientErrorException.UnprocessableEntity e) {
-            OrderInfo info = getOrder(orderId);
+            String body = shortBody(e);
 
-            if (info != null) {
-                return info;
+            if (body.contains("ORDER_NOT_APPROVED")) {
+                throw new IllegalStateException("PayPal: ordine non ancora approvato dal cliente. Completa prima l'approvazione su PayPal e poi rientra sull'applicazione.", e);
             }
 
-            throw new IllegalStateException("PayPal capture KO: " + shortBody(e), e);
+            throw new IllegalStateException("PayPal capture KO: " + body, e);
         } catch (HttpClientErrorException e) {
             throw new IllegalStateException("PayPal capture KO: " + shortBody(e), e);
         } catch (RestClientException e) {
@@ -276,13 +280,14 @@ public class PayPalApiService {
 
     private OrderInfo toOrderInfo(Map<?, ?> map) {
         if (map == null) {
-            return new OrderInfo(null, null, null, null);
+            return new OrderInfo(null, null, null, null, null);
         }
 
         String status = asString(map.get("status"));
         String payerEmail = null;
         BigDecimal capturedAmount = null;
         String capturedCurrency = null;
+        String approveUrl = extractApproveUrl(map);
 
         Object payerObject = map.get("payer");
 
@@ -325,7 +330,7 @@ public class PayPalApiService {
             }
         }
 
-        return new OrderInfo(status, capturedAmount, capturedCurrency, payerEmail);
+        return new OrderInfo(status, capturedAmount, capturedCurrency, payerEmail, approveUrl);
     }
 
     private String extractApproveUrl(Map<?, ?> map) {

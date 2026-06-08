@@ -51,7 +51,8 @@ public class PayPalCheckoutController {
 
     /**
      * PayPal ritorna di solito con ?token=ORDER_ID (&PayerID=...).
-     * Qui facciamo la CAPTURE e, SOLO se COMPLETED, creiamo ordine + inviamo email.
+     * Prima controlliamo che l'ordine PayPal sia APPROVED, poi facciamo la CAPTURE.
+     * Questo evita l'errore 422 ORDER_NOT_APPROVED quando il cliente non ha ancora approvato il pagamento.
      */
     @GetMapping("/success")
     @Transactional(rollbackFor = Exception.class)
@@ -78,12 +79,30 @@ public class PayPalCheckoutController {
             return "redirect:/checkout";
         }
 
-        // 1) CAPTURE (pagamento)
+        PayPalApiService.OrderInfo infoBeforeCapture = payPalApiService.getOrder(orderId);
+        String statusBeforeCapture = infoBeforeCapture != null ? infoBeforeCapture.status() : null;
+
+        if (statusBeforeCapture != null && !"APPROVED".equalsIgnoreCase(statusBeforeCapture)
+                && !"COMPLETED".equalsIgnoreCase(statusBeforeCapture)) {
+
+            String approveUrl = infoBeforeCapture.approveUrl();
+            if (approveUrl != null && !approveUrl.isBlank()) {
+                ra.addFlashAttribute("error", "Completa prima l'approvazione del pagamento su PayPal.");
+                return "redirect:" + approveUrl;
+            }
+
+            ra.addFlashAttribute("error", "PayPal non ancora approvato dal cliente (status=" + statusBeforeCapture + "). Riprova dal checkout.");
+            return "redirect:/checkout";
+        }
+
+        // 1) CAPTURE (pagamento), solo dopo APPROVED
         PayPalApiService.OrderInfo info;
         try {
-            info = payPalApiService.captureOrder(orderId);
+            info = "COMPLETED".equalsIgnoreCase(statusBeforeCapture)
+                    ? infoBeforeCapture
+                    : payPalApiService.captureOrder(orderId);
         } catch (Exception e) {
-            ra.addFlashAttribute("error", "PayPal capture KO: " + e.getMessage());
+            ra.addFlashAttribute("error", e.getMessage());
             return "redirect:/checkout";
         }
 

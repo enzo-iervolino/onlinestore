@@ -9,6 +9,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
+
 @Service
 public class OrderEmailServiceImpl implements OrderEmailService {
 
@@ -19,6 +21,9 @@ public class OrderEmailServiceImpl implements OrderEmailService {
 
     @Value("${app.mail.from:${MAIL_FROM:}}")
     private String configuredFrom;
+
+    @Value("${app.mail.from-name:${MAIL_FROM_NAME:Online Store}}")
+    private String configuredFromName;
 
     public OrderEmailServiceImpl(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -36,11 +41,7 @@ public class OrderEmailServiceImpl implements OrderEmailService {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        String from = resolveFromAddress();
-        if (from != null && !from.isBlank()) {
-            helper.setFrom(from);
-        }
-
+        applyFrom(helper);
         helper.setTo(to.trim());
         helper.setSubject("Conferma ordine #" + order.getId() + " – Online Store");
         helper.setText(buildHtml(order), true);
@@ -51,6 +52,25 @@ public class OrderEmailServiceImpl implements OrderEmailService {
         }
 
         mailSender.send(message);
+    }
+
+    private void applyFrom(MimeMessageHelper helper) throws MessagingException {
+        String from = resolveFromAddress();
+        if (from == null || from.isBlank()) {
+            return;
+        }
+
+        String fromName = configuredFromName == null ? "" : configuredFromName.trim();
+        if (fromName.isBlank()) {
+            helper.setFrom(from);
+            return;
+        }
+
+        try {
+            helper.setFrom(from, fromName);
+        } catch (UnsupportedEncodingException e) {
+            helper.setFrom(from);
+        }
     }
 
     private String resolveFromAddress() {
@@ -82,7 +102,7 @@ public class OrderEmailServiceImpl implements OrderEmailService {
         );
     }
 
-    private String safe(Object v) {
-        return v == null ? "" : String.valueOf(v);
+    private String safe(Object value) {
+        return value == null ? "" : String.valueOf(value);
     }
 }
