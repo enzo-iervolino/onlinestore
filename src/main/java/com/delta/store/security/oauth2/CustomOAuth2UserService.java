@@ -24,6 +24,8 @@ import java.util.UUID;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private static final String DEFAULT_ROLE = "ROLE_USER";
+    private static final String GOOGLE_REGISTRATION_ID = "google";
+    private static final String DEFAULT_AVATAR = "avatar-default.png";
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -42,20 +44,35 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2User oauth2User = super.loadUser(userRequest);
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
-        AuthProvider authProvider = resolveProvider(registrationId);
-
-        if (authProvider != AuthProvider.GOOGLE) {
-            throw new OAuth2AuthenticationException("Provider OAuth2 non supportato: " + registrationId);
-        }
-
         Map<String, Object> attributes = new HashMap<>(oauth2User.getAttributes());
 
-        String providerId = asString(attributes.get("sub"));
+        User user = saveOrUpdateOAuth2User(registrationId, attributes);
+
+        return new DefaultOAuth2User(
+                buildAuthorities(user),
+                buildApplicationAttributes(attributes, user),
+                "email"
+        );
+    }
+
+    /**
+     * Metodo condiviso anche dal flusso OIDC di Google.
+     *
+     * Google, con scope openid/email/profile, viene gestito da Spring come OpenID
+     * Connect e quindi passa da OidcUserService, non sempre da OAuth2UserService.
+     * Centralizzando qui la creazione/aggiornamento dell'utente evitiamo duplicati
+     * e garantiamo che il record venga salvato nel DB in entrambi i flussi.
+     */
+    @Transactional
+    public User saveOrUpdateOAuth2User(String registrationId, Map<String, Object> attributes) {
+        AuthProvider authProvider = resolveProvider(registrationId);
+
+        String providerId = clean(asString(attributes.get("sub")));
         String email = normalizeEmail(asString(attributes.get("email")));
-        String firstname = asString(attributes.get("given_name"));
-        String lastname = asString(attributes.get("family_name"));
-        String fullname = asString(attributes.get("name"));
-        String picture = asString(attributes.get("picture"));
+        String firstname = clean(asString(attributes.get("given_name")));
+        String lastname = clean(asString(attributes.get("family_name")));
+        String fullname = clean(asString(attributes.get("name")));
+        String picture = clean(asString(attributes.get("picture")));
 
         if (providerId == null || providerId.isBlank()) {
             throw new OAuth2AuthenticationException("Google non ha restituito l'identificativo utente.");
@@ -65,11 +82,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throw new OAuth2AuthenticationException("Google non ha restituito l'email dell'utente.");
         }
 
-        User user = userRepository.findByEmail(email)
-                .map(existingUser -> updateExistingGoogleUser(
+        return userRepository.findByAuthProviderAndProviderId(authProvider, providerId)
+                .or(() -> userRepository.findByEmail(email))
+                .map(existingUser -> updateGoogleUser(
                         existingUser,
                         authProvider,
                         providerId,
+                        email,
                         firstname,
                         lastname,
                         fullname,
@@ -84,24 +103,31 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                         fullname,
                         picture
                 ));
-
-        String role = user.getRole();
-        if (role == null || role.isBlank()) {
-            role = DEFAULT_ROLE;
-        }
-
-        attributes.put("email", user.getEmail());
-        attributes.put("name", user.getFullname());
-
-        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
-
-        return new DefaultOAuth2User(authorities, attributes, "email");
     }
 
-    private User updateExistingGoogleUser(
+    public List<GrantedAuthority> buildAuthorities(User user) {
+        return List.of(new SimpleGrantedAuthority(normalizeRole(user.getRole())));
+    }
+
+    public Map<String, Object> buildApplicationAttributes(Map<String, Object> providerAttributes, User user) {
+        Map<String, Object> applicationAttributes = new HashMap<>(providerAttributes);
+        applicationAttributes.put("id", user.getId());
+        applicationAttributes.put("email", user.getEmail());
+        applicationAttributes.put("name", buildFullname(
+                user.getFirstname(),
+                user.getLastname(),
+                user.getEmail(),
+                user.getFullname()
+        ));
+        applicationAttributes.put("picture", user.getAvatar());
+        return applicationAttributes;
+    }
+
+    private User updateGoogleUser(
             User user,
             AuthProvider authProvider,
             String providerId,
+            String email,
             String firstname,
             String lastname,
             String fullname,
@@ -109,30 +135,29 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     ) {
         user.setAuthProvider(authProvider);
         user.setProviderId(providerId);
+        user.setEmail(email);
+        user.setFirstname(firstname != null ? firstname : safe(user.getFirstname()));
+        user.setLastname(lastname != null ? lastname : safe(user.getLastname()));
+        user.setFullname(buildFullname(user.getFirstname(), user.getLastname(), email, fullname));
 
-        if (isNotBlank(firstname)) {
-            user.setFirstname(firstname.trim());
+        if (picture != null && !picture.isBlank()) {
+            user.setAvatar(picture);
+        } else if (user.getAvatar() == null || user.getAvatar().isBlank()) {
+            user.setAvatar(DEFAULT_AVATAR);
         }
-        if (isNotBlank(lastname)) {
-            user.setLastname(lastname.trim());
-        }
-        if (isNotBlank(fullname)) {
-            user.setFullname(fullname.trim());
-        } else {
-            user.setFullname(buildFullname(user.getFirstname(), user.getLastname(), user.getEmail()));
-        }
-        if (isNotBlank(picture)) {
-            user.setAvatar(picture.trim());
-        }
+
         if (user.getRole() == null || user.getRole().isBlank()) {
             user.setRole(DEFAULT_ROLE);
         }
+
         if (user.getPassword() == null || user.getPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
         }
+
         if (user.getPhone() == null || user.getPhone().isBlank()) {
             user.setPhone(buildTechnicalPhone(authProvider, providerId));
         }
+
         user.setEnabled(true);
 
         return userRepository.save(user);
@@ -149,45 +174,49 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     ) {
         User user = new User();
         user.setEmail(email);
-        user.setFirstname(isNotBlank(firstname) ? firstname.trim() : "");
-        user.setLastname(isNotBlank(lastname) ? lastname.trim() : "");
-        user.setFullname(isNotBlank(fullname) ? fullname.trim() : buildFullname(firstname, lastname, email));
+        user.setFirstname(firstname != null ? firstname : "");
+        user.setLastname(lastname != null ? lastname : "");
+        user.setFullname(buildFullname(firstname, lastname, email, fullname));
         user.setPhone(buildTechnicalPhone(authProvider, providerId));
         user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
         user.setEnabled(true);
         user.setRole(DEFAULT_ROLE);
         user.setAuthProvider(authProvider);
         user.setProviderId(providerId);
-        user.setAvatar(isNotBlank(picture) ? picture.trim() : "avatar-default.png");
+        user.setAvatar(picture != null && !picture.isBlank() ? picture : DEFAULT_AVATAR);
 
         return userRepository.save(user);
     }
 
     private AuthProvider resolveProvider(String registrationId) {
-        if (registrationId == null) {
+        if (registrationId == null || registrationId.isBlank()) {
             throw new OAuth2AuthenticationException("Provider OAuth2 mancante.");
         }
 
-        if ("google".equalsIgnoreCase(registrationId)) {
+        if (GOOGLE_REGISTRATION_ID.equalsIgnoreCase(registrationId)) {
             return AuthProvider.GOOGLE;
         }
 
-        if ("facebook".equalsIgnoreCase(registrationId)) {
-            return AuthProvider.FACEBOOK;
-        }
-
-        return AuthProvider.LOCAL;
+        throw new OAuth2AuthenticationException("Provider OAuth2 non supportato: " + registrationId);
     }
 
     private String buildTechnicalPhone(AuthProvider authProvider, String providerId) {
-        String safeProviderId = providerId == null ? UUID.randomUUID().toString() : providerId.replaceAll("[^A-Za-z0-9]", "");
+        String safeProviderId = providerId == null || providerId.isBlank()
+                ? UUID.randomUUID().toString()
+                : providerId.replaceAll("[^A-Za-z0-9]", "");
+
         if (safeProviderId.length() > 60) {
             safeProviderId = safeProviderId.substring(0, 60);
         }
+
         return authProvider.name() + "_" + safeProviderId;
     }
 
-    private String buildFullname(String firstname, String lastname, String fallbackEmail) {
+    private String buildFullname(String firstname, String lastname, String fallbackEmail, String providerFullname) {
+        if (providerFullname != null && !providerFullname.isBlank()) {
+            return providerFullname.trim();
+        }
+
         String first = firstname == null ? "" : firstname.trim();
         String last = lastname == null ? "" : lastname.trim();
         String full = (first + " " + last).trim();
@@ -210,11 +239,22 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return email.trim().toLowerCase(Locale.ROOT);
     }
 
-    private String asString(Object value) {
-        return value == null ? null : value.toString();
+    private String normalizeRole(String role) {
+        return role == null || role.isBlank() ? DEFAULT_ROLE : role.trim();
     }
 
-    private boolean isNotBlank(String value) {
-        return value != null && !value.isBlank();
+    private String clean(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.trim();
+    }
+
+    private String safe(String value) {
+        return value == null ? "" : value.trim();
+    }
+
+    private String asString(Object value) {
+        return value == null ? null : value.toString();
     }
 }
