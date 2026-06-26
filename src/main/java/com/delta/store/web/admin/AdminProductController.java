@@ -5,6 +5,11 @@ import com.delta.store.product.model.ProductCategory;
 import com.delta.store.product.model.ProductImage;
 import com.delta.store.product.model.ProductVariant;
 import com.delta.store.product.service.VideoGenerationService;
+import com.delta.store.product.repository.ProductBrandRepository;
+import com.delta.store.product.repository.ProductFamilyRepository;
+import com.delta.store.product.repository.ProductGroupRepository;
+import com.delta.store.product.repository.ProductSubfamilyRepository;
+import com.delta.store.product.repository.ProductSubgroupRepository;
 import com.delta.store.product.repository.ProductVariantRepository;
 import com.delta.store.product.service.ColorOptionService;
 import com.delta.store.product.service.ProductService;
@@ -42,6 +47,11 @@ public class AdminProductController {
     private final ProductVariantService productVariantService;
     private final ProductVariantRepository productVariantRepository;
     private final VideoGenerationService videoGenerationService;
+    private final ProductGroupRepository groupRepository;
+    private final ProductSubgroupRepository subgroupRepository;
+    private final ProductBrandRepository brandRepository;
+    private final ProductFamilyRepository familyRepository;
+    private final ProductSubfamilyRepository subfamilyRepository;
 
     @Value("${app.upload.products-dir:uploads/products}")
     private String productsUploadDir;
@@ -51,13 +61,23 @@ public class AdminProductController {
                                   SizeOptionService sizeOptionService,
                                   ProductVariantService productVariantService,
                                   ProductVariantRepository productVariantRepository,
-                                  VideoGenerationService videoGenerationService) {
+                                  VideoGenerationService videoGenerationService,
+                                  ProductGroupRepository groupRepository,
+                                  ProductSubgroupRepository subgroupRepository,
+                                  ProductBrandRepository brandRepository,
+                                  ProductFamilyRepository familyRepository,
+                                  ProductSubfamilyRepository subfamilyRepository) {
         this.productService = productService;
         this.colorOptionService = colorOptionService;
         this.sizeOptionService = sizeOptionService;
         this.productVariantService = productVariantService;
         this.productVariantRepository = productVariantRepository;
         this.videoGenerationService = videoGenerationService;
+        this.groupRepository = groupRepository;
+        this.subgroupRepository = subgroupRepository;
+        this.brandRepository = brandRepository;
+        this.familyRepository = familyRepository;
+        this.subfamilyRepository = subfamilyRepository;
     }
 
     @GetMapping(value = "/{productId}/variants", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -103,6 +123,14 @@ public class AdminProductController {
             log.error("Errore eliminazione variante id={}", variantId, ex);
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    private void addLookupTables(Model model) {
+        model.addAttribute("groups", groupRepository.findAllByOrderByCodeAsc());
+        model.addAttribute("subgroups", subgroupRepository.findAllByOrderByCodeAsc());
+        model.addAttribute("brands", brandRepository.findAllByOrderByCodeAsc());
+        model.addAttribute("families", familyRepository.findAllByOrderByCodeAsc());
+        model.addAttribute("subfamilies", subfamilyRepository.findAllByOrderByCodeAsc());
     }
 
     private static String safe(String s) {
@@ -170,6 +198,7 @@ public class AdminProductController {
 
         model.addAttribute("colors", colorOptionService.findAll());
         model.addAttribute("sizes", sizeOptionService.findAll());
+        addLookupTables(model);
 
         return "admin/products/product-form";
     }
@@ -192,6 +221,7 @@ public class AdminProductController {
 
                     model.addAttribute("colors", colorOptionService.findAll());
                     model.addAttribute("sizes", sizeOptionService.findAll());
+                    addLookupTables(model);
 
                     return "admin/products/product-form";
                 })
@@ -304,6 +334,7 @@ public class AdminProductController {
 
             model.addAttribute("colors", colorOptionService.findAll());
             model.addAttribute("sizes", sizeOptionService.findAll());
+            addLookupTables(model);
 
             return "admin/products/product-form";
         }
@@ -332,6 +363,8 @@ public class AdminProductController {
             existing.setGroupId(product.getGroupId());
             existing.setSubgroupId(product.getSubgroupId());
             existing.setBrandId(product.getBrandId());
+            existing.setFamilyId(product.getFamilyId());
+            existing.setSubfamilyId(product.getSubfamilyId());
             existing.setMaterials(product.getMaterials());
             existing.setShippingInfo(product.getShippingInfo());
             existing.setMainMediaType(product.getMainMediaType());

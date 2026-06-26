@@ -116,17 +116,40 @@
 				</div>
 
             <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Group ID</label>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Gruppo ID</label>
                     <div class="ro-box">
                         <span th:text="${product.groupId != null ? product.groupId : '-'}">-</span>
                     </div>
                 </div>
 
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Subgroup ID</label>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Sottogruppo ID</label>
                     <div class="ro-box">
                         <span th:text="${product.subgroupId != null ? product.subgroupId : '-'}">-</span>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Brand ID</label>
+                    <div class="ro-box">
+                        <span th:text="${product.brandId != null ? product.brandId : '-'}">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Famiglia ID</label>
+                    <div class="ro-box">
+                        <span th:text="${product.familyId != null ? product.familyId : '-'}">-</span>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Sottofamiglia ID</label>
+                    <div class="ro-box">
+                        <span th:text="${product.subfamilyId != null ? product.subfamilyId : '-'}">-</span>
                     </div>
                 </div>
             </div>

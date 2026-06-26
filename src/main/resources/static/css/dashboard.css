@@ -79,10 +79,31 @@ body {
   height: calc(100vh - var(--nav-height));
   background: linear-gradient(180deg, #212529 0%, #1a1e21 100%);
   color: #fff;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
   z-index: 1050;
   transition: transform 0.3s ease;
   box-shadow: 4px 0 18px rgba(0, 0, 0, 0.18);
+}
+
+#sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+#sidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+}
+
+#sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.42);
 }
 
 /* sidebar chiusa */
@@ -93,7 +114,7 @@ body {
 /* ===== MENU ===== */
 .sidebar-menu {
   list-style: none;
-  padding: 0;
+  padding: 0 0 28px;
   margin: 0;
 }
 

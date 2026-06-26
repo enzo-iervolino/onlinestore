@@ -144,13 +144,86 @@
 
 				
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Group ID (opz.)</label>
-                        <input type="number" class="form-control" th:field="*{groupId}">
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="form-label">Gruppo (opz.)</label>
+                            <a class="small" th:href="@{/admin/groups}" target="_blank">Gestisci</a>
+                        </div>
+                        <select class="form-select" th:field="*{groupId}">
+                            <option value="">Seleziona gruppo...</option>
+                            <option th:if="*{groupId != null}" th:value="*{groupId}" th:text="|Valore attuale ID: *{groupId}|">Valore attuale</option>
+                            <option th:each="g : ${groups}"
+                                    th:value="${g.id}"
+                                    th:text="${g.code + (#strings.isEmpty(g.descri) ? '' : ' - ' + g.descri)}">
+                                GRUPPO
+                            </option>
+                        </select>
                     </div>
+
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="form-label">Sottogruppo (opz.)</label>
+                            <a class="small" th:href="@{/admin/subgroups}" target="_blank">Gestisci</a>
+                        </div>
+                        <select class="form-select" th:field="*{subgroupId}">
+                            <option value="">Seleziona sottogruppo...</option>
+                            <option th:if="*{subgroupId != null}" th:value="*{subgroupId}" th:text="|Valore attuale ID: *{subgroupId}|">Valore attuale</option>
+                            <option th:each="sg : ${subgroups}"
+                                    th:value="${sg.id}"
+                                    th:text="${sg.code + (#strings.isEmpty(sg.descri) ? '' : ' - ' + sg.descri)}">
+                                SOTTOGRUPPO
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="form-label">Brand (opz.)</label>
+                            <a class="small" th:href="@{/admin/brands}" target="_blank">Gestisci</a>
+                        </div>
+                        <select class="form-select" th:field="*{brandId}">
+                            <option value="">Seleziona brand...</option>
+                            <option th:if="*{brandId != null}" th:value="*{brandId}" th:text="|Valore attuale ID: *{brandId}|">Valore attuale</option>
+                            <option th:each="b : ${brands}"
+                                    th:value="${b.id}"
+                                    th:text="${b.code + (#strings.isEmpty(b.descri) ? '' : ' - ' + b.descri)}">
+                                BRAND
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Subgroup ID (opz.)</label>
-                        <input type="number" class="form-control" th:field="*{subgroupId}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="form-label">Famiglia (opz.)</label>
+                            <a class="small" th:href="@{/admin/families}" target="_blank">Gestisci</a>
+                        </div>
+                        <select class="form-select" th:field="*{familyId}">
+                            <option value="">Seleziona famiglia...</option>
+                            <option th:if="*{familyId != null}" th:value="*{familyId}" th:text="|Valore attuale ID: *{familyId}|">Valore attuale</option>
+                            <option th:each="f : ${families}"
+                                    th:value="${f.id}"
+                                    th:text="${f.code + (#strings.isEmpty(f.descri) ? '' : ' - ' + f.descri)}">
+                                FAMIGLIA
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="form-label">Sottofamiglia (opz.)</label>
+                            <a class="small" th:href="@{/admin/subfamilies}" target="_blank">Gestisci</a>
+                        </div>
+                        <select class="form-select" th:field="*{subfamilyId}">
+                            <option value="">Seleziona sottofamiglia...</option>
+                            <option th:if="*{subfamilyId != null}" th:value="*{subfamilyId}" th:text="|Valore attuale ID: *{subfamilyId}|">Valore attuale</option>
+                            <option th:each="sf : ${subfamilies}"
+                                    th:value="${sf.id}"
+                                    th:text="${sf.code + (#strings.isEmpty(sf.descri) ? '' : ' - ' + sf.descri)}">
+                                SOTTOFAMIGLIA
+                            </option>
+                        </select>
                     </div>
                 </div>
 

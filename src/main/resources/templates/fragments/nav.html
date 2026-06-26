@@ -160,6 +160,37 @@
               Tabella Tipo Ordine
             </a>
 
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/groups}"
+               class="nav-user-menu-item">
+              Tabella Gruppi
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/subgroups}"
+               class="nav-user-menu-item">
+              Tabella Sottogruppi
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/brands}"
+               class="nav-user-menu-item">
+              Tabella Brand
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/families}"
+               class="nav-user-menu-item">
+              Tabella Famiglie
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/subfamilies}"
+               class="nav-user-menu-item">
+              Tabella Sottofamiglie
+            </a>
+
+
             <a th:if="${!isAdmin}"
                href="#"
                class="nav-user-menu-item"
@@ -328,6 +359,37 @@
                class="nav-user-menu-item">
               Tabella Tipo Ordine
             </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/groups}"
+               class="nav-user-menu-item">
+              Tabella Gruppi
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/subgroups}"
+               class="nav-user-menu-item">
+              Tabella Sottogruppi
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/brands}"
+               class="nav-user-menu-item">
+              Tabella Brand
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/families}"
+               class="nav-user-menu-item">
+              Tabella Famiglie
+            </a>
+
+            <a th:if="${isAdmin}"
+               th:href="@{/admin/subfamilies}"
+               class="nav-user-menu-item">
+              Tabella Sottofamiglie
+            </a>
+
 
             <a th:if="${!isAdmin}"
                href="#"

@@ -451,6 +451,18 @@
           </div>
           <div class="col-md-3">
             <div class="kv-box">
+              <div class="kv-label">Famiglia</div>
+              <div class="kv-value" id="info_familyId">—</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="kv-box">
+              <div class="kv-label">Sottofamiglia</div>
+              <div class="kv-value" id="info_subfamilyId">—</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="kv-box">
               <div class="kv-label">Public ID</div>
               <div class="kv-value" id="info_publicId">—</div>
             </div>
@@ -589,6 +601,8 @@
   function pickBrandId(p) { return p?.brandId ?? p?.brand_id ?? ""; }
   function pickGroupId(p) { return p?.groupId ?? p?.group_id ?? ""; }
   function pickSubgroupId(p) { return p?.subgroupId ?? p?.subgroup_id ?? ""; }
+  function pickFamilyId(p) { return p?.familyId ?? p?.family_id ?? ""; }
+  function pickSubfamilyId(p) { return p?.subfamilyId ?? p?.subfamily_id ?? ""; }
   function pickCreatedAt(p) { return p?.createdAt ?? p?.created_at ?? ""; }
   function pickUpdatedAt(p) { return p?.updatedAt ?? p?.updated_at ?? ""; }
   function pickImageDb(p) { return p?.image ?? ""; }
@@ -736,6 +750,8 @@
     document.getElementById("info_brandId").textContent = safeText(pickBrandId(p));
     document.getElementById("info_groupId").textContent = safeText(pickGroupId(p));
     document.getElementById("info_subgroupId").textContent = safeText(pickSubgroupId(p));
+    document.getElementById("info_familyId").textContent = safeText(pickFamilyId(p));
+    document.getElementById("info_subfamilyId").textContent = safeText(pickSubfamilyId(p));
     document.getElementById("info_publicId").textContent = safeText(pickPublicId(p));
     document.getElementById("info_createdAt").textContent = formatDateTime(pickCreatedAt(p));
     document.getElementById("info_updatedAt").textContent = formatDateTime(pickUpdatedAt(p));

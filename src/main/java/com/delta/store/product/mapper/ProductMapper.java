@@ -37,6 +37,8 @@ public final class ProductMapper {
         dto.setGroupId(product.getGroupId());
         dto.setSubgroupId(product.getSubgroupId());
         dto.setBrandId(product.getBrandId());
+        dto.setFamilyId(product.getFamilyId());
+        dto.setSubfamilyId(product.getSubfamilyId());
 
         dto.setDescription(product.getDescription());
         dto.setMaterials(product.getMaterials());

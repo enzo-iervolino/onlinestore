@@ -13,7 +13,12 @@ import java.util.UUID;
         name = "products",
         indexes = {
                 @Index(name = "idx_products_category", columnList = "category_id"),
-                @Index(name = "idx_products_codpro", columnList = "codpro")
+                @Index(name = "idx_products_codpro", columnList = "codpro"),
+                @Index(name = "idx_products_group", columnList = "group_id"),
+                @Index(name = "idx_products_subgroup", columnList = "subgroup_id"),
+                @Index(name = "idx_products_brand", columnList = "brand_id"),
+                @Index(name = "idx_products_family", columnList = "family_id"),
+                @Index(name = "idx_products_subfamily", columnList = "subfamily_id")
         }
 )
 public class Product {
@@ -60,6 +65,14 @@ public class Product {
     /** Brand */
     @Column(name = "brand_id")
     private Long brandId;
+
+    /** Famiglia */
+    @Column(name = "family_id")
+    private Long familyId;
+
+    /** Sottofamiglia */
+    @Column(name = "subfamily_id")
+    private Long subfamilyId;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -234,6 +247,22 @@ public class Product {
 
     public void setBrandId(Long brandId) {
         this.brandId = brandId;
+    }
+
+    public Long getFamilyId() {
+        return familyId;
+    }
+
+    public void setFamilyId(Long familyId) {
+        this.familyId = familyId;
+    }
+
+    public Long getSubfamilyId() {
+        return subfamilyId;
+    }
+
+    public void setSubfamilyId(Long subfamilyId) {
+        this.subfamilyId = subfamilyId;
     }
 
     public BigDecimal getPrice() {

@@ -94,6 +94,8 @@ public class ProductRestController {
         product.setGroupId(dto.getGroupId());
         product.setSubgroupId(dto.getSubgroupId());
         product.setBrandId(dto.getBrandId());
+        product.setFamilyId(dto.getFamilyId());
+        product.setSubfamilyId(dto.getSubfamilyId());
 
         Product saved = productService.save(product);
 

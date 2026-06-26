@@ -171,6 +171,41 @@
                            <span>Tipo Ordine</span>
                        </a>
                     </li>
+
+                    <li>
+                        <a th:if="${isAdmin}" th:href="@{/admin/groups}">
+                            <i class="bi bi-collection"></i>
+                            <span>Gruppi</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a th:if="${isAdmin}" th:href="@{/admin/subgroups}">
+                            <i class="bi bi-diagram-2"></i>
+                            <span>Sottogruppi</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a th:if="${isAdmin}" th:href="@{/admin/brands}">
+                            <i class="bi bi-bookmark-star"></i>
+                            <span>Brand</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a th:if="${isAdmin}" th:href="@{/admin/families}">
+                            <i class="bi bi-diagram-3"></i>
+                            <span>Famiglie</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a th:if="${isAdmin}" th:href="@{/admin/subfamilies}">
+                            <i class="bi bi-diagram-3-fill"></i>
+                            <span>Sottofamiglie</span>
+                        </a>
+                    </li>
 					
 					
 					

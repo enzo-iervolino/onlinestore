@@ -40,6 +40,8 @@ public class AdminProductRestController {
             Long brandId,
             Long groupId,
             Long subgroupId,
+            Long familyId,
+            Long subfamilyId,
             UUID publicId,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
@@ -244,6 +246,8 @@ public class AdminProductRestController {
                 p.getBrandId(),
                 p.getGroupId(),
                 p.getSubgroupId(),
+                p.getFamilyId(),
+                p.getSubfamilyId(),
                 p.getPublicId(),
                 p.getCreatedAt(),
                 p.getUpdatedAt()
@@ -281,6 +285,8 @@ public class AdminProductRestController {
             case "description" -> "description";
             case "groupId" -> "groupId";
             case "subgroupId" -> "subgroupId";
+            case "familyId" -> "familyId";
+            case "subfamilyId" -> "subfamilyId";
             case "publicId" -> "publicId";
             case "createdAt" -> "createdAt";
             case "updatedAt" -> "updatedAt";
@@ -324,6 +330,8 @@ public class AdminProductRestController {
             sb.append("    \"brandId\": ").append(n(p.brandId())).append(",\n");
             sb.append("    \"groupId\": ").append(n(p.groupId())).append(",\n");
             sb.append("    \"subgroupId\": ").append(n(p.subgroupId())).append(",\n");
+            sb.append("    \"familyId\": ").append(n(p.familyId())).append(",\n");
+            sb.append("    \"subfamilyId\": ").append(n(p.subfamilyId())).append(",\n");
             sb.append("    \"publicId\": ").append(q(p.publicId() != null ? p.publicId().toString() : null)).append(",\n");
             sb.append("    \"createdAt\": ").append(q(p.createdAt() != null ? p.createdAt().toString() : null)).append(",\n");
             sb.append("    \"updatedAt\": ").append(q(p.updatedAt() != null ? p.updatedAt().toString() : null)).append("\n");

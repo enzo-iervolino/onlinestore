@@ -317,11 +317,34 @@ body.cart-empty .nav-small .cart-btn:hover + .cart-empty-preview {
   color: #333;
   min-width: 180px;
   max-width: min(280px, calc(100vw - 24px));
+  max-height: calc(100vh - var(--nav-height) - 18px);
   border-radius: 10px;
   box-shadow: 0 12px 30px rgba(0,0,0,0.18);
   display: none;
   z-index: 2000;
   padding: 6px 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.nav-small .nav-user-menu::-webkit-scrollbar {
+  width: 8px;
+}
+
+.nav-small .nav-user-menu::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.04);
+}
+
+.nav-small .nav-user-menu::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.24);
+  border-radius: 999px;
+}
+
+.nav-small .nav-user-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.36);
 }
 
 .nav-small .nav-user-dropdown:hover .nav-user-menu,
@@ -608,6 +631,8 @@ body.cart-empty .nav-small .cart-btn:hover + .cart-empty-preview {
     top: auto !important;
     transform: translateX(50%) !important;
     min-width: 180px !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100vh - var(--nav-height) - 24px) !important;
     background: #fff !important;
     color: #333 !important;
     border-radius: 10px !important;
@@ -615,6 +640,10 @@ body.cart-empty .nav-small .cart-btn:hover + .cart-empty-preview {
     display: none !important;
     z-index: 2000 !important;
     padding: 6px 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
   .nav-small .nav-user-dropdown-mobile:hover .nav-user-menu-mobile,

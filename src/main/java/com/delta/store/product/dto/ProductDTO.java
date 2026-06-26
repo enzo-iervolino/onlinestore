@@ -21,6 +21,8 @@ public class ProductDTO {
     private Long groupId;
     private Long subgroupId;
     private Long brandId;
+    private Long familyId;
+    private Long subfamilyId;
 
     private String description;
     private String materials;
@@ -126,6 +128,22 @@ public class ProductDTO {
 
     public void setBrandId(Long brandId) {
         this.brandId = brandId;
+    }
+
+    public Long getFamilyId() {
+        return familyId;
+    }
+
+    public void setFamilyId(Long familyId) {
+        this.familyId = familyId;
+    }
+
+    public Long getSubfamilyId() {
+        return subfamilyId;
+    }
+
+    public void setSubfamilyId(Long subfamilyId) {
+        this.subfamilyId = subfamilyId;
     }
 
     public String getDescription() {
