@@ -117,39 +117,39 @@
 
             <div class="row">
                 <div class="col-md-4 mb-3">
-                    <label class="form-label">Gruppo ID</label>
+                    <label class="form-label">Gruppo</label>
                     <div class="ro-box">
-                        <span th:text="${product.groupId != null ? product.groupId : '-'}">-</span>
+                        <span th:text="${productGroupName != null ? productGroupName : '-'}">-</span>
                     </div>
                 </div>
 
                 <div class="col-md-4 mb-3">
-                    <label class="form-label">Sottogruppo ID</label>
+                    <label class="form-label">Sottogruppo</label>
                     <div class="ro-box">
-                        <span th:text="${product.subgroupId != null ? product.subgroupId : '-'}">-</span>
+                        <span th:text="${productSubgroupName != null ? productSubgroupName : '-'}">-</span>
                     </div>
                 </div>
 
                 <div class="col-md-4 mb-3">
-                    <label class="form-label">Brand ID</label>
+                    <label class="form-label">Brand</label>
                     <div class="ro-box">
-                        <span th:text="${product.brandId != null ? product.brandId : '-'}">-</span>
+                        <span th:text="${productBrandName != null ? productBrandName : '-'}">-</span>
                     </div>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Famiglia ID</label>
+                    <label class="form-label">Famiglia</label>
                     <div class="ro-box">
-                        <span th:text="${product.familyId != null ? product.familyId : '-'}">-</span>
+                        <span th:text="${productFamilyName != null ? productFamilyName : '-'}">-</span>
                     </div>
                 </div>
 
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Sottofamiglia ID</label>
+                    <label class="form-label">Sottofamiglia</label>
                     <div class="ro-box">
-                        <span th:text="${product.subfamilyId != null ? product.subfamilyId : '-'}">-</span>
+                        <span th:text="${productSubfamilyName != null ? productSubfamilyName : '-'}">-</span>
                     </div>
                 </div>
             </div>

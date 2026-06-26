@@ -1,10 +1,12 @@
 package com.delta.store.web.admin;
 
+import com.delta.store.product.model.ImageLookupEntity;
 import com.delta.store.product.model.Product;
 import com.delta.store.product.model.ProductCategory;
 import com.delta.store.product.model.ProductImage;
 import com.delta.store.product.model.ProductVariant;
 import com.delta.store.product.service.VideoGenerationService;
+import com.delta.store.product.repository.ImageLookupRepository;
 import com.delta.store.product.repository.ProductBrandRepository;
 import com.delta.store.product.repository.ProductFamilyRepository;
 import com.delta.store.product.repository.ProductGroupRepository;
@@ -131,6 +133,37 @@ public class AdminProductController {
         model.addAttribute("brands", brandRepository.findAllByOrderByCodeAsc());
         model.addAttribute("families", familyRepository.findAllByOrderByCodeAsc());
         model.addAttribute("subfamilies", subfamilyRepository.findAllByOrderByCodeAsc());
+    }
+
+    private void addProductLookupNames(Model model, Product product) {
+        model.addAttribute("productGroupName", resolveLookupName(groupRepository, product.getGroupId()));
+        model.addAttribute("productSubgroupName", resolveLookupName(subgroupRepository, product.getSubgroupId()));
+        model.addAttribute("productBrandName", resolveLookupName(brandRepository, product.getBrandId()));
+        model.addAttribute("productFamilyName", resolveLookupName(familyRepository, product.getFamilyId()));
+        model.addAttribute("productSubfamilyName", resolveLookupName(subfamilyRepository, product.getSubfamilyId()));
+    }
+
+    private String resolveLookupName(ImageLookupRepository<? extends ImageLookupEntity> repository, Long id) {
+        if (id == null) {
+            return null;
+        }
+
+        return repository.findById(id)
+                .map(this::formatLookupName)
+                .orElse(null);
+    }
+
+    private String formatLookupName(ImageLookupEntity item) {
+        if (item == null) {
+            return null;
+        }
+
+        String descri = safe(item.getDescri());
+        if (descri != null) {
+            return descri;
+        }
+
+        return safe(item.getCode());
     }
 
     private static String safe(String s) {
@@ -278,6 +311,7 @@ public class AdminProductController {
         model.addAttribute("product", product);
         model.addAttribute("pageTitle", "Dettaglio prodotto (ID: " + id + ")");
         model.addAttribute("images", product.getImages() != null ? product.getImages() : Collections.emptyList());
+        addProductLookupNames(model, product);
 
         model.addAttribute("prevId", prevId);
         model.addAttribute("nextId", nextId);
