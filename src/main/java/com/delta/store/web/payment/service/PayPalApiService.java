@@ -81,6 +81,14 @@ public class PayPalApiService {
     }
 
     public CreateOrderResult createOrder(BigDecimal amount) {
+        return createOrder(amount, null, null, null, null);
+    }
+
+    public CreateOrderResult createOrder(BigDecimal amount,
+                                         String customReturnUrl,
+                                         String customCancelUrl,
+                                         String description,
+                                         String customId) {
         if (!isConfigured()) {
             throw new IllegalStateException("PayPal non configurato: controlla PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET e PAYPAL_API_URL");
         }
@@ -92,8 +100,12 @@ public class PayPalApiService {
         }
 
         String normalizedApiBaseUrl = normalizedApiBaseUrl();
-        String normalizedReturnUrl = normalizePayPalReturnUrl(returnUrl);
-        String normalizedCancelUrl = normalizePayPalCancelUrl(cancelUrl);
+        String normalizedReturnUrl = customReturnUrl == null || customReturnUrl.isBlank()
+                ? normalizePayPalReturnUrl(returnUrl)
+                : normalizeRedirectUrl(customReturnUrl, "/giftcard/paypal/success", "paypal.return.url");
+        String normalizedCancelUrl = customCancelUrl == null || customCancelUrl.isBlank()
+                ? normalizePayPalCancelUrl(cancelUrl)
+                : normalizeRedirectUrl(customCancelUrl, "/giftcard/cancel", "paypal.cancel.url");
 
         String token = getAccessToken(normalizedApiBaseUrl);
 
@@ -103,6 +115,12 @@ public class PayPalApiService {
 
         Map<String, Object> purchaseUnit = new LinkedHashMap<>();
         purchaseUnit.put("amount", amountObject);
+        if (description != null && !description.isBlank()) {
+            purchaseUnit.put("description", description.trim());
+        }
+        if (customId != null && !customId.isBlank()) {
+            purchaseUnit.put("custom_id", customId.trim());
+        }
 
         Map<String, Object> applicationContext = new LinkedHashMap<>();
         applicationContext.put("return_url", normalizedReturnUrl);

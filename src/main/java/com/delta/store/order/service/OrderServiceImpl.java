@@ -117,8 +117,9 @@ public class OrderServiceImpl implements OrderService {
                 data.getShippingProvince()
         ));
 
+        BigDecimal giftcardAmount = safeBD(data.getGiftCardAmount());
         order.setGiftcardCode(data.getGiftCardCode());
-        order.setGiftcardAmount(safeBD(data.getGiftCardAmount()));
+        order.setGiftcardAmount(giftcardAmount);
 
         applyOrderType(order, data);
 
@@ -156,7 +157,11 @@ public class OrderServiceImpl implements OrderService {
 
         BigDecimal totalOrder = safeBD(data.getTotalAmount());
         if (totalOrder.compareTo(BigDecimal.ZERO) == 0) {
-            totalOrder = netSubtotal.add(shipping).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal totalBeforeGift = resolveTotalBeforeGift(subtotal, discountValue, shipping, netSubtotal);
+            totalOrder = totalBeforeGift
+                    .subtract(giftcardAmount)
+                    .max(BigDecimal.ZERO)
+                    .setScale(2, RoundingMode.HALF_UP);
         }
 
         order.setSubtotal(subtotal);
@@ -167,6 +172,24 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalAmount(totalOrder);
 
         return order;
+    }
+
+    private BigDecimal resolveTotalBeforeGift(BigDecimal subtotal,
+                                               BigDecimal discountValue,
+                                               BigDecimal shipping,
+                                               BigDecimal netSubtotal) {
+
+        BigDecimal calculated = safeBD(subtotal)
+                .subtract(safeBD(discountValue))
+                .add(safeBD(shipping))
+                .max(BigDecimal.ZERO)
+                .setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal saved = safeBD(netSubtotal)
+                .max(BigDecimal.ZERO)
+                .setScale(2, RoundingMode.HALF_UP);
+
+        return saved.compareTo(calculated) >= 0 ? saved : calculated;
     }
 
     private void applyOrderType(Order order, OrderTempData data) {

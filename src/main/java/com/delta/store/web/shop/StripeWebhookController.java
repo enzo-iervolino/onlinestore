@@ -4,6 +4,9 @@ package com.delta.store.web.shop;
 
 import com.delta.store.giftcard.model.GiftCard;
 import com.delta.store.giftcard.service.GiftCardService;
+import com.delta.store.giftcard.service.GiftCardNotificationService;
+import com.delta.store.giftcard.service.GiftCardPaymentResult;
+import com.delta.store.giftcard.service.GiftCardPurchaseService;
 import com.delta.store.order.model.Order;
 import com.delta.store.order.model.OrderTempData;
 import com.delta.store.order.service.OrderNotificationService;
@@ -25,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -32,11 +36,16 @@ import java.util.Optional;
 public class StripeWebhookController {
 
     private static final Logger log = LoggerFactory.getLogger(StripeWebhookController.class);
+    private static final String METADATA_TYPE = "type";
+    private static final String METADATA_PURCHASE_ID = "giftCardPurchaseId";
+    private static final String METADATA_VALUE_GIFT_CARD = "GIFT_CARD";
 
     private final OrderService orderService;
     private final OrderNotificationService orderNotificationService;
     private final CheckoutSnapshotService snapshotService;
     private final GiftCardService giftCardService;
+    private final GiftCardPurchaseService giftCardPurchaseService;
+    private final GiftCardNotificationService giftCardNotificationService;
 
     @Value("${stripe.webhook.secret:${stripe.webhook-secret:}}")
     private String webhookSecret;
@@ -47,11 +56,15 @@ public class StripeWebhookController {
     public StripeWebhookController(OrderService orderService,
                                    OrderNotificationService orderNotificationService,
                                    CheckoutSnapshotService snapshotService,
-                                   GiftCardService giftCardService) {
+                                   GiftCardService giftCardService,
+                                   GiftCardPurchaseService giftCardPurchaseService,
+                                   GiftCardNotificationService giftCardNotificationService) {
         this.orderService = orderService;
         this.orderNotificationService = orderNotificationService;
         this.snapshotService = snapshotService;
         this.giftCardService = giftCardService;
+        this.giftCardPurchaseService = giftCardPurchaseService;
+        this.giftCardNotificationService = giftCardNotificationService;
     }
 
     @PostMapping("/webhook")
@@ -96,7 +109,31 @@ public class StripeWebhookController {
 
             String paymentStatus = fullSession.getPaymentStatus();
             if (paymentStatus == null || !"paid".equalsIgnoreCase(paymentStatus)) {
-                log.warn("Session {} non paid (status={}) => non creo ordine.", sessionId, paymentStatus);
+                log.warn("Session {} non paid (status={}) => non creo ordine/gift card.", sessionId, paymentStatus);
+                return ResponseEntity.ok("ok");
+            }
+
+            if (isGiftCardSession(fullSession)) {
+                Long purchaseId = resolveGiftCardPurchaseId(fullSession)
+                        .orElseThrow(() -> new IllegalStateException("Sessione Stripe gift card senza purchaseId"));
+
+                GiftCardPaymentResult result = giftCardPurchaseService.completeStripePayment(
+                        purchaseId,
+                        sessionId,
+                        centsToEur(fullSession.getAmountTotal())
+                );
+
+                if (result.newlyIssued()) {
+                    String emailWarning = giftCardNotificationService.sendEmailIfRecipientPresent(result.giftCard());
+                    if (emailWarning != null) {
+                        log.warn(emailWarning);
+                    }
+                }
+
+                log.info("Gift card emessa da webhook Stripe: purchaseId={} giftCardId={} stripeSessionId={}",
+                        result.purchase().getId(),
+                        result.giftCard().getId(),
+                        sessionId);
                 return ResponseEntity.ok("ok");
             }
 
@@ -173,6 +210,35 @@ public class StripeWebhookController {
         } catch (Exception ignored) {
         }
         return Optional.empty();
+    }
+
+    private boolean isGiftCardSession(Session session) {
+        if (session == null || session.getMetadata() == null) {
+            return false;
+        }
+
+        String type = session.getMetadata().get(METADATA_TYPE);
+        return METADATA_VALUE_GIFT_CARD.equalsIgnoreCase(type);
+    }
+
+    private Optional<Long> resolveGiftCardPurchaseId(Session session) {
+        if (session == null) {
+            return Optional.empty();
+        }
+
+        Map<String, String> metadata = session.getMetadata();
+        if (metadata != null) {
+            String purchaseIdValue = metadata.get(METADATA_PURCHASE_ID);
+            if (purchaseIdValue != null && !purchaseIdValue.isBlank()) {
+                try {
+                    return Optional.of(Long.parseLong(purchaseIdValue.trim()));
+                } catch (NumberFormatException ignored) {
+                    return Optional.empty();
+                }
+            }
+        }
+
+        return giftCardPurchaseService.findByStripeSessionId(session.getId()).map(com.delta.store.giftcard.model.GiftCardPurchase::getId);
     }
 
     private BigDecimal centsToEur(Long cents) {

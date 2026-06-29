@@ -321,7 +321,7 @@
 					<div class="row">
                         <div class="col-6 totals-label totals-final">Totale ordine</div>
                         <div class="col-6 totals-value totals-final"
-                             th:text="${order.netSubtotal != null ? #numbers.formatDecimal(order.netSubtotal, 1, 'POINT', 2, 'COMMA') + ' €' : '0,00 €'}">
+                             th:text="${summaryTotalOrder != null ? #numbers.formatDecimal(summaryTotalOrder, 1, 'POINT', 2, 'COMMA') + ' €' : '0,00 €'}">
                             0,00 €
                         </div>
                     </div>
@@ -350,7 +350,7 @@
                     <div class="row">
                         <div class="col-6 totals-label  ">Netto a pagare</div>
                         <div class="col-6 totals-value "
-                             th:text="${order.totalAmount != null ? #numbers.formatDecimal(order.totalAmount, 1, 'POINT', 2, 'COMMA') + ' €' : '0,00 €'}">
+                             th:text="${netToPay != null ? #numbers.formatDecimal(netToPay, 1, 'POINT', 2, 'COMMA') + ' €' : '0,00 €'}">
                             0,00 €
                         </div>
                     </div>

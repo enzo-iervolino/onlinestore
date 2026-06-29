@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestione Gift Card</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <style>
+        body {
+            background: #f5f7fb;
+            color: #111827;
+        }
+
+        .page-header-card {
+            border: 0;
+            border-radius: 22px;
+            background: linear-gradient(135deg, #171717 0%, #533745 56%, #ab4e68 100%);
+            color: #fff;
+            box-shadow: 0 16px 36px rgba(83, 55, 69, .20);
+        }
+
+        .page-header-card .subtitle {
+            color: rgba(255, 255, 255, .84);
+            font-size: .95rem;
+        }
+
+        .stat-card {
+            border: 1px solid #eceff4;
+            border-radius: 18px;
+            background: #fff;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, .04);
+            padding: 1rem;
+            height: 100%;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: .75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: .04em;
+        }
+
+        .stat-row {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: .75rem;
+            margin-top: .25rem;
+        }
+
+        .stat-value {
+            font-size: 1.55rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .stat-money {
+            text-align: right;
+            font-size: .86rem;
+            font-weight: 800;
+            color: #212529;
+            white-space: nowrap;
+        }
+
+        .stat-help {
+            margin-top: .35rem;
+            color: #8792a2;
+            font-size: .72rem;
+        }
+
+        .filters-card,
+        .table-card {
+            border: 1px solid #e9ecef;
+            border-radius: 18px;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+        }
+
+        .filters-title {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            font-weight: 800;
+            margin-bottom: .85rem;
+        }
+
+        .filter-active-box {
+            border-radius: 14px;
+            background: #f8f3ef;
+            border: 1px solid #ead8cf;
+            color: #533745;
+            padding: .65rem .8rem;
+            font-size: .86rem;
+        }
+
+        .filters-card .form-control,
+        .filters-card .form-select {
+            background: #fff;
+            color: #111827;
+            border: 1px solid #dee2e6;
+            border-radius: .75rem;
+        }
+
+        .filters-card .form-control::placeholder {
+            color: #9ca3af;
+        }
+
+        .filters-card .form-control:focus,
+        .filters-card .form-select:focus {
+            background: #fff;
+            color: #111827;
+            border-color: #ab4e68;
+            box-shadow: 0 0 0 .2rem rgba(171, 78, 104, .12);
+        }
+
+        .filters-card .input-group-text {
+            color: #6c757d;
+            border-color: #dee2e6;
+        }
+
+        .gift-table {
+            margin-bottom: 0;
+        }
+
+        .gift-table thead th {
+            background: #111827;
+            color: #fff;
+            border: 0;
+            font-size: .76rem;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            padding: .9rem .8rem;
+        }
+
+        .gift-table tbody td {
+            vertical-align: middle;
+            padding: .85rem .8rem;
+        }
+
+        .gift-code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+            font-weight: 800;
+            color: #212529;
+        }
+
+        .small-muted {
+            font-size: .78rem;
+            color: #6c757d;
+        }
+
+        .badge-status {
+            border-radius: 999px;
+            padding: .42rem .68rem;
+            font-size: .72rem;
+            font-weight: 700;
+        }
+
+        .modal-content {
+            border: 0;
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, .22);
+        }
+
+        .detail-hero {
+            background: radial-gradient(circle at top left, rgba(255,255,255,.24), transparent 28%),
+                        linear-gradient(135deg, #111827 0%, #533745 58%, #ab4e68 100%);
+            color: #fff;
+        }
+
+        .kv-label {
+            color: #6c757d;
+            font-size: .72rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: .04em;
+        }
+
+        .kv-value {
+            font-weight: 700;
+            color: #212529;
+            word-break: break-word;
+        }
+
+        .movement-table thead th {
+            font-size: .72rem;
+            text-transform: uppercase;
+            color: #6c757d;
+            background: #f8f9fa;
+        }
+
+        .empty-state {
+            padding: 2rem 1rem;
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .page-header-card .btn,
+            .filters-card .btn {
+                width: 100%;
+            }
+
+            .stat-row {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .stat-money {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid px-3 px-lg-4 py-4">
+
+    <div class="card page-header-card mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
+                <div>
+                    <div class="small text-uppercase fw-bold opacity-75 mb-1">Area Admin</div>
+                    <h1 class="h3 mb-1 fw-bold">
+                        <i class="bi bi-gift-fill me-2"></i>Gestione Gift Card
+                    </h1>
+                    <div class="subtitle">
+                        Elenco delle card emesse, stato di validità, saldo residuo, importi aggregati e movimenti collegati.
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-light btn-sm rounded-pill px-3" th:href="@{/admin/dashboard}">
+                        <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                    </a>
+                    <a class="btn btn-outline-light btn-sm rounded-pill px-3" th:href="@{/admin/giftcard-movimenti}">
+                        <i class="bi bi-list-ul me-1"></i>Solo movimenti
+                    </a>
+                    <a class="btn btn-outline-light btn-sm rounded-pill px-3" th:href="@{/giftcard}">
+                        <i class="bi bi-plus-circle me-1"></i>Emissione cliente
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-2 col-lg-4">
+            <div class="stat-card">
+                <div class="stat-label">Totali</div>
+                <div class="stat-row">
+                    <div class="stat-value" th:text="${summary.total}">0</div>
+                    <div class="stat-money">
+                        € <span th:text="${#numbers.formatDecimal(summary.totalAmount, 1, 'POINT', 2, 'COMMA')}">0,00</span>
+                    </div>
+                </div>
+                <div class="stat-help">Importo emesso</div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-2 col-lg-4">
+            <div class="stat-card">
+                <div class="stat-label">Attive</div>
+                <div class="stat-row">
+                    <div class="stat-value text-success" th:text="${summary.active}">0</div>
+                    <div class="stat-money text-success">
+                        € <span th:text="${#numbers.formatDecimal(summary.activeAmount, 1, 'POINT', 2, 'COMMA')}">0,00</span>
+                    </div>
+                </div>
+                <div class="stat-help">Saldo attivo</div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-2 col-lg-4">
+            <div class="stat-card">
+                <div class="stat-label">Valide</div>
+                <div class="stat-row">
+                    <div class="stat-value text-primary" th:text="${summary.valid}">0</div>
+                    <div class="stat-money text-primary">
+                        € <span th:text="${#numbers.formatDecimal(summary.validAmount, 1, 'POINT', 2, 'COMMA')}">0,00</span>
+                    </div>
+                </div>
+                <div class="stat-help">Saldo utilizzabile</div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-2 col-lg-4">
+            <div class="stat-card">
+                <div class="stat-label">Scadute</div>
+                <div class="stat-row">
+                    <div class="stat-value text-warning" th:text="${summary.expired}">0</div>
+                    <div class="stat-money text-warning">
+                        € <span th:text="${#numbers.formatDecimal(summary.expiredAmount, 1, 'POINT', 2, 'COMMA')}">0,00</span>
+                    </div>
+                </div>
+                <div class="stat-help">Saldo scaduto</div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-2 col-lg-4">
+            <div class="stat-card">
+                <div class="stat-label">Esaurite</div>
+                <div class="stat-row">
+                    <div class="stat-value text-secondary" th:text="${summary.used}">0</div>
+                    <div class="stat-money text-secondary">
+                        € <span th:text="${#numbers.formatDecimal(summary.usedAmount, 1, 'POINT', 2, 'COMMA')}">0,00</span>
+                    </div>
+                </div>
+                <div class="stat-help">Valore originario</div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-2 col-lg-4">
+            <div class="stat-card">
+                <div class="stat-label">Con saldo</div>
+                <div class="stat-row">
+                    <div class="stat-value text-info" th:text="${summary.withBalance}">0</div>
+                    <div class="stat-money text-info">
+                        € <span th:text="${#numbers.formatDecimal(summary.withBalanceAmount, 1, 'POINT', 2, 'COMMA')}">0,00</span>
+                    </div>
+                </div>
+                <div class="stat-help">Saldo residuo</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="filters-card p-3 mb-3">
+        <div class="filters-title">
+            <i class="bi bi-funnel"></i>
+            Filtri gift card
+        </div>
+
+        <form method="get" th:action="@{/admin/giftcards}" class="row g-3 align-items-end">
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <label class="form-label small fw-semibold text-muted mb-1" for="q">Ricerca</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input id="q"
+                           class="form-control"
+                           type="text"
+                           name="q"
+                           th:value="${q}"
+                           placeholder="Codice, cliente, email, pagamento">
+                </div>
+            </div>
+
+            <div class="col-xl-2 col-lg-4 col-md-6">
+                <label class="form-label small fw-semibold text-muted mb-1" for="status">Stato card</label>
+                <select id="status" class="form-select" name="status">
+                    <option value="ALL" th:selected="${status == 'ALL'}">Tutte le card</option>
+                    <option value="ACTIVE" th:selected="${status == 'ACTIVE'}">Attive</option>
+                    <option value="VALID" th:selected="${status == 'VALID'}">Valide con saldo</option>
+                    <option value="WITH_BALANCE" th:selected="${status == 'WITH_BALANCE'}">Con saldo residuo</option>
+                    <option value="EXPIRED" th:selected="${status == 'EXPIRED'}">Scadute</option>
+                    <option value="USED" th:selected="${status == 'USED'}">Esaurite / usate</option>
+                    <option value="INACTIVE" th:selected="${status == 'INACTIVE'}">Disattivate</option>
+                </select>
+            </div>
+
+            <div class="col-xl-2 col-lg-4 col-md-6">
+                <label class="form-label small fw-semibold text-muted mb-1" for="paymentMethod">Metodo pagamento</label>
+                <select id="paymentMethod" class="form-select" name="paymentMethod">
+                    <option value="ALL" th:selected="${paymentMethod == 'ALL'}">Tutti</option>
+                    <option th:each="method : ${paymentMethods}"
+                            th:value="${method.name()}"
+                            th:selected="${paymentMethod == method.name()}"
+                            th:text="${method.name()}">STRIPE</option>
+                </select>
+            </div>
+
+            <div class="col-xl-2 col-lg-4 col-md-6">
+                <label class="form-label small fw-semibold text-muted mb-1" for="purchaseStatus">Stato acquisto</label>
+                <select id="purchaseStatus" class="form-select" name="purchaseStatus">
+                    <option value="ALL" th:selected="${purchaseStatus == 'ALL'}">Tutti</option>
+                    <option th:each="purchaseState : ${purchaseStatuses}"
+                            th:value="${purchaseState.name()}"
+                            th:selected="${purchaseStatus == purchaseState.name()}"
+                            th:text="${purchaseState.name()}">PAID</option>
+                </select>
+            </div>
+
+            <div class="col-xl-1 col-lg-2 col-md-3 col-6">
+                <label class="form-label small fw-semibold text-muted mb-1" for="from">Da</label>
+                <input id="from" class="form-control" type="date" name="from" th:value="${from}">
+            </div>
+
+            <div class="col-xl-1 col-lg-2 col-md-3 col-6">
+                <label class="form-label small fw-semibold text-muted mb-1" for="to">A</label>
+                <input id="to" class="form-control" type="date" name="to" th:value="${to}">
+            </div>
+
+            <div class="col-xl-1 col-lg-2 col-md-3 col-6">
+                <label class="form-label small fw-semibold text-muted mb-1" for="minAmount">Min €</label>
+                <input id="minAmount" class="form-control" type="number" step="0.01" min="0" name="minAmount" th:value="${minAmount}">
+            </div>
+
+            <div class="col-xl-1 col-lg-2 col-md-3 col-6">
+                <label class="form-label small fw-semibold text-muted mb-1" for="maxAmount">Max €</label>
+                <input id="maxAmount" class="form-control" type="number" step="0.01" min="0" name="maxAmount" th:value="${maxAmount}">
+            </div>
+
+            <div class="col-xl-2 col-lg-4 col-md-6">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill">
+                        <i class="bi bi-funnel me-1"></i>Filtra
+                    </button>
+                    <a class="btn btn-outline-secondary" th:href="@{/admin/giftcards}">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+
+        <div class="filter-active-box mt-3" th:if="${hasActiveFilters}">
+            <i class="bi bi-check-circle me-1"></i>
+            Filtri attivi: la tabella e le card riepilogative mostrano i totali dei risultati filtrati.
+        </div>
+    </div>
+
+    <div class="table-card overflow-hidden">
+        <div class="d-flex flex-column flex-md-row justify-content-between gap-2 align-items-md-center p-3 border-bottom bg-white">
+            <div class="fw-bold">
+                <i class="bi bi-table me-1"></i>Gift card trovate
+            </div>
+            <div class="small-muted">
+                Totale righe: <strong th:text="${#lists.size(cards)}">0</strong>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover gift-table align-middle">
+                <thead>
+                <tr>
+                    <th>Codice</th>
+                    <th>Cliente richiedente</th>
+                    <th>Destinatario</th>
+                    <th class="text-end">Importo</th>
+                    <th class="text-end">Saldo</th>
+                    <th>Scadenza</th>
+                    <th>Stato</th>
+                    <th>Pagamento</th>
+                    <th class="text-end">Azioni</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="card : ${cards}">
+                    <td>
+                        <div class="gift-code" th:text="${card.code}">GIFT-50-000000</div>
+                        <div class="small-muted">
+                            Emessa:
+                            <span th:text="${card.createdAt != null ? #temporals.format(card.createdAt, 'dd/MM/yyyy HH:mm') : '—'}">—</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fw-semibold" th:text="${card.requesterLabel}">Cliente ID 1</div>
+                        <div class="small-muted" th:text="${card.requesterEmail != null ? card.requesterEmail : 'Email non disponibile'}">email</div>
+                    </td>
+                    <td>
+                        <div class="fw-semibold" th:text="${card.recipient}">Destinatario</div>
+                    </td>
+                    <td class="text-end fw-bold">
+                        € <span th:text="${#numbers.formatDecimal(card.initialAmount, 1, 'POINT', 2, 'COMMA')}">0,00</span>
+                    </td>
+                    <td class="text-end fw-bold text-success">
+                        € <span th:text="${#numbers.formatDecimal(card.remainingAmount, 1, 'POINT', 2, 'COMMA')}">0,00</span>
+                    </td>
+                    <td>
+                        <span th:text="${card.expirationDate != null ? #temporals.format(card.expirationDate, 'dd/MM/yyyy') : '—'}">—</span>
+                        <div class="small-muted" th:if="${card.validityMonths != null}" th:text="${card.validityMonths + ' mesi'}">6 mesi</div>
+                    </td>
+                    <td>
+                        <span class="badge badge-status"
+                              th:classappend="${' text-bg-' + card.statusCss}"
+                              th:text="${card.status}">VALIDA</span>
+                    </td>
+                    <td>
+                        <div class="fw-semibold" th:text="${card.paymentMethod}">STRIPE</div>
+                        <div class="small-muted" th:text="${card.purchaseStatus}">PAID</div>
+                    </td>
+                    <td class="text-end">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-primary rounded-pill"
+                                data-bs-toggle="modal"
+                                th:attr="data-bs-target=|#giftCardDetailModal${card.id}|">
+                            <i class="bi bi-eye me-1"></i>Dettaglio
+                        </button>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(cards)}">
+                    <td colspan="9" class="text-center empty-state">
+                        <i class="bi bi-gift fs-1 d-block mb-2"></i>
+                        Nessuna gift card trovata con i filtri selezionati.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<div th:each="card : ${cards}"
+     class="modal fade"
+     th:id="|giftCardDetailModal${card.id}|"
+     tabindex="-1"
+     aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header detail-hero border-0">
+                <div>
+                    <div class="small text-uppercase opacity-75 fw-bold">Dettaglio Gift Card</div>
+                    <h5 class="modal-title mb-0">
+                        <i class="bi bi-gift-fill me-2"></i>
+                        <span class="gift-code text-white" th:text="${card.code}">GIFT-50-000000</span>
+                    </h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="border rounded-4 p-3 h-100 bg-light">
+                            <div class="kv-label">Importo originario</div>
+                            <div class="kv-value fs-5">
+                                € <span th:text="${#numbers.formatDecimal(card.initialAmount, 1, 'POINT', 2, 'COMMA')}">0,00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded-4 p-3 h-100 bg-light">
+                            <div class="kv-label">Saldo rimanente</div>
+                            <div class="kv-value fs-5 text-success">
+                                € <span th:text="${#numbers.formatDecimal(card.remainingAmount, 1, 'POINT', 2, 'COMMA')}">0,00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded-4 p-3 h-100 bg-light">
+                            <div class="kv-label">Stato</div>
+                            <div class="kv-value">
+                                <span class="badge badge-status"
+                                      th:classappend="${' text-bg-' + card.statusCss}"
+                                      th:text="${card.status}">VALIDA</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded-4 p-3 h-100 bg-light">
+                            <div class="kv-label">Scadenza</div>
+                            <div class="kv-value" th:text="${card.expirationDate != null ? #temporals.format(card.expirationDate, 'dd/MM/yyyy') : '—'}">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-person-check me-1"></i>Cliente e destinatario</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="kv-label">Cliente richiedente</div>
+                                <div class="kv-value" th:text="${card.requesterLabel}">Cliente ID</div>
+                                <div class="small-muted" th:text="${card.requesterEmail != null ? card.requesterEmail : 'Email non disponibile'}">email</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="kv-label">ID cliente</div>
+                                <div class="kv-value" th:text="${card.customerId != null ? card.customerId : '—'}">—</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="kv-label">Nome destinatario</div>
+                                <div class="kv-value" th:text="${card.recipientFirstName != null ? card.recipientFirstName : '—'}">—</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="kv-label">Cognome destinatario</div>
+                                <div class="kv-value" th:text="${card.recipientLastName != null ? card.recipientLastName : '—'}">—</div>
+                            </div>
+                            <div class="col-12">
+                                <div class="kv-label">Email destinatario</div>
+                                <div class="kv-value" th:text="${card.recipientEmail != null ? card.recipientEmail : '—'}">—</div>
+                            </div>
+                            <div class="col-12">
+                                <div class="kv-label">Messaggio personalizzato</div>
+                                <div class="border rounded-4 p-3 bg-light mt-1"
+                                     th:text="${card.personalMessage != null and !#strings.isEmpty(card.personalMessage) ? card.personalMessage : '—'}">—</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-credit-card me-1"></i>Pagamento e riferimenti</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="kv-label">Metodo pagamento</div>
+                                <div class="kv-value" th:text="${card.paymentMethod}">STRIPE</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="kv-label">Stato acquisto</div>
+                                <div class="kv-value" th:text="${card.purchaseStatus}">PAID</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="kv-label">Data emissione</div>
+                                <div class="kv-value" th:text="${card.createdAt != null ? #temporals.format(card.createdAt, 'dd/MM/yyyy HH:mm') : '—'}">—</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="kv-label">Data pagamento</div>
+                                <div class="kv-value" th:text="${card.paidAt != null ? #temporals.format(card.paidAt, 'dd/MM/yyyy HH:mm') : '—'}">—</div>
+                            </div>
+                            <div class="col-12">
+                                <div class="kv-label">Stripe session</div>
+                                <div class="kv-value small" th:text="${card.stripeSessionId != null ? card.stripeSessionId : '—'}">—</div>
+                            </div>
+                            <div class="col-12">
+                                <div class="kv-label">PayPal order</div>
+                                <div class="kv-value small" th:text="${card.paypalOrderId != null ? card.paypalOrderId : '—'}">—</div>
+                            </div>
+                            <div class="col-12">
+                                <div class="kv-label">Riferimento provider</div>
+                                <div class="kv-value small" th:text="${card.providerReference != null ? card.providerReference : '—'}">—</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-clock-history me-1"></i>Movimenti della card</h6>
+                    <span class="small-muted" th:text="${#lists.size(card.movements) + ' movimenti'}">0 movimenti</span>
+                </div>
+
+                <div class="table-responsive border rounded-4 overflow-hidden">
+                    <table class="table table-sm movement-table mb-0 align-middle">
+                        <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Tipo</th>
+                            <th>Descrizione</th>
+                            <th>Ordine</th>
+                            <th class="text-end">Importo</th>
+                            <th class="text-end">Saldo dopo</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="movement : ${card.movements}">
+                            <td th:text="${movement.movementDate != null ? #temporals.format(movement.movementDate, 'dd/MM/yyyy HH:mm') : '—'}">—</td>
+                            <td>
+                                <span class="badge rounded-pill"
+                                      th:classappend="${movement.type == 'EMISSIONE' ? ' text-bg-success' : ' text-bg-danger'}"
+                                      th:text="${movement.type}">MOVIMENTO</span>
+                            </td>
+                            <td th:text="${movement.description}">Descrizione</td>
+                            <td>
+                                <a th:if="${movement.orderId != null}"
+                                   th:href="@{/admin/orders/{id}(id=${movement.orderId})}"
+                                   th:text="${'#' + movement.orderId}">#1</a>
+                                <span th:if="${movement.orderId == null}">—</span>
+                            </td>
+                            <td class="text-end fw-bold"
+                                th:classappend="${movement.amount != null and movement.amount.signum() < 0 ? ' text-danger' : ' text-success'}">
+                                € <span th:text="${#numbers.formatDecimal(movement.amount, 1, 'POINT', 2, 'COMMA')}">0,00</span>
+                            </td>
+                            <td class="text-end fw-bold">
+                                € <span th:text="${#numbers.formatDecimal(movement.balanceAfter, 1, 'POINT', 2, 'COMMA')}">0,00</span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(card.movements)}">
+                            <td colspan="6" class="text-center text-muted py-3">Nessun movimento disponibile.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">
+                    Chiudi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

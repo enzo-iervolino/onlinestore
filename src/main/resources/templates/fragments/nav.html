@@ -28,6 +28,19 @@
           <i class="bi bi-bag"></i><span>Shop</span>
         </a>
 
+        <a class="nav-link nav-link-giftcard"
+           th:if="${isAuthenticated}"
+           th:href="@{/giftcard}">
+          <i class="bi bi-gift"></i><span>Gift Card</span>
+        </a>
+
+        <label class="nav-link nav-link-giftcard"
+               th:if="${!isAuthenticated}"
+               for="login-modal-toggle"
+               style="cursor:pointer;">
+          <i class="bi bi-gift"></i><span>Gift Card</span>
+        </label>
+
 		
 		
 		
@@ -131,7 +144,7 @@
             </a>
 
             <a th:if="${isAdmin}"
-               th:href="@{/admin/giftcard-movimenti}"
+               th:href="@{/admin/giftcards}"
                class="nav-user-menu-item">
               GiftCard
             </a>
@@ -323,7 +336,7 @@
             </a>
 
             <a th:if="${isAdmin}"
-               th:href="@{/admin/giftcard-movimenti}"
+               th:href="@{/admin/giftcards}"
                class="nav-user-menu-item">
               GiftCard
             </a>

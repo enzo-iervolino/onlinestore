@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="it" xmlns:th="http://www.thymeleaf.org">
 <body>
@@ -723,4 +724,1187 @@
 </div>
 
 </body>
+=======
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="profileModal">
+
+  <!-- ===================== MODALE PROFILO ===================== -->
+  <div class="modal fade"
+       id="profileModal"
+       tabindex="-1"
+       aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered"
+         style="max-width:520px;">
+
+      <div class="modal-content shadow">
+
+        <!-- HEADER -->
+        <div class="modal-header py-2">
+          <h6 class="modal-title mb-0">👤 Profilo utente</h6>
+          <button type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"></button>
+        </div>
+
+        <!-- BODY -->
+        <div class="modal-body text-center">
+
+          <!-- AVATAR -->
+          <div class="d-flex justify-content-center mb-2">
+            <img class="profile-avatar"
+                 th:src="${currentUser != null and currentUser.avatar != null}
+			              ? @{/uploads/avatars/{img}(img=${currentUser.avatar})}
+			              : @{/images/avatar-default.png}"
+                 alt="Avatar">
+          </div>
+
+          <!-- EMAIL -->
+          <div class="fw-semibold small mb-3"
+               th:text="${currentUser != null ? currentUser.email : '—'}">
+          </div>
+
+          <!-- RIQUADRO DATI -->
+          <div class="border rounded bg-light p-3 text-start small">
+
+            <div class="d-flex align-items-center mb-2 gap-2">
+              <i class="bi bi-hash text-primary"></i>
+              <span th:text="${currentUser != null ? currentUser.id : '—'}"></span>
+            </div>
+
+            <div class="d-flex align-items-center mb-2 gap-2">
+              <i class="bi bi-person-fill text-primary"></i>
+              <span th:text="${currentUser != null ? currentUser.fullname : '—'}"></span>
+            </div>
+
+            <div class="d-flex align-items-center mb-2 gap-2">
+              <i class="bi bi-shield-lock-fill text-primary"></i>
+              <span th:text="${currentUser != null ? currentUser.role : '—'}"></span>
+            </div>
+
+            <div class="d-flex align-items-center mb-2 gap-2">
+              <i class="bi bi-telephone-fill text-primary"></i>
+              <span th:text="${currentUser != null ? currentUser.phone : '—'}"></span>
+            </div>
+
+            <div class="d-flex align-items-start gap-2">
+              <i class="bi bi-geo-alt-fill text-primary mt-1"></i>
+              <span th:if="${currentUser != null and currentUser.address != null}">
+                <span th:text="${currentUser.address.street}"></span>,
+                <span th:text="${currentUser.address.city}"></span>
+                <span th:text="${currentUser.address.zipcode}"></span>
+                (<span th:text="${currentUser.address.province}"></span>)
+              </span>
+              <span th:unless="${currentUser != null and currentUser.address != null}">
+                —
+              </span>
+            </div>
+
+          </div>
+
+        </div><!-- /modal-body -->
+
+        <!-- FOOTER - PULSANTI SMALL -->
+        <div class="modal-footer d-flex justify-content-between flex-wrap gap-1 py-2">
+
+          <form th:action="@{/profile/avatar}" method="post" class="m-0">
+            <button type="submit"
+                    class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-pencil me-1"></i>
+              Avatar
+            </button>
+          </form>
+
+          <form th:action="@{/password/change-password}" method="post" class="m-0">
+            <button type="submit"
+                    class="btn btn-outline-secondary btn-sm"
+                    title="Cambia password">
+              <i class="bi bi-key me-1"></i>
+              Password
+            </button>
+          </form>
+
+          <form th:action="@{/profile/phone}" method="post" class="m-0">
+            <button type="submit"
+                    class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-telephone me-1"></i>
+              Telefono
+            </button>
+          </form>
+
+          <form th:action="@{/profile/address}" method="post" class="m-0">
+            <button type="submit"
+                    class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-geo-alt me-1"></i>
+              Indirizzo
+            </button>
+          </form>
+
+          <button type="button"
+                  class="btn btn-outline-secondary btn-sm"
+                  id="openOrdersBtn"
+                  data-bs-dismiss="modal"
+                  data-bs-toggle="modal"
+                  data-bs-target="#userOrdersModal"
+                  th:attr="data-user-id=${currentUser != null ? currentUser.id : 0}">
+            <i class="bi bi-list-check me-1"></i>
+            Ordini
+          </button>
+
+          <button type="button"
+                  class="btn btn-outline-secondary btn-sm"
+                  id="openGiftCardsBtn"
+                  data-bs-dismiss="modal"
+                  data-bs-toggle="modal"
+                  data-bs-target="#userGiftCardsModal"
+                  th:attr="data-user-id=${currentUser != null ? currentUser.id : 0}">
+            <i class="bi bi-gift me-1"></i>
+            Gift Card
+          </button>
+
+          <button type="button"
+                  class="btn btn-outline-dark btn-sm"
+                  data-bs-dismiss="modal">
+            Chiudi
+          </button>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODALE ORDINI UTENTE ===================== -->
+  <div class="modal fade"
+       id="userOrdersModal"
+       tabindex="-1"
+       aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content shadow">
+
+        <div class="modal-header py-2">
+          <h6 class="modal-title mb-0">🧾 I miei ordini</h6>
+          <button type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <div id="userOrdersLoading" class="text-center py-4 d-none">
+            <div class="spinner-border" role="status" aria-hidden="true"></div>
+            <div class="small text-muted mt-2">Carico ordini...</div>
+          </div>
+
+          <div id="userOrdersEmpty" class="alert alert-light border d-none mb-0">
+            Nessun ordine trovato.
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead class="table-light">
+              <tr>
+                <th style="width:90px;">ID ordine</th>
+                <th style="width:140px;">Data</th>
+                <th>Modalità pagamento</th>
+                <th class="text-end" style="width:150px;">Importo totale</th>
+                <th class="text-center" style="width:90px;">Azioni</th>
+              </tr>
+              </thead>
+              <tbody id="userOrdersTbody">
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+        <div class="modal-footer py-2">
+
+          <button type="button"
+                  class="btn btn-outline-secondary btn-sm"
+                  data-bs-dismiss="modal"
+                  data-bs-toggle="modal"
+                  data-bs-target="#profileModal">
+            <i class="bi bi-arrow-left me-1"></i> Profilo
+          </button>
+
+          <button type="button" class="btn btn-outline-dark btn-sm" data-bs-dismiss="modal">Chiudi</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODALE DETTAGLIO ORDINE ===================== -->
+  <div class="modal fade"
+       id="userOrderDetailModal"
+       tabindex="-1"
+       aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content shadow">
+
+        <div class="modal-header py-2">
+          <div>
+            <h6 class="modal-title mb-0">
+              Dettaglio ordine <span class="fw-semibold" id="od_id">—</span>
+            </h6>
+            <div class="small ">
+              <span id="od_date">—</span>
+              <span class="mx-2">•</span>
+              <span id="od_status">—</span>
+              <span class="mx-2">•</span>
+              <span id="od_payment">—</span>
+            </div>
+          </div>
+
+          <button type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <div id="orderDetailLoading" class="text-center py-4 d-none">
+            <div class="spinner-border" role="status" aria-hidden="true"></div>
+            <div class="small text-muted mt-2">Carico dettaglio...</div>
+          </div>
+
+          <div id="orderDetailEmpty" class="alert alert-light border d-none mb-0">
+            Dettaglio non disponibile.
+          </div>
+
+          <div id="orderDetailContent" class="d-none">
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-7">
+                <div class="border rounded p-3 bg-light">
+                  <div class="small text-muted">Cliente</div>
+                  <div class="fw-semibold" id="od_customer">—</div>
+                  <div class="small" id="od_email">—</div>
+                  <div class="small mt-2" id="od_address">—</div>
+                </div>
+              </div>
+
+              <div class="col-md-5">
+                <div class="border rounded p-3 bg-light">
+                  <div class="d-flex justify-content-between small">
+                    <span>Subtotale</span>
+                    <span id="od_subtotal">—</span>
+                  </div>
+                  <div class="d-flex justify-content-between small">
+                    <span>Sconto</span>
+                    <span id="od_discount">—</span>
+                  </div>
+                  <div class="d-flex justify-content-between small">
+                    <span>Spedizione</span>
+                    <span id="od_shipping">—</span>
+                  </div>
+
+                  <div class="d-flex justify-content-between small d-none" id="od_giftcard_row">
+                    <span>Giftcard</span>
+                    <span id="od_giftcard">—</span>
+                  </div>
+
+                  <hr class="my-2">
+                  <div class="d-flex justify-content-between fw-semibold">
+                    <span>Totale</span>
+                    <span id="od_total">—</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                  <th style="width:160px;">Codice</th>
+                  <th>Prodotto</th>
+                  <th class="text-end" style="width:120px;">Prezzo</th>
+                  <th class="text-center" style="width:90px;">Qtà</th>
+                  <th class="text-end" style="width:140px;">Totale riga</th>
+                </tr>
+                </thead>
+                <tbody id="orderDetailItemsTbody">
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="modal-footer py-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="backToOrdersBtn">
+            <i class="bi bi-arrow-left me-1"></i> Torna agli ordini
+          </button>
+
+          <a class="btn btn-primary btn-sm disabled"
+             id="printOrderPdfBtn"
+             href="#"
+             target="_blank"
+             rel="noopener"
+             aria-disabled="true">
+            <i class="bi bi-printer me-1"></i> Stampa PDF
+          </a>
+
+          <button type="button" class="btn btn-outline-dark btn-sm" data-bs-dismiss="modal">Chiudi</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODALE GIFT CARD UTENTE ===================== -->
+  <div class="modal fade"
+       id="userGiftCardsModal"
+       tabindex="-1"
+       aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+      <div class="modal-content shadow">
+
+        <div class="modal-header py-2">
+          <h6 class="modal-title mb-0">🎁 Le mie Gift Card</h6>
+          <button type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <div id="userGiftCardsLoading" class="text-center py-4 d-none">
+            <div class="spinner-border" role="status" aria-hidden="true"></div>
+            <div class="small text-muted mt-2">Carico gift card...</div>
+          </div>
+
+          <div id="userGiftCardsEmpty" class="alert alert-light border d-none mb-0">
+            Nessuna gift card trovata.
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead class="table-light">
+              <tr>
+                <th style="width:220px;">Codice</th>
+                <th class="text-end" style="width:150px;">Importo originario</th>
+                <th class="text-end" style="width:150px;">Saldo rimanente</th>
+                <th>Destinatario</th>
+                <th style="width:120px;">Stato</th>
+                <th class="text-center" style="width:90px;">Azioni</th>
+              </tr>
+              </thead>
+              <tbody id="userGiftCardsTbody">
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+        <div class="modal-footer py-2">
+
+          <button type="button"
+                  class="btn btn-outline-secondary btn-sm"
+                  data-bs-dismiss="modal"
+                  data-bs-toggle="modal"
+                  data-bs-target="#profileModal">
+            <i class="bi bi-arrow-left me-1"></i> Profilo
+          </button>
+
+          <a class="btn btn-primary btn-sm"
+             th:href="@{/giftcard}">
+            <i class="bi bi-plus-circle me-1"></i> Acquista Gift Card
+          </a>
+
+          <button type="button" class="btn btn-outline-dark btn-sm" data-bs-dismiss="modal">Chiudi</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODALE DETTAGLIO GIFT CARD ===================== -->
+  <div class="modal fade"
+       id="userGiftCardDetailModal"
+       tabindex="-1"
+       aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content shadow">
+
+        <div class="modal-header py-2">
+          <div>
+            <h6 class="modal-title mb-0">
+              Dettaglio Gift Card <span class="fw-semibold" id="gcd_code">—</span>
+            </h6>
+            <div class="small">
+              <span id="gcd_status">—</span>
+              <span class="mx-2">•</span>
+              Scadenza <span id="gcd_expiration">—</span>
+            </div>
+          </div>
+
+          <button type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <div id="giftCardDetailLoading" class="text-center py-4 d-none">
+            <div class="spinner-border" role="status" aria-hidden="true"></div>
+            <div class="small text-muted mt-2">Carico dettaglio gift card...</div>
+          </div>
+
+          <div id="giftCardDetailEmpty" class="alert alert-light border d-none mb-0">
+            Dettaglio gift card non disponibile.
+          </div>
+
+          <div id="giftCardDetailContent" class="d-none">
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <div class="border rounded p-3 bg-light h-100">
+                  <div class="small text-muted">Importo originario</div>
+                  <div class="fw-semibold fs-5" id="gcd_initial">—</div>
+                  <div class="small text-muted mt-2">Saldo rimanente</div>
+                  <div class="fw-semibold fs-5" id="gcd_remaining">—</div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="border rounded p-3 bg-light h-100">
+                  <div class="small text-muted">Destinatario</div>
+                  <div class="fw-semibold" id="gcd_recipient">—</div>
+                  <div class="small text-muted mt-2">Messaggio</div>
+                  <div class="small" id="gcd_message">—</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                  <th style="width:170px;">Data</th>
+                  <th>Movimento</th>
+                  <th style="width:110px;">Ordine</th>
+                  <th class="text-end" style="width:130px;">Importo</th>
+                  <th class="text-end" style="width:150px;">Saldo dopo</th>
+                </tr>
+                </thead>
+                <tbody id="giftCardMovementsTbody">
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="modal-footer py-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="backToGiftCardsBtn">
+            <i class="bi bi-arrow-left me-1"></i> Torna alle gift card
+          </button>
+
+          <button type="button" class="btn btn-outline-dark btn-sm" data-bs-dismiss="modal">Chiudi</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== JS (ordini + dettaglio) ===================== -->
+  <script th:inline="javascript">
+    (function () {
+
+      const openBtn = document.getElementById('openOrdersBtn');
+      const printOrderPdfBtn = document.getElementById('printOrderPdfBtn');
+
+      const ordersModalEl = document.getElementById('userOrdersModal');
+      const ordersTbody = document.getElementById('userOrdersTbody');
+      const ordersLoadingEl = document.getElementById('userOrdersLoading');
+      const ordersEmptyEl = document.getElementById('userOrdersEmpty');
+
+      const detailModalEl = document.getElementById('userOrderDetailModal');
+      const detailLoadingEl = document.getElementById('orderDetailLoading');
+      const detailEmptyEl = document.getElementById('orderDetailEmpty');
+      const detailContentEl = document.getElementById('orderDetailContent');
+      const detailItemsTbody = document.getElementById('orderDetailItemsTbody');
+      const backToOrdersBtn = document.getElementById('backToOrdersBtn');
+
+      const od_id = document.getElementById('od_id');
+      const od_date = document.getElementById('od_date');
+      const od_status = document.getElementById('od_status');
+      const od_payment = document.getElementById('od_payment');
+      const od_customer = document.getElementById('od_customer');
+      const od_email = document.getElementById('od_email');
+      const od_address = document.getElementById('od_address');
+      const od_subtotal = document.getElementById('od_subtotal');
+      const od_discount = document.getElementById('od_discount');
+      const od_shipping = document.getElementById('od_shipping');
+      const od_giftcard_row = document.getElementById('od_giftcard_row');
+      const od_giftcard = document.getElementById('od_giftcard');
+      const od_total = document.getElementById('od_total');
+
+      if (!openBtn || !ordersModalEl || !ordersTbody || !detailModalEl) return;
+
+      const eur = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' });
+
+      function toNumber(v) {
+        if (v == null) return null;
+
+        if (typeof v === 'number') {
+          return Number.isFinite(v) ? v : null;
+        }
+
+        if (typeof v === 'string') {
+          let s = v.trim();
+          if (!s) return null;
+
+          s = s.replace(/\s+/g, '');
+          s = s.replace(/[€]/g, '');
+          s = s.replace(/[^\d,.\-]/g, '');
+
+          if (!s) return null;
+
+          const hasComma = s.includes(',');
+          const hasDot = s.includes('.');
+
+          if (hasComma && hasDot) {
+            if (s.lastIndexOf(',') > s.lastIndexOf('.')) {
+              s = s.replace(/\./g, '').replace(',', '.');
+            } else {
+              s = s.replace(/,/g, '');
+            }
+          } else if (hasComma) {
+            s = s.replace(',', '.');
+          }
+
+          const n = Number(s);
+          return Number.isFinite(n) ? n : null;
+        }
+
+        return null;
+      }
+
+      function round2(n) {
+        return Math.round((n + Number.EPSILON) * 100) / 100;
+      }
+
+      function absIfNumber(n) {
+        return (typeof n === 'number' && Number.isFinite(n)) ? Math.abs(n) : null;
+      }
+
+      function escapeHtml(s) {
+        return (s ?? '').toString()
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+      }
+
+      function setOrdersLoading(v) {
+        if (!ordersLoadingEl) return;
+        ordersLoadingEl.classList.toggle('d-none', !v);
+      }
+
+      function setOrdersEmpty(v) {
+        if (!ordersEmptyEl) return;
+        ordersEmptyEl.classList.toggle('d-none', !v);
+      }
+
+      function setDetailLoading(v) {
+        if (!detailLoadingEl) return;
+        detailLoadingEl.classList.toggle('d-none', !v);
+      }
+
+      function setDetailEmpty(v) {
+        if (!detailEmptyEl) return;
+        detailEmptyEl.classList.toggle('d-none', !v);
+      }
+
+      function setDetailContent(v) {
+        if (!detailContentEl) return;
+        detailContentEl.classList.toggle('d-none', !v);
+      }
+
+      function formatDateOnly(isoDate) {
+        if (!isoDate) return '—';
+        try {
+          return new Date(isoDate + 'T00:00:00').toLocaleDateString('it-IT');
+        } catch (e) {
+          return isoDate;
+        }
+      }
+
+      function formatDateTime(isoDateTime, fallbackDate) {
+        if (isoDateTime) {
+          try {
+            return new Date(isoDateTime).toLocaleString('it-IT');
+          } catch (e) {
+            return isoDateTime;
+          }
+        }
+        return fallbackDate ? formatDateOnly(fallbackDate) : '—';
+      }
+
+      function pickFirstNumeric(...values) {
+        for (const value of values) {
+          const n = toNumber(value);
+          if (n != null) return n;
+        }
+        return null;
+      }
+
+      function extractGiftcardAmount(order) {
+        if (!order || typeof order !== 'object') return null;
+
+        const direct = pickFirstNumeric(
+          order.giftcardAmount,
+          order.giftCardAmount,
+          order.giftcardValue,
+          order.giftCardValue,
+          order.giftcardUsedAmount,
+          order.giftCardUsedAmount,
+          order.giftcardUsed,
+          order.giftCardUsed
+        );
+        if (direct != null) return direct;
+
+        const summary = order.summary || order.breakdown || null;
+        if (summary && typeof summary === 'object') {
+          const nested = pickFirstNumeric(
+            summary.giftcardAmount,
+            summary.giftCardAmount,
+            summary.giftcardValue,
+            summary.giftCardValue,
+            summary.giftcardUsedAmount,
+            summary.giftCardUsedAmount
+          );
+          if (nested != null) return nested;
+        }
+
+        return null;
+      }
+
+      function inferGiftcardAmount(sub, disc, ship, tot) {
+        if (sub == null || disc == null || ship == null || tot == null) return null;
+
+        const inferred = round2((sub - disc + ship) - tot);
+
+        if (!Number.isFinite(inferred) || inferred <= 0) return null;
+
+        return inferred;
+      }
+
+      function renderGiftcardLine(giftRaw) {
+        const giftAbs = absIfNumber(giftRaw);
+
+        if (giftAbs != null && giftAbs > 0) {
+          if (od_giftcard_row) od_giftcard_row.classList.remove('d-none');
+          if (od_giftcard) od_giftcard.textContent = '-' + eur.format(giftAbs);
+        } else {
+          if (od_giftcard_row) od_giftcard_row.classList.add('d-none');
+          if (od_giftcard) od_giftcard.textContent = '—';
+        }
+      }
+
+      async function loadOrders() {
+        const userId = openBtn.getAttribute('data-user-id');
+
+        ordersTbody.innerHTML = '';
+        setOrdersEmpty(false);
+        setOrdersLoading(true);
+
+        try {
+          const res = await fetch(`/profile/orders?userId=${encodeURIComponent(userId)}`, {
+            headers: { 'Accept': 'application/json' }
+          });
+
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+
+          const data = await res.json();
+
+          if (!Array.isArray(data) || data.length === 0) {
+            setOrdersEmpty(true);
+            return;
+          }
+
+          const rows = data.map(o => {
+            const id = o.id ?? '';
+            const date = o.createdDate ? formatDateOnly(o.createdDate) : '—';
+            const pm = o.paymentMethod ?? '—';
+            const totalNum = toNumber(o.totalAmount);
+            const total = (totalNum != null) ? eur.format(totalNum) : '—';
+
+            return `
+              <tr>
+                <td class="fw-semibold">#${escapeHtml(id)}</td>
+                <td>${escapeHtml(date)}</td>
+                <td>${escapeHtml(pm)}</td>
+                <td class="text-end">${escapeHtml(total)}</td>
+                <td class="text-center">
+                  <button type="button"
+                          class="btn btn-outline-secondary btn-sm open-order-detail"
+                          data-order-id="${escapeHtml(id)}"
+                          title="Vedi ordine">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+
+          ordersTbody.innerHTML = rows;
+
+        } catch (e) {
+          console.error(e);
+          setOrdersEmpty(true);
+        } finally {
+          setOrdersLoading(false);
+        }
+      }
+
+      async function loadOrderDetail(orderId) {
+        setDetailEmpty(false);
+        setDetailContent(false);
+        setDetailLoading(true);
+        detailItemsTbody.innerHTML = '';
+
+        od_id.textContent = '#' + (orderId ?? '—');
+        od_date.textContent = '—';
+        od_status.textContent = '—';
+        od_payment.textContent = '—';
+
+        od_subtotal.textContent = '—';
+        od_discount.textContent = '—';
+        od_shipping.textContent = '—';
+        od_total.textContent = '—';
+        od_customer.textContent = '—';
+        od_email.textContent = '—';
+        od_address.textContent = '—';
+
+        if (od_giftcard_row) od_giftcard_row.classList.add('d-none');
+        if (od_giftcard) od_giftcard.textContent = '—';
+
+        if (printOrderPdfBtn) {
+          printOrderPdfBtn.href = '#';
+          printOrderPdfBtn.classList.add('disabled');
+          printOrderPdfBtn.setAttribute('aria-disabled', 'true');
+        }
+
+        try {
+          const res = await fetch(`/profile/orders/${encodeURIComponent(orderId)}`, {
+            headers: { 'Accept': 'application/json' }
+          });
+
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+
+          const o = await res.json();
+          if (!o || !o.id) {
+            setDetailEmpty(true);
+            return;
+          }
+
+          if (printOrderPdfBtn) {
+            printOrderPdfBtn.href = `/profile/orders/${encodeURIComponent(o.id)}/pdf`;
+            printOrderPdfBtn.classList.remove('disabled');
+            printOrderPdfBtn.setAttribute('aria-disabled', 'false');
+          }
+
+          od_id.textContent = '#' + o.id;
+          od_date.textContent = formatDateTime(o.createdAt, o.createdDate);
+          od_status.textContent = o.status ?? '—';
+          od_payment.textContent = o.paymentMethod ?? '—';
+
+          od_customer.textContent = o.customerName ?? '—';
+          od_email.textContent = o.customerEmail ?? '—';
+          od_address.textContent = o.customerAddress ?? '—';
+
+          const sub = toNumber(o.subtotal);
+          const disc = toNumber(o.discountValue) ?? 0;
+          const ship = toNumber(o.shippingCost) ?? 0;
+          const tot = toNumber(o.totalAmount);
+
+          od_subtotal.textContent = sub != null ? eur.format(sub) : '—';
+          od_discount.textContent = (disc != null) ? ('-' + eur.format(Math.abs(disc))) : '—';
+          od_shipping.textContent = ship != null ? eur.format(ship) : '—';
+
+          let giftRaw = extractGiftcardAmount(o);
+
+          if (giftRaw == null) {
+            giftRaw = inferGiftcardAmount(
+              sub,
+              Math.abs(disc),
+              ship,
+              tot
+            );
+          }
+
+          renderGiftcardLine(giftRaw);
+
+          od_total.textContent = tot != null ? eur.format(tot) : '—';
+
+          const items = Array.isArray(o.items) ? o.items : [];
+          if (items.length === 0) {
+            detailItemsTbody.innerHTML = `
+              <tr>
+                <td colspan="5" class="text-center text-muted small py-3">Nessuna riga ordine.</td>
+              </tr>
+            `;
+          } else {
+            detailItemsTbody.innerHTML = items.map(it => {
+              const code = it.variantCode ?? it.productCode ?? it.sku ?? '—';
+              const name = it.productName ?? 'Articolo';
+              const unit = toNumber(it.unitPrice) ?? 0;
+              const qty = toNumber(it.quantity) ?? 0;
+              const line = toNumber(it.lineTotal);
+              const lineTot = (line != null) ? line : round2(unit * qty);
+
+              return `
+                <tr>
+                  <td class="small fw-semibold">${escapeHtml(code)}</td>
+                  <td>${escapeHtml(name)}</td>
+                  <td class="text-end">${eur.format(unit)}</td>
+                  <td class="text-center">${escapeHtml(qty)}</td>
+                  <td class="text-end">${eur.format(lineTot)}</td>
+                </tr>
+              `;
+            }).join('');
+          }
+
+          setDetailContent(true);
+
+        } catch (e) {
+          console.error(e);
+          setDetailEmpty(true);
+        } finally {
+          setDetailLoading(false);
+        }
+      }
+
+      ordersModalEl.addEventListener('shown.bs.modal', loadOrders);
+
+      ordersTbody.addEventListener('click', function (e) {
+        const btn = e.target.closest('.open-order-detail');
+        if (!btn) return;
+
+        const orderId = btn.getAttribute('data-order-id');
+        if (!orderId) return;
+
+        const ordersModal = bootstrap.Modal.getOrCreateInstance(ordersModalEl);
+        const detailModal = bootstrap.Modal.getOrCreateInstance(detailModalEl);
+
+        ordersModal.hide();
+        detailModal.show();
+        loadOrderDetail(orderId);
+      });
+
+      backToOrdersBtn?.addEventListener('click', function () {
+        const detailModal = bootstrap.Modal.getOrCreateInstance(detailModalEl);
+        const ordersModal = bootstrap.Modal.getOrCreateInstance(ordersModalEl);
+        detailModal.hide();
+        ordersModal.show();
+      });
+
+    })();
+  </script>
+
+  <!-- ===================== JS (gift card + movimenti) ===================== -->
+  <script th:inline="javascript">
+    (function () {
+
+      const openGiftCardsBtn = document.getElementById('openGiftCardsBtn');
+      const giftCardsModalEl = document.getElementById('userGiftCardsModal');
+      const giftCardsTbody = document.getElementById('userGiftCardsTbody');
+      const giftCardsLoadingEl = document.getElementById('userGiftCardsLoading');
+      const giftCardsEmptyEl = document.getElementById('userGiftCardsEmpty');
+
+      const giftCardDetailModalEl = document.getElementById('userGiftCardDetailModal');
+      const giftCardDetailLoadingEl = document.getElementById('giftCardDetailLoading');
+      const giftCardDetailEmptyEl = document.getElementById('giftCardDetailEmpty');
+      const giftCardDetailContentEl = document.getElementById('giftCardDetailContent');
+      const giftCardMovementsTbody = document.getElementById('giftCardMovementsTbody');
+      const backToGiftCardsBtn = document.getElementById('backToGiftCardsBtn');
+
+      const gcd_code = document.getElementById('gcd_code');
+      const gcd_status = document.getElementById('gcd_status');
+      const gcd_expiration = document.getElementById('gcd_expiration');
+      const gcd_initial = document.getElementById('gcd_initial');
+      const gcd_remaining = document.getElementById('gcd_remaining');
+      const gcd_recipient = document.getElementById('gcd_recipient');
+      const gcd_message = document.getElementById('gcd_message');
+
+      if (!openGiftCardsBtn || !giftCardsModalEl || !giftCardsTbody || !giftCardDetailModalEl) return;
+
+      const eur = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' });
+
+      function toNumber(v) {
+        if (v == null) return null;
+
+        if (typeof v === 'number') {
+          return Number.isFinite(v) ? v : null;
+        }
+
+        if (typeof v === 'string') {
+          let s = v.trim();
+          if (!s) return null;
+
+          s = s.replace(/\s+/g, '');
+          s = s.replace(/[€]/g, '');
+          s = s.replace(/[^\d,.\-]/g, '');
+
+          if (!s) return null;
+
+          const hasComma = s.includes(',');
+          const hasDot = s.includes('.');
+
+          if (hasComma && hasDot) {
+            if (s.lastIndexOf(',') > s.lastIndexOf('.')) {
+              s = s.replace(/\./g, '').replace(',', '.');
+            } else {
+              s = s.replace(/,/g, '');
+            }
+          } else if (hasComma) {
+            s = s.replace(',', '.');
+          }
+
+          const n = Number(s);
+          return Number.isFinite(n) ? n : null;
+        }
+
+        return null;
+      }
+
+      function escapeHtml(s) {
+        return (s ?? '').toString()
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+      }
+
+      function setGiftCardsLoading(v) {
+        if (!giftCardsLoadingEl) return;
+        giftCardsLoadingEl.classList.toggle('d-none', !v);
+      }
+
+      function setGiftCardsEmpty(v) {
+        if (!giftCardsEmptyEl) return;
+        giftCardsEmptyEl.classList.toggle('d-none', !v);
+      }
+
+      function setGiftCardDetailLoading(v) {
+        if (!giftCardDetailLoadingEl) return;
+        giftCardDetailLoadingEl.classList.toggle('d-none', !v);
+      }
+
+      function setGiftCardDetailEmpty(v) {
+        if (!giftCardDetailEmptyEl) return;
+        giftCardDetailEmptyEl.classList.toggle('d-none', !v);
+      }
+
+      function setGiftCardDetailContent(v) {
+        if (!giftCardDetailContentEl) return;
+        giftCardDetailContentEl.classList.toggle('d-none', !v);
+      }
+
+      function formatDateOnly(isoDate) {
+        if (!isoDate) return '—';
+        try {
+          return new Date(isoDate + 'T00:00:00').toLocaleDateString('it-IT');
+        } catch (e) {
+          return isoDate;
+        }
+      }
+
+      function formatDateTime(isoDateTime) {
+        if (!isoDateTime) return '—';
+        try {
+          return new Date(isoDateTime).toLocaleString('it-IT');
+        } catch (e) {
+          return isoDateTime;
+        }
+      }
+
+      function formatMoney(value) {
+        const n = toNumber(value);
+        return n != null ? eur.format(n) : '—';
+      }
+
+      function statusBadge(status) {
+        const normalized = (status ?? '—').toString().toUpperCase();
+        let cls = 'text-bg-secondary';
+        if (normalized === 'ATTIVA') cls = 'text-bg-success';
+        if (normalized === 'SCADUTA' || normalized === 'ESAURITA') cls = 'text-bg-warning';
+        if (normalized === 'DISATTIVATA') cls = 'text-bg-danger';
+        return `<span class="badge ${cls}">${escapeHtml(normalized)}</span>`;
+      }
+
+      async function loadGiftCards() {
+        const userId = openGiftCardsBtn.getAttribute('data-user-id');
+
+        giftCardsTbody.innerHTML = '';
+        setGiftCardsEmpty(false);
+        setGiftCardsLoading(true);
+
+        try {
+          const res = await fetch(`/profile/giftcards?userId=${encodeURIComponent(userId)}`, {
+            headers: { 'Accept': 'application/json' }
+          });
+
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+
+          const data = await res.json();
+
+          if (!Array.isArray(data) || data.length === 0) {
+            setGiftCardsEmpty(true);
+            return;
+          }
+
+          giftCardsTbody.innerHTML = data.map(card => {
+            const id = card.id ?? '';
+            const code = card.code ?? '—';
+            const initial = formatMoney(card.initialAmount);
+            const remaining = formatMoney(card.remainingAmount);
+            const recipient = card.recipient ?? '—';
+            const status = card.status ?? '—';
+
+            return `
+              <tr>
+                <td class="fw-semibold small">${escapeHtml(code)}</td>
+                <td class="text-end">${escapeHtml(initial)}</td>
+                <td class="text-end fw-semibold">${escapeHtml(remaining)}</td>
+                <td class="small">${escapeHtml(recipient)}</td>
+                <td>${statusBadge(status)}</td>
+                <td class="text-center">
+                  <button type="button"
+                          class="btn btn-outline-secondary btn-sm open-giftcard-detail"
+                          data-giftcard-id="${escapeHtml(id)}"
+                          title="Vedi movimenti">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+
+        } catch (e) {
+          console.error(e);
+          setGiftCardsEmpty(true);
+        } finally {
+          setGiftCardsLoading(false);
+        }
+      }
+
+      async function loadGiftCardDetail(giftCardId) {
+        setGiftCardDetailEmpty(false);
+        setGiftCardDetailContent(false);
+        setGiftCardDetailLoading(true);
+        giftCardMovementsTbody.innerHTML = '';
+
+        gcd_code.textContent = '—';
+        gcd_status.textContent = '—';
+        gcd_expiration.textContent = '—';
+        gcd_initial.textContent = '—';
+        gcd_remaining.textContent = '—';
+        gcd_recipient.textContent = '—';
+        gcd_message.textContent = '—';
+
+        try {
+          const res = await fetch(`/profile/giftcards/${encodeURIComponent(giftCardId)}`, {
+            headers: { 'Accept': 'application/json' }
+          });
+
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+
+          const card = await res.json();
+          if (!card || !card.id) {
+            setGiftCardDetailEmpty(true);
+            return;
+          }
+
+          gcd_code.textContent = card.code ?? '—';
+          gcd_status.innerHTML = statusBadge(card.status ?? '—');
+          gcd_expiration.textContent = card.expirationDate ? formatDateOnly(card.expirationDate) : '—';
+          gcd_initial.textContent = formatMoney(card.initialAmount);
+          gcd_remaining.textContent = formatMoney(card.remainingAmount);
+          gcd_recipient.textContent = card.recipient ?? '—';
+          gcd_message.textContent = card.personalMessage ?? '—';
+
+          const movements = Array.isArray(card.movements) ? card.movements : [];
+          if (movements.length === 0) {
+            giftCardMovementsTbody.innerHTML = `
+              <tr>
+                <td colspan="5" class="text-center text-muted small py-3">Nessun movimento trovato.</td>
+              </tr>
+            `;
+          } else {
+            giftCardMovementsTbody.innerHTML = movements.map(m => {
+              const amount = toNumber(m.amount);
+              const amountText = amount != null ? eur.format(amount) : '—';
+              const orderText = m.orderId ? ('#' + m.orderId) : '—';
+              const type = m.description ?? m.type ?? 'Movimento';
+
+              return `
+                <tr>
+                  <td class="small">${escapeHtml(formatDateTime(m.movementDate))}</td>
+                  <td>${escapeHtml(type)}</td>
+                  <td>${escapeHtml(orderText)}</td>
+                  <td class="text-end ${amount != null && amount < 0 ? 'text-danger' : 'text-success'}">${escapeHtml(amountText)}</td>
+                  <td class="text-end fw-semibold">${escapeHtml(formatMoney(m.balanceAfter))}</td>
+                </tr>
+              `;
+            }).join('');
+          }
+
+          setGiftCardDetailContent(true);
+
+        } catch (e) {
+          console.error(e);
+          setGiftCardDetailEmpty(true);
+        } finally {
+          setGiftCardDetailLoading(false);
+        }
+      }
+
+      giftCardsModalEl.addEventListener('shown.bs.modal', loadGiftCards);
+
+      giftCardsTbody.addEventListener('click', function (e) {
+        const btn = e.target.closest('.open-giftcard-detail');
+        if (!btn) return;
+
+        const giftCardId = btn.getAttribute('data-giftcard-id');
+        if (!giftCardId) return;
+
+        const listModal = bootstrap.Modal.getOrCreateInstance(giftCardsModalEl);
+        const detailModal = bootstrap.Modal.getOrCreateInstance(giftCardDetailModalEl);
+
+        listModal.hide();
+        detailModal.show();
+        loadGiftCardDetail(giftCardId);
+      });
+
+      backToGiftCardsBtn?.addEventListener('click', function () {
+        const detailModal = bootstrap.Modal.getOrCreateInstance(giftCardDetailModalEl);
+        const listModal = bootstrap.Modal.getOrCreateInstance(giftCardsModalEl);
+        detailModal.hide();
+        listModal.show();
+      });
+
+    })();
+  </script>
+
+</div>
+
+</body>
+>>>>>>> af32148 (Implementa gestione gift card)
 </html>

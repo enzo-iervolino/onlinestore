@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Gift Card - Online Store')}"></head>
+
+<body>
+<div th:replace="~{fragments/nav :: nav}"></div>
+
+<main class="giftcard-page">
+    <style>
+        .giftcard-page {
+            min-height: calc(100vh - 180px);
+            padding: 46px 0 76px;
+            color: #6d4b16;
+            background:
+                radial-gradient(circle at 10% 10%, rgba(255, 255, 255, .88), transparent 22%),
+                radial-gradient(circle at 88% 14%, rgba(215, 176, 95, .26), transparent 28%),
+                radial-gradient(circle at 50% 100%, rgba(190, 145, 58, .18), transparent 36%),
+                linear-gradient(180deg, #fbf5eb 0%, #f6ead7 46%, #edd7b0 100%);
+        }
+
+        .giftcard-container {
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+        }
+
+        .giftcard-intro {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 22px;
+            align-items: end;
+            margin-bottom: 26px;
+        }
+
+        .giftcard-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(124, 86, 18, .82);
+            font-size: .78rem;
+            font-weight: 800;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .giftcard-kicker::before {
+            content: "";
+            width: 34px;
+            height: 1px;
+            background: linear-gradient(90deg, #b8862c, #edcc81);
+            opacity: .95;
+        }
+
+        .giftcard-title {
+            max-width: 760px;
+            margin: 0;
+            font-size: clamp(2.2rem, 4vw, 4rem);
+            line-height: .98;
+            letter-spacing: -.04em;
+            color: #7b5517;
+            text-shadow: 0 2px 10px rgba(255, 255, 255, .25);
+        }
+
+        .giftcard-subtitle {
+            max-width: 710px;
+            margin: 14px 0 0;
+            color: rgba(95, 71, 30, .88);
+            font-size: 1rem;
+        }
+
+        .giftcard-trust-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .giftcard-trust-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 13px;
+            border-radius: 999px;
+            color: #78551a;
+            background: rgba(255, 252, 246, .72);
+            border: 1px solid rgba(197, 153, 74, .26);
+            box-shadow: 0 10px 24px rgba(143, 103, 35, .10);
+            font-size: .85rem;
+            white-space: nowrap;
+        }
+
+        .giftcard-layout {
+            display: grid;
+            grid-template-columns: minmax(300px, .9fr) minmax(380px, 1.1fr);
+            gap: 28px;
+            align-items: start;
+        }
+
+        .giftcard-showcase,
+        .giftcard-panel {
+            background: rgba(255, 250, 242, .88);
+            border: 1px solid rgba(196, 152, 71, .22);
+            border-radius: 26px;
+            box-shadow: 0 24px 60px rgba(128, 95, 35, .16);
+            backdrop-filter: blur(12px);
+        }
+
+        .giftcard-showcase {
+            padding: 20px;
+            position: sticky;
+            top: 86px;
+            overflow: hidden;
+        }
+
+        .giftcard-showcase::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(135deg, rgba(230, 196, 126, .22), transparent 32%),
+                radial-gradient(circle at 76% 16%, rgba(255, 255, 255, .76), transparent 28%),
+                radial-gradient(circle at 15% 90%, rgba(194, 145, 55, .12), transparent 26%);
+        }
+
+        .giftcard-preview-card {
+            position: relative;
+            z-index: 1;
+            border-radius: 22px;
+            overflow: hidden;
+            background:
+                linear-gradient(145deg, rgba(255, 249, 239, .96) 0%, rgba(246, 228, 192, .88) 100%),
+                url('/images/gift-card-bg-pattern.svg') center/cover no-repeat;
+            border: 1px solid rgba(196, 152, 71, .26);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .65);
+        }
+
+        .giftcard-preview-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 14% 18%, rgba(255, 255, 255, .76), transparent 25%),
+                linear-gradient(145deg, rgba(215, 177, 89, .14), transparent 38%),
+                linear-gradient(325deg, rgba(255, 233, 180, .16), transparent 30%);
+            pointer-events: none;
+        }
+
+        .giftcard-image-wrap {
+            position: relative;
+            z-index: 1;
+            padding: 18px 18px 0;
+        }
+
+        .giftcard-image {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 18px;
+            border: 1px solid rgba(208, 171, 92, .22);
+            box-shadow: 0 18px 38px rgba(150, 109, 42, .18);
+            background: rgba(255, 255, 255, .56);
+        }
+
+        .giftcard-amount-card {
+            position: relative;
+            z-index: 1;
+            padding: 22px 22px 24px;
+        }
+
+        .giftcard-amount-card span.label {
+            display: block;
+            color: rgba(125, 89, 24, .78);
+            font-size: .78rem;
+            text-transform: uppercase;
+            letter-spacing: .16em;
+            font-weight: 800;
+        }
+
+        .giftcard-amount-card strong {
+            display: block;
+            margin-top: 7px;
+            color: #a26a12;
+            font-size: clamp(2.3rem, 5vw, 4rem);
+            font-weight: 850;
+            letter-spacing: -.05em;
+            line-height: .95;
+        }
+
+        .giftcard-meta {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .giftcard-meta div {
+            border-radius: 18px;
+            background: rgba(255, 253, 248, .72);
+            border: 1px solid rgba(200, 159, 80, .18);
+            padding: 14px 15px;
+            color: rgba(102, 74, 29, .84);
+            font-size: .88rem;
+            box-shadow: 0 10px 24px rgba(150, 109, 42, .08);
+        }
+
+        .giftcard-meta b {
+            display: block;
+            margin-bottom: 4px;
+            color: #8d5e12;
+        }
+
+        .giftcard-panel {
+            padding: clamp(22px, 4vw, 36px);
+        }
+
+        .giftcard-section {
+            padding: 22px 0;
+            border-top: 1px solid rgba(199, 154, 74, .16);
+        }
+
+        .giftcard-section:first-of-type {
+            padding-top: 0;
+            border-top: 0;
+        }
+
+        .giftcard-section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 0 14px;
+            color: #7c5516;
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -.01em;
+        }
+
+        .giftcard-section-title i {
+            color: #bd8a2f;
+        }
+
+        .amount-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .amount-option,
+        .payment-option {
+            position: relative;
+            display: block;
+            margin: 0;
+        }
+
+        .amount-option input,
+        .payment-option input {
+            position: absolute;
+            opacity: 0;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .amount-option span {
+            display: flex;
+            min-height: 52px;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(202, 163, 85, .20);
+            border-radius: 14px;
+            background: rgba(255, 252, 247, .82);
+            color: #855b18;
+            font-weight: 800;
+            cursor: pointer;
+            transition: .18s ease;
+            box-shadow: 0 10px 22px rgba(165, 120, 45, .06);
+        }
+
+        .amount-option input:checked + span,
+        .amount-option span:hover {
+            background: linear-gradient(135deg, #be8a2b, #f3d185);
+            border-color: rgba(184, 134, 44, .58);
+            color: #5c3808;
+            box-shadow: 0 14px 32px rgba(170, 128, 53, .20);
+            transform: translateY(-1px);
+        }
+
+        .giftcard-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .giftcard-field-full {
+            grid-column: 1 / -1;
+        }
+
+        .giftcard-field label {
+            display: block;
+            margin-bottom: 7px;
+            color: #7c5516;
+            font-weight: 700;
+            font-size: .9rem;
+        }
+
+        .giftcard-field input,
+        .giftcard-field select,
+        .giftcard-field textarea {
+            width: 100%;
+            border: 1px solid rgba(207, 171, 97, .24);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, .86);
+            color: #5f4319;
+            padding: 12px 14px;
+            outline: none;
+            transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+            box-shadow: inset 0 1px 2px rgba(154, 111, 41, .04);
+        }
+
+        .giftcard-field select option {
+            color: #5f4319;
+            background: #fffdf8;
+        }
+
+        .giftcard-field textarea {
+            min-height: 116px;
+            resize: vertical;
+        }
+
+        .giftcard-field input::placeholder,
+        .giftcard-field textarea::placeholder {
+            color: rgba(121, 89, 37, .40);
+        }
+
+        .giftcard-field input:focus,
+        .giftcard-field select:focus,
+        .giftcard-field textarea:focus {
+            background: #fffefb;
+            border-color: rgba(193, 145, 48, .76);
+            box-shadow: 0 0 0 4px rgba(198, 153, 73, .14);
+        }
+
+        .payment-method-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .payment-option span {
+            display: flex;
+            min-height: 82px;
+            flex-direction: column;
+            justify-content: center;
+            gap: 4px;
+            border: 1px solid rgba(202, 163, 85, .20);
+            border-radius: 18px;
+            background: rgba(255, 252, 247, .82);
+            color: #7a5518;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: .18s ease;
+            box-shadow: 0 10px 22px rgba(165, 120, 45, .06);
+        }
+
+        .payment-option i {
+            color: #bd8a2f;
+            font-size: 1.35rem;
+        }
+
+        .payment-option small {
+            color: rgba(111, 79, 30, .68);
+            font-weight: 600;
+        }
+
+        .payment-option input:checked + span,
+        .payment-option span:hover {
+            background: linear-gradient(145deg, rgba(248, 229, 190, .88), rgba(255, 250, 242, .98));
+            border-color: rgba(188, 140, 48, .52);
+            box-shadow: 0 14px 32px rgba(165, 120, 45, .16);
+            transform: translateY(-1px);
+        }
+
+        .giftcard-note {
+            margin-top: 9px;
+            color: rgba(104, 75, 28, .76);
+            font-size: .88rem;
+        }
+
+        .giftcard-summary {
+            margin-top: 2px;
+            border-radius: 20px;
+            background: linear-gradient(145deg, rgba(255, 251, 245, .96), rgba(246, 230, 198, .88));
+            border: 1px solid rgba(201, 160, 82, .20);
+            color: #6d4b16;
+            padding: 18px 20px;
+            box-shadow: 0 14px 28px rgba(165, 120, 45, .08);
+        }
+
+        .giftcard-summary-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 9px 0;
+            border-bottom: 1px solid rgba(204, 165, 89, .16);
+        }
+
+        .giftcard-summary-row:last-child {
+            border-bottom: 0;
+        }
+
+        .giftcard-summary-row span:first-child {
+            color: rgba(107, 76, 26, .76);
+        }
+
+        .giftcard-submit {
+            width: 100%;
+            border: 0;
+            border-radius: 16px;
+            margin-top: 18px;
+            padding: 15px 22px;
+            background: linear-gradient(135deg, #ba8327, #f3d284);
+            color: #553309;
+            font-weight: 900;
+            letter-spacing: .11em;
+            text-transform: uppercase;
+            box-shadow: 0 18px 38px rgba(177, 131, 53, .20);
+            transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+        }
+
+        .giftcard-submit:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.04);
+            box-shadow: 0 22px 42px rgba(177, 131, 53, .24);
+        }
+
+        .giftcard-alert {
+            border: 1px solid rgba(198, 156, 80, .18);
+            border-radius: 18px;
+            padding: 16px 18px;
+            margin-bottom: 20px;
+        }
+
+        .giftcard-alert-success {
+            background: rgba(241, 252, 241, .92);
+            color: #2f6d3d;
+        }
+
+        .giftcard-alert-warning {
+            background: rgba(255, 248, 227, .92);
+            color: #8f6d1a;
+        }
+
+        .giftcard-alert-danger {
+            background: rgba(255, 239, 240, .92);
+            color: #9c3945;
+        }
+
+        .giftcard-code {
+            display: inline-block;
+            margin-top: 6px;
+            padding: 7px 10px;
+            border-radius: 10px;
+            background: rgba(193, 147, 55, .12);
+            color: #85590f;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-weight: 800;
+        }
+
+        @media (max-width: 980px) {
+            .giftcard-intro,
+            .giftcard-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .giftcard-trust-row {
+                justify-content: flex-start;
+            }
+
+            .giftcard-showcase {
+                position: static;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .giftcard-page {
+                padding-top: 28px;
+            }
+
+            .giftcard-showcase,
+            .giftcard-panel {
+                border-radius: 22px;
+            }
+
+            .amount-grid,
+            .payment-method-grid,
+            .giftcard-form-grid,
+            .giftcard-meta {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <div class="giftcard-container">
+        <div class="giftcard-intro fade-in-up">
+            <div>
+                <div class="giftcard-kicker">Gift card online</div>
+                <h1 class="giftcard-title">Regala credito da usare nello shop</h1>
+                <p class="giftcard-subtitle">
+                    Scegli l'importo, inserisci i dati del destinatario e completa il pagamento. Il codice viene generato dopo la conferma di Stripe o PayPal.
+                </p>
+            </div>
+            <div class="giftcard-trust-row" aria-label="Caratteristiche gift card">
+                <span class="giftcard-trust-pill"><i class="bi bi-shield-check"></i> Pagamento sicuro</span>
+                <span class="giftcard-trust-pill"><i class="bi bi-clock"></i> Validità fino a 12 mesi</span>
+            </div>
+        </div>
+
+        <div class="giftcard-layout">
+            <aside class="giftcard-showcase fade-in-scale">
+                <div class="giftcard-preview-card">
+                    <div class="giftcard-image-wrap">
+                        <img class="giftcard-image"
+                             th:src="@{/images/gift-card-online.svg}"
+                             alt="Gift Card Online Store">
+                    </div>
+
+                    <div class="giftcard-amount-card">
+                        <span class="label">Importo selezionato</span>
+                        <strong>€ <span id="giftAmountPreview">50,00</span></strong>
+                    </div>
+                </div>
+
+                <div class="giftcard-meta">
+                    <div>
+                        <b>Validità</b>
+                        Default 6 mesi, massimo 12 mesi.
+                    </div>
+                    <div>
+                        <b>Importo massimo</b>
+                        € 1000,00 anche scegliendo “Altro”.
+                    </div>
+                </div>
+            </aside>
+
+            <section class="giftcard-panel fade-in-up">
+                <div th:if="${issuedGiftCardCode}" class="giftcard-alert giftcard-alert-success">
+                    <strong>Gift card pagata ed emessa correttamente.</strong><br>
+                    Codice: <span class="giftcard-code" th:text="${issuedGiftCardCode}">GIFT-50-000000</span><br>
+                    Importo: € <span th:text="${issuedGiftCardAmount}">50,00</span><br>
+                    Scadenza: <span th:text="${#temporals.format(issuedGiftCardExpiration, 'dd/MM/yyyy')}">01/01/2027</span><br>
+                    <span th:if="${issuedGiftCardRecipientEmail != null}">
+                        Email destinatario: <span th:text="${issuedGiftCardRecipientEmail}">cliente@email.it</span>
+                    </span>
+                </div>
+
+                <div th:if="${warning}" class="giftcard-alert giftcard-alert-warning" th:text="${warning}"></div>
+                <div th:if="${error}" class="giftcard-alert giftcard-alert-danger" th:text="${error}"></div>
+
+                <form method="post" th:action="@{/giftcard/checkout}" th:object="${giftCardForm}">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                    <div class="giftcard-section">
+                        <h2 class="giftcard-section-title"><i class="bi bi-cash-coin"></i>Importo</h2>
+                        <div class="amount-grid" aria-label="Importi gift card selezionabili">
+                            <label class="amount-option">
+                                <input type="radio" name="selectedAmount" value="25.00" th:checked="${giftCardForm.selectedAmount == '25.00'}">
+                                <span>25,00 €</span>
+                            </label>
+                            <label class="amount-option">
+                                <input type="radio" name="selectedAmount" value="50.00" th:checked="${giftCardForm.selectedAmount == '50.00'}">
+                                <span>50,00 €</span>
+                            </label>
+                            <label class="amount-option">
+                                <input type="radio" name="selectedAmount" value="100.00" th:checked="${giftCardForm.selectedAmount == '100.00'}">
+                                <span>100,00 €</span>
+                            </label>
+                            <label class="amount-option">
+                                <input type="radio" name="selectedAmount" value="150.00" th:checked="${giftCardForm.selectedAmount == '150.00'}">
+                                <span>150,00 €</span>
+                            </label>
+                            <label class="amount-option">
+                                <input type="radio" name="selectedAmount" value="200.00" th:checked="${giftCardForm.selectedAmount == '200.00'}">
+                                <span>200,00 €</span>
+                            </label>
+                            <label class="amount-option">
+                                <input type="radio" name="selectedAmount" value="300.00" th:checked="${giftCardForm.selectedAmount == '300.00'}">
+                                <span>300,00 €</span>
+                            </label>
+                            <label class="amount-option">
+                                <input type="radio" name="selectedAmount" value="400.00" th:checked="${giftCardForm.selectedAmount == '400.00'}">
+                                <span>400,00 €</span>
+                            </label>
+                            <label class="amount-option">
+                                <input type="radio" name="selectedAmount" value="500.00" th:checked="${giftCardForm.selectedAmount == '500.00'}">
+                                <span>500,00 €</span>
+                            </label>
+                            <label class="amount-option">
+                                <input type="radio" name="selectedAmount" value="OTHER" th:checked="${giftCardForm.selectedAmount == 'OTHER'}">
+                                <span>Altro</span>
+                            </label>
+                        </div>
+
+                        <div class="giftcard-form-grid" style="margin-top:14px">
+                            <div class="giftcard-field">
+                                <label for="customAmount">Importo libero</label>
+                                <input id="customAmount"
+                                       type="number"
+                                       min="1"
+                                       max="1000"
+                                       step="0.01"
+                                       th:field="*{customAmount}"
+                                       placeholder="Fino a 1000,00 €">
+                                <div class="giftcard-note">
+                                    Compilalo solo se selezioni “Altro”.
+                                </div>
+                            </div>
+
+                            <div class="giftcard-field">
+                                <label for="validityMonths">Validità</label>
+                                <select id="validityMonths" th:field="*{validityMonths}">
+                                    <option value="1">1 mese</option>
+                                    <option value="2">2 mesi</option>
+                                    <option value="3">3 mesi</option>
+                                    <option value="6">6 mesi - default</option>
+                                    <option value="9">9 mesi</option>
+                                    <option value="12">12 mesi - massimo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="giftcard-section">
+                        <h2 class="giftcard-section-title"><i class="bi bi-person-heart"></i>Destinatario</h2>
+                        <p class="giftcard-note" style="margin-top:-6px;margin-bottom:14px">
+                            I dati del destinatario sono facoltativi. Se inserisci l'e-mail, il codice verrà inviato anche al destinatario.
+                        </p>
+
+                        <div class="giftcard-form-grid">
+                            <div class="giftcard-field">
+                                <label for="recipientFirstName">Nome</label>
+                                <input id="recipientFirstName" th:field="*{recipientFirstName}" maxlength="80" autocomplete="given-name">
+                            </div>
+                            <div class="giftcard-field">
+                                <label for="recipientLastName">Cognome</label>
+                                <input id="recipientLastName" th:field="*{recipientLastName}" maxlength="80" autocomplete="family-name">
+                            </div>
+                            <div class="giftcard-field giftcard-field-full">
+                                <label for="recipientEmail">E-mail</label>
+                                <input id="recipientEmail" type="email" th:field="*{recipientEmail}" maxlength="160" autocomplete="email">
+                            </div>
+                            <div class="giftcard-field giftcard-field-full">
+                                <label for="personalMessage">Messaggio personalizzato</label>
+                                <textarea id="personalMessage"
+                                          th:field="*{personalMessage}"
+                                          maxlength="1000"
+                                          placeholder="Scrivi un messaggio da associare alla gift card"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="giftcard-section">
+                        <h2 class="giftcard-section-title"><i class="bi bi-credit-card-2-front"></i>Pagamento</h2>
+                        <div class="payment-method-grid" aria-label="Modalità di pagamento gift card">
+                            <label class="payment-option">
+                                <input type="radio" name="paymentMethod" value="STRIPE" th:checked="${giftCardForm.paymentMethod == null or giftCardForm.paymentMethod == 'STRIPE'}">
+                                <span>
+                                    <i class="bi bi-credit-card"></i>
+                                    <strong>Stripe</strong>
+                                    <small>Carta di credito/debito</small>
+                                </span>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="paymentMethod" value="PAYPAL" th:checked="${giftCardForm.paymentMethod == 'PAYPAL'}">
+                                <span>
+                                    <i class="bi bi-paypal"></i>
+                                    <strong>PayPal</strong>
+                                    <small>Pagamento online PayPal</small>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="giftcard-summary">
+                        <div class="giftcard-summary-row">
+                            <span>Valore gift card</span>
+                            <strong>€ <span id="giftAmountSummary">50,00</span></strong>
+                        </div>
+                        <div class="giftcard-summary-row">
+                            <span>Validità selezionata</span>
+                            <strong><span id="giftValiditySummary">6</span> mesi</strong>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="giftcard-submit">
+                        Procedi al pagamento
+                    </button>
+                </form>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const amountInputs = document.querySelectorAll('input[name="selectedAmount"]');
+            const customAmount = document.getElementById('customAmount');
+            const preview = document.getElementById('giftAmountPreview');
+            const summary = document.getElementById('giftAmountSummary');
+            const validity = document.getElementById('validityMonths');
+            const validitySummary = document.getElementById('giftValiditySummary');
+            const euro = new Intl.NumberFormat('it-IT', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+            function selectedValue() {
+                const selected = document.querySelector('input[name="selectedAmount"]:checked');
+                if (!selected) {
+                    return 50;
+                }
+                if (selected.value === 'OTHER') {
+                    const custom = parseFloat((customAmount.value || '').replace(',', '.'));
+                    return Number.isFinite(custom) ? Math.min(custom, 1000) : 0;
+                }
+                return parseFloat(selected.value);
+            }
+
+            function refreshAmount() {
+                const value = selectedValue();
+                const text = euro.format(value);
+                preview.textContent = text;
+                summary.textContent = text;
+            }
+
+            function refreshValidity() {
+                validitySummary.textContent = validity.value || '6';
+            }
+
+            amountInputs.forEach(input => input.addEventListener('change', refreshAmount));
+            customAmount.addEventListener('input', refreshAmount);
+            validity.addEventListener('change', refreshValidity);
+
+            refreshAmount();
+            refreshValidity();
+        })();
+    </script>
+</main>
+
+<div th:replace="~{fragments/cart :: cartOffcanvas}"></div>
+<div th:replace="~{fragments/login-modal :: loginModal}"></div>
+<div th:replace="~{fragments/forgot-password-modal :: forgotPasswordModal}"></div>
+<div th:replace="~{fragments/profile-modal :: profileModal}"></div>
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/cart.js}"></script>
+</body>
+</html>

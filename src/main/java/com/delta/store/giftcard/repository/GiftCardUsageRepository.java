@@ -15,6 +15,9 @@ public interface GiftCardUsageRepository
     findByGiftCard_CodeContainingIgnoreCaseOrderByUsedAtDesc(String code);
 
     List<GiftCardUsage>
+    findByGiftCard_IdOrderByUsedAtAsc(Long giftCardId);
+
+    List<GiftCardUsage>
     findByUsedAtBetweenOrderByUsedAtDesc(LocalDateTime from,
                                         LocalDateTime to);
 }

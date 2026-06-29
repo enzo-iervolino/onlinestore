@@ -1,7 +1,8 @@
-
 package com.delta.store.email;
 
 import jakarta.mail.MessagingException;
+
+import java.time.LocalDate;
 
 public interface EmailService {
 
@@ -12,4 +13,11 @@ public interface EmailService {
                                     String total,
                                     String paymentMethod,
                                     byte[] pdfAttachment) throws MessagingException;
+
+    void sendGiftCardEmail(String to,
+                           String recipientName,
+                           String code,
+                           String amount,
+                           LocalDate expirationDate,
+                           String personalMessage) throws MessagingException;
 }

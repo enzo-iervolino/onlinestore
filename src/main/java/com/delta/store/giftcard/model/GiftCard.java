@@ -1,6 +1,13 @@
 package com.delta.store.giftcard.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,10 +24,13 @@ public class GiftCard {
     @Column(nullable = false, unique = true, length = 30)
     private String code;
 
-    @Column(name = "initial_amount", nullable = false)
+    @Column(name = "customer_id")
+    private Long customerId;
+
+    @Column(name = "initial_amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal initialAmount;
 
-    @Column(name = "remaining_amount", nullable = false)
+    @Column(name = "remaining_amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal remainingAmount;
 
     @Column(nullable = false)
@@ -32,6 +42,21 @@ public class GiftCard {
     @Column(name = "expiration_date")
     private LocalDate expirationDate;
 
+    @Column(name = "validity_months")
+    private Integer validityMonths = 6;
+
+    @Column(name = "recipient_first_name", length = 80)
+    private String recipientFirstName;
+
+    @Column(name = "recipient_last_name", length = 80)
+    private String recipientLastName;
+
+    @Column(name = "recipient_email", length = 160)
+    private String recipientEmail;
+
+    @Column(name = "personal_message", length = 1000)
+    private String personalMessage;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -39,13 +64,10 @@ public class GiftCard {
     @Column(nullable = false)
     private Long version = 0L;
 
-
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
-
-    /* ================= GETTER & SETTER ================= */
 
     public Long getId() {
         return id;
@@ -57,6 +79,14 @@ public class GiftCard {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
     }
 
     public BigDecimal getInitialAmount() {
@@ -99,7 +129,51 @@ public class GiftCard {
         this.expirationDate = expirationDate;
     }
 
+    public Integer getValidityMonths() {
+        return validityMonths;
+    }
+
+    public void setValidityMonths(Integer validityMonths) {
+        this.validityMonths = validityMonths;
+    }
+
+    public String getRecipientFirstName() {
+        return recipientFirstName;
+    }
+
+    public void setRecipientFirstName(String recipientFirstName) {
+        this.recipientFirstName = recipientFirstName;
+    }
+
+    public String getRecipientLastName() {
+        return recipientLastName;
+    }
+
+    public void setRecipientLastName(String recipientLastName) {
+        this.recipientLastName = recipientLastName;
+    }
+
+    public String getRecipientEmail() {
+        return recipientEmail;
+    }
+
+    public void setRecipientEmail(String recipientEmail) {
+        this.recipientEmail = recipientEmail;
+    }
+
+    public String getPersonalMessage() {
+        return personalMessage;
+    }
+
+    public void setPersonalMessage(String personalMessage) {
+        this.personalMessage = personalMessage;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 }

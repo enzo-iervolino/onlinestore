@@ -69,6 +69,11 @@ public class SecurityConfig {
                     // PAYPAL (return/cancel + eventuali webhook)
                     "/paypal/**",
 
+                    // RIENTRI PAGAMENTO GIFT CARD (la pagina /giftcard resta protetta)
+                    "/giftcard/stripe/success",
+                    "/giftcard/paypal/success",
+                    "/giftcard/cancel",
+
                     // CARRELLO
                     "/cart",
                     "/cart/**",
@@ -114,8 +119,10 @@ public class SecurityConfig {
 
             // ================= LOGIN CLASSICO =================
             .formLogin(form -> form
+                .loginPage("/login")
                 .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/", true)
+                .defaultSuccessUrl("/", false)
+                .failureUrl("/login?error")
                 .permitAll()
             )
 
@@ -125,7 +132,7 @@ public class SecurityConfig {
                     .userService(customOAuth2UserService)
                     .oidcUserService(customOidcUserService)
                 )
-                .defaultSuccessUrl("/", true)
+                .defaultSuccessUrl("/", false)
                 .failureUrl("/?login&error")
             )
 

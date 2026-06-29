@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -143,7 +145,12 @@ public class AdminOrderController {
                         backUrl = "/admin/users?openOrdersUserId=" + userId;
                     }
 
+                    BigDecimal summaryTotalOrder = resolveSummaryTotalOrder(order);
+                    BigDecimal netToPay = resolveNetToPay(order, summaryTotalOrder);
+
                     model.addAttribute("order", order);
+                    model.addAttribute("summaryTotalOrder", summaryTotalOrder);
+                    model.addAttribute("netToPay", netToPay);
                     model.addAttribute("backUrl", backUrl);
                     model.addAttribute("from", from);
                     model.addAttribute("userId", userId);
@@ -155,6 +162,50 @@ public class AdminOrderController {
                     ra.addFlashAttribute("errorMessage", "Ordine non trovato.");
                     return "redirect:/admin/orders";
                 });
+    }
+
+    private BigDecimal resolveSummaryTotalOrder(Order order) {
+        BigDecimal savedTotalBeforeGift = safeMoney(order.getNetSubtotal());
+
+        if (savedTotalBeforeGift.compareTo(BigDecimal.ZERO) > 0) {
+            return savedTotalBeforeGift;
+        }
+
+        BigDecimal subtotal = safeMoney(order.getSubtotal());
+        BigDecimal discountValue = safeMoney(order.getDiscountValue());
+        BigDecimal shippingCost = safeMoney(order.getShippingCost());
+
+        return subtotal
+                .subtract(discountValue)
+                .add(shippingCost)
+                .max(BigDecimal.ZERO)
+                .setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal resolveNetToPay(Order order, BigDecimal summaryTotalOrder) {
+        BigDecimal giftcardAmount = safeMoney(order.getGiftcardAmount());
+
+        if (giftcardAmount.compareTo(BigDecimal.ZERO) > 0) {
+            return safeMoney(summaryTotalOrder)
+                    .subtract(giftcardAmount)
+                    .max(BigDecimal.ZERO)
+                    .setScale(2, RoundingMode.HALF_UP);
+        }
+
+        BigDecimal savedNetToPay = safeMoney(order.getTotalAmount());
+        if (savedNetToPay.compareTo(BigDecimal.ZERO) > 0) {
+            return savedNetToPay;
+        }
+
+        return safeMoney(summaryTotalOrder);
+    }
+
+    private BigDecimal safeMoney(BigDecimal value) {
+        if (value == null) {
+            return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        }
+
+        return value.setScale(2, RoundingMode.HALF_UP);
     }
 
     @PostMapping("/{id}/delete")
