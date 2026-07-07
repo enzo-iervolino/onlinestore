@@ -31,14 +31,18 @@
         <a class="nav-link nav-link-giftcard"
            th:if="${isAuthenticated}"
            th:href="@{/giftcard}">
-          <i class="bi bi-gift"></i><span>Gift Card</span>
+          <i class="bi bi-gift"></i>
+          <span class="giftcard-label-desktop">Gift Card</span>
+          <span class="giftcard-label-mobile">Gift</span>
         </a>
 
         <label class="nav-link nav-link-giftcard"
                th:if="${!isAuthenticated}"
                for="login-modal-toggle"
                style="cursor:pointer;">
-          <i class="bi bi-gift"></i><span>Gift Card</span>
+          <i class="bi bi-gift"></i>
+          <span class="giftcard-label-desktop">Gift Card</span>
+          <span class="giftcard-label-mobile">Gift</span>
         </label>
 
 		

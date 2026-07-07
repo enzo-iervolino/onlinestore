@@ -147,6 +147,10 @@ nav.nav-small {
   display: none;
 }
 
+.nav-small .giftcard-label-mobile {
+  display: none;
+}
+
 .nav-small .nav-user-dropdown-mobile {
   position: relative;
 }
@@ -503,7 +507,7 @@ body.cart-empty .nav-small .cart-btn:hover + .cart-empty-preview {
 
   .nav-small .nav-pages {
     display: grid !important;
-    grid-template-columns: repeat(4, 1fr) !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
     width: 100%;
     height: 100%;
     margin-left: 0 !important;
@@ -527,6 +531,7 @@ body.cart-empty .nav-small .cart-btn:hover + .cart-empty-preview {
 
   .nav-small .nav-link-home,
   .nav-small .nav-link-shop,
+  .nav-small .nav-link-giftcard,
   .nav-small .nav-link-mobile-cart,
   .nav-small .nav-link-mobile-login,
   .nav-small .nav-link-mobile-profile {
@@ -554,6 +559,7 @@ body.cart-empty .nav-small .cart-btn:hover + .cart-empty-preview {
 
   .nav-small .nav-link-home::after,
   .nav-small .nav-link-shop::after,
+  .nav-small .nav-link-giftcard::after,
   .nav-small .nav-link-mobile-cart::after,
   .nav-small .nav-link-mobile-login::after,
   .nav-small .nav-link-mobile-profile::after,
@@ -563,6 +569,7 @@ body.cart-empty .nav-small .cart-btn:hover + .cart-empty-preview {
 
   .nav-small .nav-link-home span,
   .nav-small .nav-link-shop span,
+  .nav-small .nav-link-giftcard span,
   .nav-small .nav-link-mobile-cart span,
   .nav-small .nav-link-mobile-login span,
   .nav-small .nav-link-mobile-profile span,
@@ -577,12 +584,21 @@ body.cart-empty .nav-small .cart-btn:hover + .cart-empty-preview {
 
   .nav-small .nav-link-home i,
   .nav-small .nav-link-shop i,
+  .nav-small .nav-link-giftcard i,
   .nav-small .nav-link-mobile-cart i,
   .nav-small .nav-link-mobile-login i {
     font-size: 0.92rem !important;
     line-height: 1 !important;
     margin: 0 !important;
     transform: none !important;
+  }
+
+  .nav-small .nav-link-giftcard .giftcard-label-desktop {
+    display: none !important;
+  }
+
+  .nav-small .nav-link-giftcard .giftcard-label-mobile {
+    display: block !important;
   }
 
   .nav-small .nav-link-mobile-cart {
@@ -680,6 +696,7 @@ body.cart-empty .nav-small .cart-btn:hover + .cart-empty-preview {
 
   .nav-small .nav-link-home span,
   .nav-small .nav-link-shop span,
+  .nav-small .nav-link-giftcard span,
   .nav-small .nav-link-mobile-cart span,
   .nav-small .nav-link-mobile-login span,
   .nav-small .nav-link-mobile-profile span,
@@ -689,6 +706,7 @@ body.cart-empty .nav-small .cart-btn:hover + .cart-empty-preview {
 
   .nav-small .nav-link-home i,
   .nav-small .nav-link-shop i,
+  .nav-small .nav-link-giftcard i,
   .nav-small .nav-link-mobile-cart i,
   .nav-small .nav-link-mobile-login i {
     font-size: 0.86rem !important;
