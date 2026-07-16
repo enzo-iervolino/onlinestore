@@ -1,133 +1,218 @@
 <!DOCTYPE html>
 <html lang="it" xmlns:th="http://www.thymeleaf.org">
-  <body th:fragment="loginModal">
+<body th:fragment="loginModal">
 
-    <!-- toggle (auto-open se ?login o ?error) -->
+    <!-- Toggle condiviso con i pulsanti login della navbar. -->
     <input
-      type="checkbox"
-      id="login-modal-toggle"
-      class="modal-toggle"
-      th:checked="${param.login != null or param.error != null}"
+        type="checkbox"
+        id="login-modal-toggle"
+        class="modal-toggle"
+        th:checked="${param.login != null or param.error != null}"
+        aria-hidden="true"
     />
 
-    <!-- backdrop -->
-    <label for="login-modal-toggle" class="modal-backdrop"></label>
+    <!-- Backdrop: il click chiude il modale senza modificare il flusso di login. -->
+    <label
+        for="login-modal-toggle"
+        class="login-modal-backdrop"
+        aria-label="Chiudi il modale di accesso">
+    </label>
 
-    <!-- modal -->
-    <div class="modal-box">
-      <div class="auth-card">
-        <div class="modal-header">
-          <h3><i class="bi bi-shield-lock"></i> Accedi</h3>
+    <section
+        class="login-modal-shell"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="login-modal-title"
+        aria-describedby="login-modal-description">
 
-          <label for="login-modal-toggle" class="modal-close" aria-label="Close">
-            <i class="bi bi-x-lg"></i>
-          </label>
-        </div>
+        <div class="login-auth-card">
 
-        <div class="modal-body">
-          <!-- errore login -->
-          <div class="auth-alert" th:if="${param.error}">
-            Credenziali non valide.
-          </div>
+            <header class="login-modal-header">
+                <div class="login-title-wrap">
+                    <span class="login-title-icon" aria-hidden="true">
+                        <i class="bi bi-person-lock"></i>
+                    </span>
 
-          <!-- logout ok -->
-          <div class="auth-alert ok" th:if="${param.logout}">
-            Logout effettuato con successo.
-          </div>
+                    <div>
+                        <span class="login-eyebrow">Area riservata</span>
+                        <h2 id="login-modal-title">Bentornato</h2>
+                    </div>
+                </div>
 
+                <button
+                    type="button"
+                    class="login-modal-close"
+                    aria-label="Chiudi il modale di accesso"
+                    onclick="closeLoginModal()">
+                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                </button>
+            </header>
 
-          <!-- login con Google -->
-          <a th:href="@{/oauth2/authorization/google}"
-             class="auth-btn"
-             style="display:flex;align-items:center;justify-content:center;gap:.5rem;text-decoration:none;background:#fff;color:#222;border:1px solid #ddd;margin-bottom:1rem;">
-            <i class="bi bi-google"></i>
-            Accedi con Google
-          </a>
+            <div class="login-modal-body">
+                <p id="login-modal-description" class="login-intro">
+                    Accedi al tuo account per gestire profilo, ordini e acquisti.
+                </p>
 
-          <div style="display:flex;align-items:center;gap:.75rem;margin:0 0 1rem;color:#777;font-size:.85rem;">
-            <span style="height:1px;background:#ddd;flex:1;"></span>
-            <span>oppure</span>
-            <span style="height:1px;background:#ddd;flex:1;"></span>
-          </div>
+                <!-- Errore login. -->
+                <div class="auth-alert login-alert" role="alert" th:if="${param.error}">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    <span>Accesso non riuscito. Verifica le credenziali o le autorizzazioni richieste.</span>
+                </div>
 
-          <form th:action="@{/login}" method="post">
-            <input
-              type="hidden"
-              th:name="${_csrf.parameterName}"
-              th:value="${_csrf.token}"
-            />
+                <!-- Logout completato. -->
+                <div class="auth-alert ok login-alert" role="status" th:if="${param.logout}">
+                    <i class="bi bi-check-circle" aria-hidden="true"></i>
+                    <span>Logout effettuato con successo.</span>
+                </div>
 
-            <!-- USERNAME -->
-            <div class="auth-field">
-              <label for="login-username">Email o Username</label>
-              <input
-                id="login-username"
-                class="auth-input"
-                name="username"
-                autocomplete="username"
-                required
-              />
+                <!-- Accesso OAuth2: endpoint e procedura restano invariati. -->
+                <div class="login-social-grid" aria-label="Accesso con account social">
+                    <a
+                        th:href="@{/oauth2/authorization/google}"
+                        class="login-social-btn login-social-google">
+                        <span class="login-google-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                                <path fill="#4285F4" d="M21.8 12.1c0-.7-.1-1.3-.2-1.9H12v3.9h5.5c-.3 1.5-1.1 2.7-2.3 3.5l3.4 2.6c2-1.8 3.2-4.6 3.2-8.1Z"/>
+                                <path fill="#34A853" d="M12 22c2.8 0 5.1-.9 6.8-2.5l-3.4-2.6c-.9.6-2.1 1-3.4 1-2.6 0-4.9-1.8-5.7-4.2l-3.5 2.7A10.2 10.2 0 0 0 12 22Z"/>
+                                <path fill="#FBBC05" d="M6.3 13.7A6 6 0 0 1 6 12c0-.6.1-1.2.3-1.7L2.8 7.6A10.2 10.2 0 0 0 1.8 12c0 1.6.4 3.1 1 4.4l3.5-2.7Z"/>
+                                <path fill="#EA4335" d="M12 6c1.6 0 3 .6 4.1 1.6l3-2.9A10.1 10.1 0 0 0 2.8 7.6l3.5 2.7A6 6 0 0 1 12 6Z"/>
+                            </svg>
+                        </span>
+                        <span>Google</span>
+                    </a>
+
+                    <a
+                        th:href="@{/oauth2/authorization/facebook}"
+                        class="login-social-btn login-social-facebook">
+                        <i class="bi bi-facebook" aria-hidden="true"></i>
+                        <span>Facebook</span>
+                    </a>
+                </div>
+
+                <div class="login-divider" aria-hidden="true">
+                    <span>oppure accedi con email</span>
+                </div>
+
+                <form th:action="@{/login}" method="post" class="login-form">
+                    <input
+                        type="hidden"
+                        th:name="${_csrf.parameterName}"
+                        th:value="${_csrf.token}"
+                    />
+
+                    <div class="auth-field login-field">
+                        <label for="login-username">Email o username</label>
+
+                        <div class="login-input-shell">
+                            <i class="bi bi-person" aria-hidden="true"></i>
+                            <input
+                                id="login-username"
+                                class="auth-input login-input"
+                                type="text"
+                                name="username"
+                                autocomplete="username"
+                                placeholder="Inserisci email o username"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="auth-field login-field password-field">
+                        <label for="login-password">Password</label>
+
+                        <div class="login-input-shell password-wrapper">
+                            <i class="bi bi-lock" aria-hidden="true"></i>
+                            <input
+                                id="login-password"
+                                class="auth-input login-input"
+                                type="password"
+                                name="password"
+                                autocomplete="current-password"
+                                placeholder="Inserisci la password"
+                                required
+                            />
+
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                aria-label="Mostra password"
+                                aria-pressed="false"
+                                onclick="toggleLoginPassword(this)">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button class="auth-btn login-submit" type="submit">
+                        <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>
+                        <span>Accedi</span>
+                    </button>
+                </form>
+
+                <div class="auth-actions login-actions">
+                    <a
+                        href="#"
+                        class="auth-link"
+                        data-bs-toggle="modal"
+                        data-bs-target="#forgotPasswordModal"
+                        onclick="closeLoginModal()">
+                        Password dimenticata?
+                    </a>
+
+                    <a th:href="@{/register}" class="auth-link login-register-link">
+                        Crea un account
+                        <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                    </a>
+                </div>
+
+                <div class="login-security-note">
+                    <i class="bi bi-shield-check" aria-hidden="true"></i>
+                    <span>Accesso protetto e dati trattati in modo sicuro.</span>
+                </div>
             </div>
-
-			<!-- PASSWORD + TOGGLE INLINE -->
-			<div class="auth-field password-field">
-			  <label for="login-password">Password</label>
-
-			  <div class="password-wrapper">
-			    <input
-			      id="login-password"
-			      class="auth-input"
-			      type="password"
-			      name="password"
-			      autocomplete="current-password"
-			      required
-			    />
-
-			    <button
-			      type="button"
-			      class="password-toggle"
-			      aria-label="Mostra password"
-			      onclick="toggleLoginPassword()"
-			    >
-			      <i class="bi bi-eye"></i>
-			    </button>
-			  </div>
-			</div>
-
-
-            <button class="auth-btn" type="submit">Login</button>
-          </form>
-
-          <div class="auth-actions">
-			<a href="#"
-			   class="auth-link"
-			   data-bs-toggle="modal"
-			   data-bs-target="#forgotPasswordModal">
-			  Password dimenticata?
-			</a>
-            <a th:href="@{/register}" class="auth-link">Registrati</a>
-          </div>
         </div>
-      </div>
-    </div>
+    </section>
 
-    <!-- SCRIPT INLINE (semplice e sicuro) -->
     <script>
-      function toggleLoginPassword() {
-        const input = document.getElementById("login-password");
-        const icon = document.querySelector(".password-toggle i");
-
-        if (input.type === "password") {
-          input.type = "text";
-          icon.classList.remove("bi-eye");
-          icon.classList.add("bi-eye-slash");
-        } else {
-          input.type = "password";
-          icon.classList.remove("bi-eye-slash");
-          icon.classList.add("bi-eye");
+        function closeLoginModal() {
+            const toggle = document.getElementById("login-modal-toggle");
+            if (toggle) {
+                toggle.checked = false;
+            }
         }
-      }
+
+        function toggleLoginPassword(button) {
+            const input = document.getElementById("login-password");
+            const icon = button ? button.querySelector("i") : null;
+
+            if (!input || !button || !icon) {
+                return;
+            }
+
+            const passwordIsVisible = input.type === "text";
+            input.type = passwordIsVisible ? "password" : "text";
+
+            icon.classList.toggle("bi-eye", passwordIsVisible);
+            icon.classList.toggle("bi-eye-slash", !passwordIsVisible);
+
+            button.setAttribute("aria-pressed", String(!passwordIsVisible));
+            button.setAttribute(
+                "aria-label",
+                passwordIsVisible ? "Mostra password" : "Nascondi password"
+            );
+        }
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key !== "Escape") {
+                return;
+            }
+
+            const toggle = document.getElementById("login-modal-toggle");
+            if (toggle && toggle.checked) {
+                closeLoginModal();
+            }
+        });
     </script>
 
-  </body>
+</body>
 </html>

@@ -25,6 +25,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private static final String DEFAULT_ROLE = "ROLE_USER";
     private static final String GOOGLE_REGISTRATION_ID = "google";
+    private static final String FACEBOOK_REGISTRATION_ID = "facebook";
     private static final String DEFAULT_AVATAR = "avatar-default.png";
 
     private final UserRepository userRepository;
@@ -56,35 +57,37 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     /**
-     * Metodo condiviso anche dal flusso OIDC di Google.
-     *
-     * Google, con scope openid/email/profile, viene gestito da Spring come OpenID
-     * Connect e quindi passa da OidcUserService, non sempre da OAuth2UserService.
-     * Centralizzando qui la creazione/aggiornamento dell'utente evitiamo duplicati
-     * e garantiamo che il record venga salvato nel DB in entrambi i flussi.
+     * Metodo condiviso dal flusso OAuth2 di Facebook e dal flusso OIDC di Google.
+     * Gli attributi restituiti dai due provider hanno nomi diversi e vengono
+     * normalizzati prima di creare o aggiornare il record utente esistente.
      */
     @Transactional
     public User saveOrUpdateOAuth2User(String registrationId, Map<String, Object> attributes) {
         AuthProvider authProvider = resolveProvider(registrationId);
 
-        String providerId = clean(asString(attributes.get("sub")));
+        String providerId = extractProviderId(authProvider, attributes);
         String email = normalizeEmail(asString(attributes.get("email")));
-        String firstname = clean(asString(attributes.get("given_name")));
-        String lastname = clean(asString(attributes.get("family_name")));
+        String firstname = extractFirstname(authProvider, attributes);
+        String lastname = extractLastname(authProvider, attributes);
         String fullname = clean(asString(attributes.get("name")));
-        String picture = clean(asString(attributes.get("picture")));
+        String picture = extractPicture(authProvider, attributes.get("picture"));
 
         if (providerId == null || providerId.isBlank()) {
-            throw new OAuth2AuthenticationException("Google non ha restituito l'identificativo utente.");
+            throw new OAuth2AuthenticationException(
+                    providerDisplayName(authProvider) + " non ha restituito l'identificativo utente."
+            );
         }
 
         if (email == null || email.isBlank()) {
-            throw new OAuth2AuthenticationException("Google non ha restituito l'email dell'utente.");
+            throw new OAuth2AuthenticationException(
+                    providerDisplayName(authProvider)
+                            + " non ha restituito l'email dell'utente. Verifica che il permesso email sia autorizzato."
+            );
         }
 
         return userRepository.findByAuthProviderAndProviderId(authProvider, providerId)
                 .or(() -> userRepository.findByEmail(email))
-                .map(existingUser -> updateGoogleUser(
+                .map(existingUser -> updateOAuth2User(
                         existingUser,
                         authProvider,
                         providerId,
@@ -94,7 +97,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                         fullname,
                         picture
                 ))
-                .orElseGet(() -> createGoogleUser(
+                .orElseGet(() -> createOAuth2User(
                         authProvider,
                         providerId,
                         email,
@@ -123,7 +126,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return applicationAttributes;
     }
 
-    private User updateGoogleUser(
+    private User updateOAuth2User(
             User user,
             AuthProvider authProvider,
             String providerId,
@@ -163,7 +166,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return userRepository.save(user);
     }
 
-    private User createGoogleUser(
+    private User createOAuth2User(
             AuthProvider authProvider,
             String providerId,
             String email,
@@ -197,7 +200,43 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             return AuthProvider.GOOGLE;
         }
 
+        if (FACEBOOK_REGISTRATION_ID.equalsIgnoreCase(registrationId)) {
+            return AuthProvider.FACEBOOK;
+        }
+
         throw new OAuth2AuthenticationException("Provider OAuth2 non supportato: " + registrationId);
+    }
+
+    private String extractProviderId(AuthProvider authProvider, Map<String, Object> attributes) {
+        if (authProvider == AuthProvider.FACEBOOK) {
+            return clean(asString(attributes.get("id")));
+        }
+        return clean(asString(attributes.get("sub")));
+    }
+
+    private String extractFirstname(AuthProvider authProvider, Map<String, Object> attributes) {
+        String attributeName = authProvider == AuthProvider.FACEBOOK ? "first_name" : "given_name";
+        return clean(asString(attributes.get(attributeName)));
+    }
+
+    private String extractLastname(AuthProvider authProvider, Map<String, Object> attributes) {
+        String attributeName = authProvider == AuthProvider.FACEBOOK ? "last_name" : "family_name";
+        return clean(asString(attributes.get(attributeName)));
+    }
+
+    private String extractPicture(AuthProvider authProvider, Object pictureAttribute) {
+        if (authProvider == AuthProvider.FACEBOOK && pictureAttribute instanceof Map<?, ?> pictureMap) {
+            Object dataAttribute = pictureMap.get("data");
+            if (dataAttribute instanceof Map<?, ?> dataMap) {
+                return clean(asString(dataMap.get("url")));
+            }
+        }
+
+        return clean(asString(pictureAttribute));
+    }
+
+    private String providerDisplayName(AuthProvider authProvider) {
+        return authProvider == AuthProvider.FACEBOOK ? "Facebook" : "Google";
     }
 
     private String buildTechnicalPhone(AuthProvider authProvider, String providerId) {
