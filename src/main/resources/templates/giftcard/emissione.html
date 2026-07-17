@@ -91,9 +91,10 @@
 
         .giftcard-layout {
             display: grid;
-            grid-template-columns: minmax(300px, .9fr) minmax(380px, 1.1fr);
-            gap: 28px;
+            grid-template-columns: minmax(250px, 360px) minmax(0, 1fr);
+            gap: 24px;
             align-items: start;
+            justify-content: center;
         }
 
         .giftcard-showcase,
@@ -106,9 +107,12 @@
         }
 
         .giftcard-showcase {
-            padding: 20px;
+            width: 100%;
+            max-width: 360px;
+            padding: 14px;
             position: sticky;
-            top: 86px;
+            top: 72px;
+            justify-self: center;
             overflow: hidden;
         }
 
@@ -126,7 +130,7 @@
         .giftcard-preview-card {
             position: relative;
             z-index: 1;
-            border-radius: 22px;
+            border-radius: 18px;
             overflow: hidden;
             background:
                 linear-gradient(145deg, rgba(255, 249, 239, .96) 0%, rgba(246, 228, 192, .88) 100%),
@@ -149,14 +153,16 @@
         .giftcard-image-wrap {
             position: relative;
             z-index: 1;
-            padding: 18px 18px 0;
+            padding: 12px 12px 0;
         }
 
         .giftcard-image {
             display: block;
             width: 100%;
             height: auto;
-            border-radius: 18px;
+            max-height: 230px;
+            object-fit: contain;
+            border-radius: 14px;
             border: 1px solid rgba(208, 171, 92, .22);
             box-shadow: 0 18px 38px rgba(150, 109, 42, .18);
             background: rgba(255, 255, 255, .56);
@@ -165,7 +171,7 @@
         .giftcard-amount-card {
             position: relative;
             z-index: 1;
-            padding: 22px 22px 24px;
+            padding: 14px 16px 16px;
         }
 
         .giftcard-amount-card span.label {
@@ -179,9 +185,9 @@
 
         .giftcard-amount-card strong {
             display: block;
-            margin-top: 7px;
+            margin-top: 5px;
             color: #a26a12;
-            font-size: clamp(2.3rem, 5vw, 4rem);
+            font-size: clamp(1.9rem, 3.5vw, 2.8rem);
             font-weight: 850;
             letter-spacing: -.05em;
             line-height: .95;
@@ -192,17 +198,17 @@
             z-index: 1;
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
-            margin-top: 14px;
+            gap: 8px;
+            margin-top: 10px;
         }
 
         .giftcard-meta div {
-            border-radius: 18px;
+            border-radius: 14px;
             background: rgba(255, 253, 248, .72);
             border: 1px solid rgba(200, 159, 80, .18);
-            padding: 14px 15px;
+            padding: 10px 11px;
             color: rgba(102, 74, 29, .84);
-            font-size: .88rem;
+            font-size: .78rem;
             box-shadow: 0 10px 24px rgba(150, 109, 42, .08);
         }
 

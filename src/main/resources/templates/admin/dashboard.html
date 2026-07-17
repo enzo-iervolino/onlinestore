@@ -269,9 +269,9 @@
                                 <i class="bi bi-bag"></i>
                                 <span>Ordini</span>
                             </h5>
-                            <p class="dashboard-metric">128</p>
+                            <p class="dashboard-metric" th:text="${ordersCount}">0</p>
                             <p class="dashboard-subtext">Ordini registrati nel sistema</p>
-                            <span class="metric-badge">+12% questo mese</span>
+                            <span class="metric-badge">Dato aggiornato dal database</span>
                         </div>
                     </div>
                 </div>
@@ -283,9 +283,9 @@
                                 <i class="bi bi-box"></i>
                                 <span>Prodotti</span>
                             </h5>
-                            <p class="dashboard-metric">56</p>
-                            <p class="dashboard-subtext">Articoli attualmente disponibili</p>
-                            <span class="metric-badge">Catalogo aggiornato</span>
+                            <p class="dashboard-metric" th:text="${productsCount}">0</p>
+                            <p class="dashboard-subtext">Articoli presenti nel catalogo</p>
+                            <span class="metric-badge">Catalogo aggiornato in tempo reale</span>
                         </div>
                     </div>
                 </div>
@@ -297,9 +297,9 @@
                                 <i class="bi bi-people"></i>
                                 <span>Utenti</span>
                             </h5>
-                            <p class="dashboard-metric">312</p>
+                            <p class="dashboard-metric" th:text="${usersCount}">0</p>
                             <p class="dashboard-subtext">Utenti registrati alla piattaforma</p>
-                            <span class="metric-badge">Nuovi accessi attivi</span>
+                            <span class="metric-badge">Dato aggiornato dal database</span>
                         </div>
                     </div>
                 </div>
@@ -339,54 +339,35 @@
 		                        </tr>
 		                        </thead>
 		                        <tbody>
-		                        <tr>
-		                            <td class="order-code">#ORD-1001</td>
-		                            <td class="customer-name">Mario Rossi</td>
-		                            <td>20/03/2026</td>
+		                        <tr th:each="order : ${recentOrders}">
 		                            <td>
-		                                <span class="badge badge-soft badge-soft-success">Pagato</span>
+		                                <a class="order-code text-decoration-none"
+		                                   th:href="@{/admin/orders/{id}(id=${order.id})}"
+		                                   th:text="|#ORD-${order.id}|">#ORD-1</a>
 		                            </td>
-		                            <td class="text-end amount-text">€ 89,90</td>
+		                            <td class="customer-name"
+		                                th:text="${order.customerName != null and !#strings.isEmpty(order.customerName) ? order.customerName : 'Cliente non indicato'}">
+		                                Cliente
+		                            </td>
+		                            <td th:text="${order.createdAt != null ? #temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm') : '—'}">
+		                                01/01/2026 10:30
+		                            </td>
+		                            <td>
+		                                <span class="badge badge-soft badge-soft-primary"
+		                                      th:text="${order.status != null and !#strings.isEmpty(order.status) ? order.status : 'Non definito'}">
+		                                    Stato
+		                                </span>
+		                            </td>
+		                            <td class="text-end amount-text"
+		                                th:text="${order.totalAmount != null ? #numbers.formatCurrency(order.totalAmount) : '€ 0,00'}">
+		                                € 0,00
+		                            </td>
 		                        </tr>
 
-		                        <tr>
-		                            <td class="order-code">#ORD-1002</td>
-		                            <td class="customer-name">Luigi Bianchi</td>
-		                            <td>20/03/2026</td>
-		                            <td>
-		                                <span class="badge badge-soft badge-soft-warning">In attesa</span>
+		                        <tr th:if="${#lists.isEmpty(recentOrders)}">
+		                            <td colspan="5" class="text-center text-muted py-4">
+		                                <i class="bi bi-inbox me-2"></i>Nessun ordine ancora registrato.
 		                            </td>
-		                            <td class="text-end amount-text">€ 129,00</td>
-		                        </tr>
-
-		                        <tr>
-		                            <td class="order-code">#ORD-1003</td>
-		                            <td class="customer-name">Anna Verdi</td>
-		                            <td>19/03/2026</td>
-		                            <td>
-		                                <span class="badge badge-soft badge-soft-primary">Spedito</span>
-		                            </td>
-		                            <td class="text-end amount-text">€ 59,50</td>
-		                        </tr>
-
-		                        <tr>
-		                            <td class="order-code">#ORD-1004</td>
-		                            <td class="customer-name">Giulia Esposito</td>
-		                            <td>19/03/2026</td>
-		                            <td>
-		                                <span class="badge badge-soft badge-soft-danger">Annullato</span>
-		                            </td>
-		                            <td class="text-end amount-text">€ 42,00</td>
-		                        </tr>
-
-		                        <tr>
-		                            <td class="order-code">#ORD-1005</td>
-		                            <td class="customer-name">Paolo Romano</td>
-		                            <td>18/03/2026</td>
-		                            <td>
-		                                <span class="badge badge-soft badge-soft-success">Pagato</span>
-		                            </td>
-		                            <td class="text-end amount-text">€ 210,30</td>
 		                        </tr>
 		                        </tbody>
 		                    </table>
