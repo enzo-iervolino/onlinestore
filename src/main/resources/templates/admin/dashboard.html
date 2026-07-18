@@ -67,192 +67,57 @@
                 </a>
             </li>
 
-            <li class="submenu">
-                <a href="#" data-bs-toggle="collapse" data-bs-target="#productsMenu">
-                    <i class="bi bi-box-seam"></i>
-                    <span>Prodotti</span>
-                    <i class="bi bi-chevron-down ms-auto"></i>
+            <li th:each="menuItem : ${adminMenuItems}"
+                th:classappend="${menuItem.group ? 'submenu' : ''}">
+
+                <th:block th:if="${menuItem.group}">
+                    <a href="#"
+                       data-bs-toggle="collapse"
+                       th:data-bs-target="${'#adminMenu-' + menuItem.id}"
+                       th:aria-controls="${'adminMenu-' + menuItem.id}"
+                       aria-expanded="false"
+                       th:title="${menuItem.description}">
+                        <i th:class="${'bi ' + menuItem.icon}" aria-hidden="true"></i>
+                        <span th:text="${menuItem.label}">Menu</span>
+                        <i class="bi bi-chevron-down ms-auto" aria-hidden="true"></i>
+                    </a>
+
+                    <ul class="collapse" th:id="${'adminMenu-' + menuItem.id}">
+                        <li th:each="childItem : ${menuItem.children}">
+                            <a th:if="${childItem.link}"
+                               th:href="${childItem.url}"
+                               th:title="${childItem.description}">
+                                <i th:class="${'bi ' + childItem.icon}" aria-hidden="true"></i>
+                                <span th:text="${childItem.label}">Voce menu</span>
+                            </a>
+
+                            <span th:if="${childItem.placeholder}"
+                                  class="sidebar-disabled"
+                                  aria-disabled="true"
+                                  th:title="${childItem.description}">
+                                <i th:class="${'bi ' + childItem.icon}" aria-hidden="true"></i>
+                                <span th:text="${childItem.label}">Voce menu</span>
+                                <small>Presto</small>
+                            </span>
+                        </li>
+                    </ul>
+                </th:block>
+
+                <a th:if="${menuItem.link}"
+                   th:href="${menuItem.url}"
+                   th:title="${menuItem.description}">
+                    <i th:class="${'bi ' + menuItem.icon}" aria-hidden="true"></i>
+                    <span th:text="${menuItem.label}">Voce menu</span>
                 </a>
 
-                <ul class="collapse" id="productsMenu">
-                    <li>
-                        <a th:if="${isAdmin}" th:href="@{/admin/products}">
-                            Lista Prodotti
-                        </a>
-                    </li>
-                    <li>
-                        <a th:href="@{/api/admin/products}">
-                            Prodotti json
-                        </a>
-                    </li>
-                    <li>
-                        <a th:if="${isAdmin}" th:href="@{/api/admin/products/pretty}">
-                            Prodotti json-pretty
-                        </a>
-                    </li>
-                </ul>
-            </li>
-
-            <li class="submenu">
-                <a href="#" data-bs-toggle="collapse" data-bs-target="#ordersMenu">
-                    <i class="bi bi-bag"></i>
-                    <span>Ordini</span>
-                    <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-
-                <ul class="collapse" id="ordersMenu">
-                    <li>
-                        <a th:href="@{/admin/orders}">Lista</a>
-                    </li>
-                    <li><a href="#">Nuovi</a></li>
-                    <li><a href="#">Pagati</a></li>
-                    <li><a href="#">Spediti</a></li>
-                </ul>
-            </li>
-
-            <li>
-                <a th:if="${isAdmin}" th:href="@{/admin/users}">
-                    <i class="bi bi-people"></i>
-                    <span>Utenti</span>
-                </a>
-            </li>
-
-            <li>
-                <a th:if="${isAdmin}" th:href="@{/admin/categories}">
-                    <i class="bi bi-grid"></i>
-                    <span>Categorie</span>
-                </a>
-            </li>
-
-            <li>
-                <a th:if="${isAdmin}" th:href="@{/admin/giftcards}">
-                    <i class="bi bi-gift"></i>
-                    <span>GiftCard</span>
-                </a>
-            </li>
-
-			<li>
-              <a th:if="${isAdmin}" th:href="@{/admin/discount-codes}">
-                 <i class="bi bi-ticket-perforated-fill"></i>
-                  <span>Buoni Sconto</span>
-              </a>
-            </li>
-			
-			
-			
-			
-			
-			
-			<li class="submenu">
-                <a href="#" data-bs-toggle="collapse" data-bs-target="#tabelleMenu">
-                    <i class="bi bi-table"></i>
-                    <span>Tabelle</span>
-                    <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-
-                <ul class="collapse" id="tabelleMenu">
-                    <li>
-                        <a th:if="${isAdmin}" th:href="@{/admin/colors}">
-                            <i class="bi bi-palette"></i>
-                            <span>Colori</span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a th:if="${isAdmin}" th:href="@{/admin/sizes}">
-                            <i class="bi bi-rulers"></i>
-                            <span>Taglie</span>
-                        </a>
-                    </li>
-                
-					<li>
-                       <a th:if="${isAdmin}" th:href="@{/admin/order-types}">
-                          <i class="bi bi-tags"></i>
-                           <span>Tipo Ordine</span>
-                       </a>
-                    </li>
-
-                    <li>
-                        <a th:if="${isAdmin}" th:href="@{/admin/groups}">
-                            <i class="bi bi-collection"></i>
-                            <span>Gruppi</span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a th:if="${isAdmin}" th:href="@{/admin/subgroups}">
-                            <i class="bi bi-diagram-2"></i>
-                            <span>Sottogruppi</span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a th:if="${isAdmin}" th:href="@{/admin/brands}">
-                            <i class="bi bi-bookmark-star"></i>
-                            <span>Brand</span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a th:if="${isAdmin}" th:href="@{/admin/families}">
-                            <i class="bi bi-diagram-3"></i>
-                            <span>Famiglie</span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a th:if="${isAdmin}" th:href="@{/admin/subfamilies}">
-                            <i class="bi bi-diagram-3-fill"></i>
-                            <span>Sottofamiglie</span>
-                        </a>
-                    </li>
-					
-					
-					
-					
-				</ul>
-            </li>
-
-            <li>
-                <a href="#">
-                    <i class="bi bi-gear"></i>
-                    <span>Impostazioni</span>
-                </a>
-            </li>
-
-            <li class="submenu">
-                <a href="#" data-bs-toggle="collapse" data-bs-target="#proveMenu">
-                    <i class="bi bi-gear"></i>
-                    <span>Prove di sviluppo</span>
-                    <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-
-                <ul class="collapse" id="proveMenu">
-                    
-					
-					
-					<li>
-					                        <a th:if="${isAdmin}" th:href="@{/admin/import}">
-					                            <i class="bi bi-table"></i>
-					                            <span>Importa file</span>
-					                        </a>
-					                    </li>
-					
-					
-					<li>
-                        <a th:if="${isAdmin}" th:href="@{/admin/prove}">
-                            <i class="bi bi-table"></i>
-                            <span>Tabella cartitemDto</span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a th:if="${isAdmin}" th:href="@{/admin/prove/ordertempdata-table}">
-                            <i class="bi bi-table"></i>
-                            <span>Tabella ordertempdata</span>
-                        </a>
-                    </li>
-                </ul>
+                <span th:if="${menuItem.placeholder}"
+                      class="sidebar-disabled"
+                      aria-disabled="true"
+                      th:title="${menuItem.description}">
+                    <i th:class="${'bi ' + menuItem.icon}" aria-hidden="true"></i>
+                    <span th:text="${menuItem.label}">Voce menu</span>
+                    <small>Presto</small>
+                </span>
             </li>
         </ul>
     </aside>
@@ -312,6 +177,34 @@
 				</div>
         </div>
    
+
+            <div class="row g-4 mt-1" th:if="${!#lists.isEmpty(adminMenuQuickLinks)}">
+                <div class="col-12">
+                    <div class="card dashboard-card table-card dashboard-links-card">
+                        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <h5>
+                                <i class="bi bi-lightning-charge"></i>
+                                Collegamenti rapidi
+                            </h5>
+                            <span class="text-muted small">Voci attive configurate dal menu amministratore</span>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="dashboard-quick-links">
+                                <a th:each="quickLink : ${adminMenuQuickLinks}"
+                                   th:href="${quickLink.url}"
+                                   th:title="${quickLink.description}"
+                                   class="dashboard-quick-link">
+                                    <i th:class="${'bi ' + quickLink.icon}" aria-hidden="true"></i>
+                                    <span th:text="${quickLink.label}">Voce rapida</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
 		<div class="row g-4 mt-1">
 		    <div class="col-12">
 		        <div class="card dashboard-card table-card">
@@ -321,7 +214,9 @@
 		                    Ultimi ordini
 		                </h5>
 
-		                <a th:href="@{/admin/orders}" class="btn btn-sm btn-outline-primary">
+		                <a th:if="${adminMenu.isVisible('orders-list', isAdmin)}"
+                               th:href="@{/admin/orders}"
+                               class="btn btn-sm btn-outline-primary">
 		                    Vedi tutti
 		                </a>
 		            </div>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Configura menu amministratore</title>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        body {
+            background: #f5f7fb;
+        }
+
+        .page-shell {
+            max-width: 1320px;
+        }
+
+        .configuration-card {
+            border: 0;
+            border-radius: 1rem;
+            box-shadow: 0 0.45rem 1.4rem rgba(15, 23, 42, 0.08);
+        }
+
+        .configuration-table {
+            min-width: 780px;
+        }
+
+        .configuration-table thead th {
+            white-space: nowrap;
+        }
+
+        .configuration-group-row td {
+            background: #f6f8fb;
+        }
+
+        .menu-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.7rem;
+        }
+
+        .menu-label > i {
+            margin-top: 0.1rem;
+            color: #0d6efd;
+            font-size: 1.05rem;
+        }
+
+        .menu-label small {
+            display: block;
+            margin-top: 0.15rem;
+            color: #6c757d;
+        }
+
+        .flag-switch {
+            min-width: 100px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            padding-left: 0;
+        }
+
+        .flag-switch .form-check-input {
+            float: none;
+            margin: 0;
+        }
+
+        .flag-switch .form-check-label {
+            min-width: 38px;
+            font-family: monospace;
+        }
+
+        .sticky-actions {
+            position: sticky;
+            bottom: 0;
+            z-index: 5;
+            background: rgba(255, 255, 255, 0.96);
+            border-top: 1px solid #dee2e6;
+            backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid page-shell py-4 py-lg-5">
+
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+        <div>
+            <div class="text-uppercase small fw-semibold text-primary mb-1">Impostazioni</div>
+            <h1 class="h2 mb-1">Configura menu amministratore</h1>
+            <p class="text-muted mb-0">
+                Attiva o disattiva le voci della Dashboard senza eliminare endpoint, controller o dati.
+            </p>
+        </div>
+
+        <a class="btn btn-outline-secondary" th:href="@{/admin/dashboard}">
+            <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>
+            Torna alla Dashboard
+        </a>
+    </div>
+
+    <div th:if="${menuConfigSuccess}"
+         class="alert alert-success alert-dismissible fade show"
+         role="alert">
+        <i class="bi bi-check-circle me-2" aria-hidden="true"></i>
+        <span th:text="${menuConfigSuccess}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Chiudi"></button>
+    </div>
+
+    <div th:if="${menuConfigError}"
+         class="alert alert-danger alert-dismissible fade show"
+         role="alert">
+        <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>
+        <span th:text="${menuConfigError}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Chiudi"></button>
+    </div>
+
+    <div class="alert alert-info d-flex align-items-start gap-2" role="note">
+        <i class="bi bi-info-circle mt-1" aria-hidden="true"></i>
+        <div>
+            Il pannello aggiorna direttamente
+            <code th:text="${adminMenuConfigurationPath}">config/menu/admin-menu.json</code>.
+            Le voci <strong>Impostazioni</strong> e <strong>Configura menu</strong> restano sempre attive
+            per garantire l’accesso a questa pagina.
+        </div>
+    </div>
+
+    <form th:action="@{/admin/menu}" method="post">
+        <input type="hidden"
+               th:name="${_csrf.parameterName}"
+               th:value="${_csrf.token}">
+
+        <div class="card configuration-card overflow-hidden">
+            <div class="card-header bg-white border-0 px-3 px-lg-4 pt-4 pb-3">
+                <h2 class="h5 mb-1">Voci disponibili</h2>
+                <div class="text-muted small">
+                    Il valore true rende visibile la voce; false la nasconde dal menu amministratore.
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 configuration-table">
+                    <thead class="table-light">
+                    <tr>
+                        <th class="ps-3 ps-lg-4">Menu</th>
+                        <th>Voce</th>
+                        <th>Destinazione</th>
+                        <th class="text-center pe-3 pe-lg-4">Attiva</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${adminMenuConfigurationItems}"
+                        th:classappend="${item.group ? 'configuration-group-row' : ''}">
+                        <td class="ps-3 ps-lg-4 fw-semibold" th:text="${item.menu}">Menu</td>
+                        <td>
+                            <div class="menu-label">
+                                <i th:class="${'bi ' + item.icon}" aria-hidden="true"></i>
+                                <div>
+                                    <strong th:text="${item.label}">Voce</strong>
+                                    <small th:if="${!#strings.isEmpty(item.description)}"
+                                           th:text="${item.description}"></small>
+                                    <span class="badge text-bg-secondary mt-1"
+                                          th:text="${item.group ? 'MENU' : (item.link ? 'LINK' : 'RISERVATA')}">
+                                        LINK
+                                    </span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <code th:if="${item.link}" th:text="${item.url}">/admin/link</code>
+                            <span th:unless="${item.link}" class="text-muted">—</span>
+                        </td>
+                        <td class="text-center pe-3 pe-lg-4">
+                            <div class="form-check form-switch flag-switch">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="enabled"
+                                       th:id="${'menuFlag-' + item.id}"
+                                       th:value="${item.id}"
+                                       th:checked="${item.enabled}"
+                                       th:disabled="${item.id == 'settings' or item.id == 'menu-configuration'}"
+                                       th:title="${item.id == 'settings' or item.id == 'menu-configuration' ? 'Voce sempre attiva' : null}">
+                                <label class="form-check-label" th:for="${'menuFlag-' + item.id}">
+                                    <span th:text="${item.enabled ? 'true' : 'false'}">true</span>
+                                </label>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="sticky-actions d-flex flex-column flex-sm-row justify-content-end gap-2 p-3 px-lg-4">
+                <a class="btn btn-outline-secondary" th:href="@{/admin/dashboard}">Annulla</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-floppy me-1" aria-hidden="true"></i>
+                    Salva configurazione
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script>
+    document.querySelectorAll('input[name="enabled"]').forEach(function (input) {
+        const label = document.querySelector('label[for="' + input.id + '"] span');
+
+        function syncLabel() {
+            if (label) {
+                label.textContent = input.checked ? 'true' : 'false';
+            }
+        }
+
+        input.addEventListener('change', syncLabel);
+        syncLabel();
+    });
+</script>
+</body>
+</html>

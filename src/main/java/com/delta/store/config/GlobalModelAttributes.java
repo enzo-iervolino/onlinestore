@@ -11,13 +11,21 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import java.util.List;
+
 @ControllerAdvice(annotations = Controller.class)
 public class GlobalModelAttributes {
 
     private final UserRepository userRepository;
+    private final AdminMenuProperties adminMenuProperties;
+    private final SiteNoticeProperties siteNoticeProperties;
 
-    public GlobalModelAttributes(UserRepository userRepository) {
+    public GlobalModelAttributes(UserRepository userRepository,
+                                 AdminMenuProperties adminMenuProperties,
+                                 SiteNoticeProperties siteNoticeProperties) {
         this.userRepository = userRepository;
+        this.adminMenuProperties = adminMenuProperties;
+        this.siteNoticeProperties = siteNoticeProperties;
     }
 
     // CART SEMPRE DALLO STESSO POSTO
@@ -36,27 +44,58 @@ public class GlobalModelAttributes {
         return request.getRequestURI();
     }
 
+    @ModelAttribute("adminMenu")
+    public AdminMenuProperties adminMenu() {
+        return adminMenuProperties;
+    }
+
+    @ModelAttribute("adminMenuItems")
+    public List<AdminMenuProperties.MenuNode> adminMenuItems() {
+        return adminMenuProperties.visibleMenu(isAdmin());
+    }
+
+    @ModelAttribute("adminMenuQuickLinks")
+    public List<AdminMenuProperties.MenuItem> adminMenuQuickLinks() {
+        return adminMenuProperties.visibleQuickLinks(isAdmin());
+    }
+
+    @ModelAttribute("adminMenuConfigurationItems")
+    public List<AdminMenuProperties.MenuItem> adminMenuConfigurationItems() {
+        return isAdmin() ? adminMenuProperties.getConfigurationItems() : List.of();
+    }
+
+    @ModelAttribute("adminMenuConfigurationPath")
+    public String adminMenuConfigurationPath() {
+        return adminMenuProperties.getConfigurationDisplayPath();
+    }
+
+    @ModelAttribute("siteNotice")
+    public SiteNoticeProperties.SiteNoticeView siteNotice() {
+        return siteNoticeProperties.getView();
+    }
+
     @ModelAttribute("isAuthenticated")
     public boolean isAuthenticated() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return auth != null && auth.isAuthenticated()
+        Authentication auth = currentAuthentication();
+        return auth != null
+                && auth.isAuthenticated()
                 && !(auth instanceof AnonymousAuthenticationToken);
     }
 
     @ModelAttribute("isAdmin")
     public boolean isAdmin() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Authentication auth = currentAuthentication();
         if (auth == null || auth instanceof AnonymousAuthenticationToken) {
             return false;
         }
 
         return auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
     }
 
     @ModelAttribute("currentUserEmail")
     public String currentUserEmail() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Authentication auth = currentAuthentication();
         if (auth == null || auth instanceof AnonymousAuthenticationToken) {
             return "";
         }
@@ -65,22 +104,22 @@ public class GlobalModelAttributes {
 
     @ModelAttribute("currentAvatar")
     public String currentAvatar() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Authentication auth = currentAuthentication();
 
         if (auth == null || auth instanceof AnonymousAuthenticationToken) {
             return "/images/avatar-default.png";
         }
 
         return userRepository.findByEmail(auth.getName())
-                .map(u -> {
-                    String avatar = u.getAvatar();
+                .map(user -> {
+                    String avatar = user.getAvatar();
 
-                    // avatar di default NON deve mai passare da uploads
-                    if (avatar == null || avatar.isBlank() || avatar.equals("avatar-default.png")) {
+                    // L'avatar predefinito non deve mai passare dalla cartella uploads.
+                    if (avatar == null || avatar.isBlank() || "avatar-default.png".equals(avatar)) {
                         return "/images/avatar-default.png";
                     }
 
-                    // Google restituisce una URL completa per la foto profilo
+                    // I provider OAuth possono restituire una URL completa.
                     if (avatar.startsWith("http://") || avatar.startsWith("https://")) {
                         return avatar;
                     }
@@ -90,4 +129,7 @@ public class GlobalModelAttributes {
                 .orElse("/images/avatar-default.png");
     }
 
+    private Authentication currentAuthentication() {
+        return SecurityContextHolder.getContext().getAuthentication();
+    }
 }

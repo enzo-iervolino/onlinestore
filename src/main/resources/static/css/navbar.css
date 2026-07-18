@@ -730,3 +730,87 @@ body.cart-empty .nav-small .cart-btn:hover + .cart-empty-preview {
     min-width: 165px !important;
   }
 }
+/* =========================================================
+   AVVISO SCORREVOLE GLOBALE
+   Configurabile da Dashboard > Impostazioni > Gestione avviso.
+   ========================================================= */
+.site-notice-ticker {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1001;
+  height: 30px;
+  overflow: hidden;
+  pointer-events: none;
+  color: #fff;
+  background: transparent;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.98), 0 0 2px rgba(0, 0, 0, 0.95);
+}
+
+.site-notice-track {
+  width: max-content;
+  min-width: 200%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  animation: site-notice-scroll 20s linear infinite;
+  will-change: transform;
+}
+
+.site-notice-message {
+  width: max-content;
+  min-width: 100vw;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  padding: 0.25rem 3rem;
+  overflow: visible;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+@keyframes site-notice-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 768px) {
+  .site-notice-ticker {
+    position: fixed;
+    top: 0;
+    bottom: auto;
+    height: 28px;
+    z-index: 10000;
+  }
+
+  .site-notice-message {
+    padding: 0.22rem 1.75rem;
+    font-size: 0.78rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-notice-track {
+    width: 100%;
+    min-width: 100%;
+    animation: none;
+  }
+
+  .site-notice-message {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .site-notice-message + .site-notice-message {
+    display: none;
+  }
+}

@@ -443,4 +443,15 @@
       </div>
     </div>
   </div>
+  <div class="site-notice-ticker"
+       th:if="${siteNotice != null and siteNotice.visible}"
+       role="status"
+       th:aria-label="${siteNotice.text}">
+    <span class="visually-hidden" th:text="${siteNotice.text}"></span>
+    <div class="site-notice-track" aria-hidden="true">
+      <span class="site-notice-message" th:text="${siteNotice.text}">Avviso</span>
+      <span class="site-notice-message" th:text="${siteNotice.text}">Avviso</span>
+    </div>
+  </div>
+
 </nav>

@@ -408,3 +408,54 @@ body {
     font-size: 1.7rem;
   }
 }
+/* ===== MENU DINAMICO / VOCI NON ANCORA COLLEGATE ===== */
+.sidebar-menu li .sidebar-disabled {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 20px;
+  color: rgba(255, 255, 255, 0.48);
+  cursor: not-allowed;
+  white-space: nowrap;
+}
+
+.sidebar-menu li .sidebar-disabled small {
+  margin-left: auto;
+  padding: 0.12rem 0.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dashboard-quick-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+}
+
+.dashboard-quick-link {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(13, 110, 253, 0.14);
+  border-radius: 12px;
+  color: #243047;
+  background: rgba(248, 250, 252, 0.9);
+  text-decoration: none;
+  font-weight: 600;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.dashboard-quick-link:hover {
+  transform: translateY(-2px);
+  border-color: rgba(13, 110, 253, 0.35);
+  color: #0d6efd;
+  background: #fff;
+}
+
+.dashboard-quick-link i {
+  font-size: 1rem;
+}
