@@ -1,6 +1,22 @@
 package com.delta.store.product.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -31,48 +47,99 @@ public class Product {
     private Long id;
 
     /**
-     * UUID pubblico da usare nelle API / URL
+     * UUID pubblico da usare nelle API / URL.
      */
     @Column(name = "public_id", nullable = false, unique = true, length = 36, updatable = false, columnDefinition = "uuid")
     private UUID publicId;
 
-    /** Codice prodotto */
+    /** Codice prodotto. */
     @Column(nullable = false, unique = true, length = 50)
     private String codpro;
 
-    /** Nome prodotto */
+    /** Nome prodotto. */
     @Column(nullable = false, length = 255)
     private String name;
 
-    /** Categoria principale */
+    /** Categoria principale. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private ProductCategory category;
 
-    /** Stock (opzionale) */
+    /** Stock opzionale. */
     @Column(name = "stock_qty")
     private Integer stockQty;
-    
-    
-    /** Gruppo logico */
+
+    /**
+     * Identificativi lookup mantenuti come campi scrivibili per non modificare
+     * i flussi CRUD e le API già esistenti.
+     */
     @Column(name = "group_id")
     private Long groupId;
 
-    /** Sottogruppo (se usato) */
     @Column(name = "subgroup_id")
     private Long subgroupId;
 
-    /** Brand */
     @Column(name = "brand_id")
     private Long brandId;
 
-    /** Famiglia */
     @Column(name = "family_id")
     private Long familyId;
 
-    /** Sottofamiglia */
     @Column(name = "subfamily_id")
     private Long subfamilyId;
+
+    /**
+     * Relazioni di sola lettura sugli stessi campi ID.
+     *
+     * insertable=false e updatable=false evitano una doppia gestione della
+     * medesima colonna: la scrittura continua a passare dai campi Long sopra.
+     * Le foreign key reali vengono create in modo controllato
+     * da ProductLookupForeignKeyInitializer, dopo la verifica dei dati.
+     */
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(
+            name = "group_id",
+            insertable = false,
+            updatable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT)
+    )
+    private ProductGroup group;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(
+            name = "subgroup_id",
+            insertable = false,
+            updatable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT)
+    )
+    private ProductSubgroup subgroup;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(
+            name = "brand_id",
+            insertable = false,
+            updatable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT)
+    )
+    private ProductBrand brand;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(
+            name = "family_id",
+            insertable = false,
+            updatable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT)
+    )
+    private ProductFamily family;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(
+            name = "subfamily_id",
+            insertable = false,
+            updatable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT)
+    )
+    private ProductSubfamily subfamily;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -83,28 +150,28 @@ public class Product {
     @Column(columnDefinition = "text")
     private String shippingInfo;
 
-    /** Prezzo base (IVA inclusa) */
+    /** Prezzo base IVA inclusa. */
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    /** Media principale (path o URL): può essere immagine oppure video */
+    /** Media principale, path o URL: può essere immagine oppure video. */
     @Column(length = 500)
     private String image;
 
-    /** Tipo media principale: IMAGE / VIDEO */
+    /** Tipo media principale: IMAGE / VIDEO. */
     @Column(name = "main_media_type", nullable = false, length = 20)
     private String mainMediaType = MAIN_MEDIA_TYPE_IMAGE;
 
-    /** Poster opzionale da usare quando il media principale è un video */
+    /** Poster opzionale da usare quando il media principale è un video. */
     @Column(name = "main_video_poster", length = 500)
     private String mainVideoPoster;
 
-    /** Immagini aggiuntive (tabella product_image) */
+    /** Immagini aggiuntive, tabella product_image. */
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC, id ASC")
     private Set<ProductImage> images = new LinkedHashSet<>();
 
-    /** Varianti (colori/taglie) */
+    /** Varianti colori/taglie. */
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("id ASC")
     private Set<ProductVariant> variants = new LinkedHashSet<>();
@@ -225,6 +292,14 @@ public class Product {
         this.category = category;
     }
 
+    public Integer getStockQty() {
+        return stockQty;
+    }
+
+    public void setStockQty(Integer stockQty) {
+        this.stockQty = stockQty;
+    }
+
     public Long getGroupId() {
         return groupId;
     }
@@ -263,6 +338,50 @@ public class Product {
 
     public void setSubfamilyId(Long subfamilyId) {
         this.subfamilyId = subfamilyId;
+    }
+
+    public ProductGroup getGroup() {
+        return group;
+    }
+
+    public ProductSubgroup getSubgroup() {
+        return subgroup;
+    }
+
+    public ProductBrand getBrand() {
+        return brand;
+    }
+
+    public ProductFamily getFamily() {
+        return family;
+    }
+
+    public ProductSubfamily getSubfamily() {
+        return subfamily;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getMaterials() {
+        return materials;
+    }
+
+    public void setMaterials(String materials) {
+        this.materials = materials;
+    }
+
+    public String getShippingInfo() {
+        return shippingInfo;
+    }
+
+    public void setShippingInfo(String shippingInfo) {
+        this.shippingInfo = shippingInfo;
     }
 
     public BigDecimal getPrice() {
@@ -346,36 +465,4 @@ public class Product {
                 ", price=" + price +
                 '}';
     }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getMaterials() {
-        return materials;
-    }
-
-    public void setMaterials(String materials) {
-        this.materials = materials;
-    }
-
-    public String getShippingInfo() {
-        return shippingInfo;
-    }
-
-    public void setShippingInfo(String shippingInfo) {
-        this.shippingInfo = shippingInfo;
-    }
-
-	public Integer getStockQty() {
-		return stockQty;
-	}
-
-	public void setStockQty(Integer stockQty) {
-		this.stockQty = stockQty;
-	}
 }

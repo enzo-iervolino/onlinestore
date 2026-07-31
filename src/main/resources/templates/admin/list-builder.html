@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista personalizzata - Admin</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <style>
+        body.list-builder-page {
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: #f4f6f9;
+            color: #212529;
+        }
+
+        .list-builder-page .page-title,
+        .list-builder-page .form-label,
+        .list-builder-page .card,
+        .list-builder-page .table {
+            color: #212529;
+        }
+
+        .list-builder-page .form-select,
+        .list-builder-page .form-control {
+            width: 100%;
+            min-width: 0;
+            background-color: #ffffff;
+            border: 1px solid #ced4da;
+            color: #212529;
+            box-shadow: none;
+        }
+
+        .list-builder-page .form-select {
+            appearance: auto;
+            -webkit-appearance: menulist;
+            min-height: 2.35rem;
+        }
+
+        .list-builder-page .form-select option {
+            background-color: #ffffff;
+            color: #212529;
+        }
+
+        .list-builder-page .form-select:focus,
+        .list-builder-page .form-control:focus {
+            background-color: #ffffff;
+            border-color: #86b7fe;
+            color: #212529;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.2);
+        }
+
+        .list-builder-page .form-control::placeholder {
+            color: #6c757d;
+            opacity: 1;
+        }
+
+        .admin-toolbar {
+            background: #212529;
+            color: #fff;
+        }
+
+        .page-shell {
+            width: 100%;
+            max-width: 100%;
+            padding-right: clamp(0.75rem, 1.6vw, 1.6rem);
+            padding-left: clamp(0.75rem, 1.6vw, 1.6rem);
+        }
+
+        .step-card {
+            max-width: 100%;
+            overflow: hidden;
+            border: 0;
+            border-radius: 1rem;
+            box-shadow: 0 0.45rem 1.4rem rgba(33, 37, 41, 0.08);
+        }
+
+        .step-number {
+            display: inline-flex;
+            width: 2rem;
+            height: 2rem;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            border-radius: 50%;
+            background: #0d6efd;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .field-table-wrapper {
+            width: 100%;
+            max-width: 100%;
+            overflow: visible;
+        }
+
+        .field-table {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .field-table th,
+        .field-table td {
+            min-width: 0;
+            padding: 0.65rem 0.5rem;
+            white-space: normal;
+            vertical-align: top;
+            overflow-wrap: anywhere;
+        }
+
+        .field-table thead th {
+            vertical-align: middle;
+            font-size: 0.79rem;
+            line-height: 1.15;
+        }
+
+        .field-show-heading,
+        .field-show-cell {
+            width: 64px;
+            text-align: center;
+        }
+
+        .field-order-heading,
+        .field-order-cell {
+            width: 82px;
+        }
+
+        .field-name-heading,
+        .field-name-cell {
+            width: 135px;
+        }
+
+        .field-type-heading,
+        .field-type-cell {
+            width: 86px;
+        }
+
+        .field-required-heading,
+        .field-required-cell {
+            width: 100px;
+        }
+
+        .field-relation-heading,
+        .field-relation-cell {
+            width: 220px;
+        }
+
+        .field-format-heading,
+        .field-format-cell {
+            width: 390px;
+        }
+
+        .field-name {
+            font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+            font-weight: 600;
+        }
+
+        .field-order-cell .form-control {
+            text-align: center;
+        }
+
+        .cell-responsive-label {
+            display: none;
+        }
+
+        .relation-box {
+            width: 100%;
+            min-width: 0;
+            max-width: none;
+            padding: 0.55rem;
+            border: 1px solid #dbe5f1;
+            border-radius: 0.7rem;
+            background: #f8fbff;
+        }
+
+        .relation-box .relation-path {
+            color: #495057;
+            white-space: normal;
+        }
+
+        .relation-box .form-select {
+            min-height: 2.05rem;
+            font-size: 0.78rem;
+        }
+
+        .column-format-box {
+            width: 100%;
+            min-width: 0;
+            padding: 0.55rem;
+            border: 1px solid #dfe3e7;
+            border-radius: 0.7rem;
+            background: #fbfcfd;
+        }
+
+        .column-format-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.45rem;
+            align-items: end;
+        }
+
+        .column-format-label {
+            display: block;
+            min-height: 1.8em;
+            margin-bottom: 0.2rem;
+            color: #495057;
+            font-size: 0.65rem;
+            font-weight: 700;
+            line-height: 1.05;
+            letter-spacing: 0.01em;
+            white-space: normal;
+        }
+
+        .column-format-box .form-control,
+        .column-format-box .form-select {
+            min-height: 2.05rem;
+            padding-right: 0.4rem;
+            padding-left: 0.4rem;
+            font-size: 0.76rem;
+        }
+
+        .column-format-help {
+            margin-top: 0.45rem;
+            color: #6c757d;
+            font-size: 0.68rem;
+            line-height: 1.3;
+            white-space: normal;
+        }
+
+        .result-wrapper {
+            width: 100%;
+            max-width: 100%;
+            max-height: 62vh;
+            overflow: auto;
+        }
+
+        .result-table {
+            width: max-content;
+            min-width: 100%;
+            table-layout: fixed;
+        }
+
+        .result-table th,
+        .result-table td {
+            vertical-align: middle;
+            overflow: hidden;
+        }
+
+        .result-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #e9ecef;
+        }
+
+        .list-cell-text {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .list-cell-text--ellipsis {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .list-cell-text--clip {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: clip;
+        }
+
+        .list-cell-text--wrap {
+            overflow: visible;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .list-image-link {
+            display: inline-flex;
+            width: 76px;
+            height: 76px;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+            border-radius: 0.65rem;
+            background: #ffffff;
+        }
+
+        .list-image-preview {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .empty-state {
+            border: 1px dashed #adb5bd;
+            border-radius: 0.9rem;
+            background: #fff;
+        }
+
+        @media (max-width: 1279.98px) {
+            .field-table-wrapper {
+                padding: 0 0.75rem 0.75rem;
+            }
+
+            .field-table,
+            .field-table tbody {
+                display: block;
+                width: 100%;
+            }
+
+            .field-table thead {
+                display: none;
+            }
+
+            .field-table tr.field-row {
+                display: grid;
+                grid-template-columns: 90px 105px minmax(0, 1fr) 115px;
+                grid-template-areas:
+                    "show order name type"
+                    "required relation relation alias"
+                    "format format format format";
+                gap: 0.75rem;
+                width: 100%;
+                margin-bottom: 0.75rem;
+                padding: 0.9rem;
+                border: 1px solid #dfe3e7;
+                border-radius: 0.85rem;
+                background: #ffffff;
+                box-shadow: 0 0.2rem 0.65rem rgba(33, 37, 41, 0.05);
+            }
+
+            .field-table tr.field-row:last-child {
+                margin-bottom: 0;
+            }
+
+            .field-table tr.field-empty-row {
+                display: block;
+            }
+
+            .field-table td {
+                display: block;
+                width: auto;
+                min-width: 0;
+                padding: 0;
+                border: 0;
+            }
+
+            .field-table td::before {
+                content: attr(data-label);
+                display: block;
+                margin-bottom: 0.3rem;
+                color: #6c757d;
+                font-size: 0.67rem;
+                font-weight: 700;
+                line-height: 1.1;
+                text-transform: uppercase;
+                letter-spacing: 0.035em;
+            }
+
+            .field-show-cell {
+                grid-area: show;
+                text-align: left;
+            }
+
+            .field-order-cell {
+                grid-area: order;
+            }
+
+            .field-name-cell {
+                grid-area: name;
+            }
+
+            .field-type-cell {
+                grid-area: type;
+            }
+
+            .field-required-cell {
+                grid-area: required;
+            }
+
+            .field-relation-cell {
+                grid-area: relation;
+            }
+
+            .field-alias-cell {
+                grid-area: alias;
+            }
+
+            .field-format-cell {
+                grid-area: format;
+            }
+        }
+
+        @media (max-width: 991.98px) {
+            .field-table tr.field-row {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                grid-template-areas:
+                    "show order"
+                    "name type"
+                    "required alias"
+                    "relation relation"
+                    "format format";
+            }
+
+            .column-format-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .page-title {
+                font-size: 1.45rem;
+            }
+
+            .step-card .card-body {
+                padding: 1rem;
+            }
+
+            .field-table-wrapper {
+                padding: 0 0.5rem 0.5rem;
+            }
+
+            .field-table tr.field-row {
+                gap: 0.65rem;
+                padding: 0.75rem;
+            }
+
+            .result-table {
+                min-width: 640px;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .field-table tr.field-row {
+                grid-template-columns: minmax(0, 1fr);
+                grid-template-areas:
+                    "show"
+                    "order"
+                    "name"
+                    "type"
+                    "required"
+                    "relation"
+                    "alias"
+                    "format";
+            }
+        }
+
+        @media (max-width: 419.98px) {
+            .column-format-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+    </style>
+</head>
+<body class="list-builder-page">
+
+<header class="admin-toolbar py-2">
+    <div class="container-fluid page-shell d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <a class="btn btn-outline-light btn-sm" th:href="@{/admin/dashboard}">
+            <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>
+            Dashboard
+        </a>
+
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-list-columns-reverse" aria-hidden="true"></i>
+            <span class="fw-semibold">Admin · Impostazioni</span>
+        </div>
+    </div>
+</header>
+
+<main class="container-fluid page-shell py-4 py-lg-5">
+    <div class="mb-4">
+        <div class="text-uppercase text-primary fw-semibold small mb-1">Tool amministrativo</div>
+        <h1 class="page-title h2 mb-2">Costruisci lista personalizzata</h1>
+        <p class="text-muted mb-0">
+            Seleziona una tabella, scegli i campi, imposta il loro ordine nella lista, sostituisci gli ID collegati
+            con un valore descrittivo e configura larghezza, spazio, numero massimo di caratteri e comportamento del testo.
+            I percorsi immagine vengono mostrati automaticamente come anteprime.
+        </p>
+    </div>
+
+    <div th:if="${listBuilderError}" class="alert alert-danger d-flex align-items-start gap-2" role="alert">
+        <i class="bi bi-exclamation-triangle-fill mt-1" aria-hidden="true"></i>
+        <div th:text="${listBuilderError}">Errore durante la lettura del database.</div>
+    </div>
+
+    <section class="card step-card mb-4">
+        <div class="card-body p-3 p-lg-4">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <span class="step-number">1</span>
+                <div>
+                    <h2 class="h5 mb-0">Seleziona la tabella</h2>
+                    <div class="text-muted small">Sono mostrate le tabelle applicative disponibili nel database.</div>
+                </div>
+            </div>
+
+            <form method="get" th:action="@{/admin/list-builder}" class="row g-3 align-items-end">
+                <div class="col-12 col-lg-9">
+                    <label for="table" class="form-label fw-semibold">Tabella database</label>
+                    <select id="table" name="table" class="form-select database-table-select" required>
+                        <option value="">Seleziona una tabella...</option>
+                        <option th:each="databaseTable : ${databaseTables}"
+                                th:value="${databaseTable.key}"
+                                th:text="${databaseTable.displayName}"
+                                th:selected="${databaseTable.key == selectedTableKey}">
+                            public.tabella
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-12 col-lg-3 d-grid">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-table me-1" aria-hidden="true"></i>
+                        Mostra campi
+                    </button>
+                </div>
+            </form>
+
+            <div th:if="${#lists.isEmpty(databaseTables)}" class="alert alert-warning mt-3 mb-0">
+                Nessuna tabella disponibile oppure collegamento al database non attivo.
+            </div>
+        </div>
+    </section>
+
+    <section th:if="${selectedTable != null}" class="card step-card mb-4">
+        <div class="card-body p-0">
+            <div class="p-3 p-lg-4 pb-3">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="step-number">2</span>
+                        <div>
+                            <h2 class="h5 mb-0">Seleziona campi e formato delle colonne</h2>
+                            <div class="text-muted small">
+                                Tabella: <strong th:text="${selectedTable.displayName}">public.tabella</strong>.
+                                Usa “Ordine” per stabilire la posizione dei campi selezionati.
+                            </div>
+                        </div>
+                    </div>
+
+                    <span class="badge text-bg-light border"
+                          th:text="|${#lists.size(databaseColumns)} campi disponibili|">
+                        0 campi disponibili
+                    </span>
+                </div>
+            </div>
+
+            <form method="post" th:action="@{/admin/list-builder/preview}">
+                <input type="hidden"
+                       th:name="${_csrf.parameterName}"
+                       th:value="${_csrf.token}">
+                <input type="hidden" name="table" th:value="${selectedTable.key}">
+
+                <div class="field-table-wrapper">
+                    <table class="table table-hover field-table align-middle mb-0"
+                           aria-label="Selezione e configurazione dei campi della lista">
+                        <thead class="table-light">
+                        <tr>
+                            <th class="field-show-heading">Mostra</th>
+                            <th class="field-order-heading">Ordine</th>
+                            <th class="field-name-heading">Campo</th>
+                            <th class="field-type-heading">Tipo</th>
+                            <th class="field-required-heading">Obbligatorio</th>
+                            <th class="field-relation-heading">Valore relazione</th>
+                            <th class="field-format-heading">Formato colonna</th>
+                            <th class="field-alias-heading">Alias intestazione</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr class="field-row" th:each="column : ${databaseColumns}">
+                            <td class="field-show-cell" data-label="Mostra">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="selectedColumns"
+                                       th:id="${'field-' + column.ordinalPosition}"
+                                       th:value="${column.name}"
+                                       th:checked="${#lists.contains(selectedColumns, column.name)}"
+                                       th:aria-label="|Mostra il campo ${column.name}|">
+                            </td>
+                            <td class="field-order-cell" data-label="Ordine elenco">
+                                <label class="visually-hidden"
+                                       th:for="${'order-' + column.ordinalPosition}">
+                                    Ordine del campo nella lista
+                                </label>
+                                <input type="number"
+                                       class="form-control form-control-sm"
+                                       th:id="${'order-' + column.ordinalPosition}"
+                                       th:name="${'order_' + column.name}"
+                                       th:value="${columnOrders != null ? columnOrders[column.name] : column.ordinalPosition}"
+                                       min="1"
+                                       max="9999"
+                                       step="1"
+                                       inputmode="numeric"
+                                       autocomplete="off"
+                                       th:title="|Ordine del campo ${column.name} nella lista|">
+                                <div class="small text-muted mt-1">1 = primo</div>
+                            </td>
+                            <td class="field-name-cell" data-label="Campo">
+                                <label class="field-name"
+                                       th:for="${'field-' + column.ordinalPosition}"
+                                       th:text="${column.name}">
+                                    campo
+                                </label>
+                            </td>
+                            <td class="field-type-cell" data-label="Tipo">
+                                <span class="badge text-bg-secondary" th:text="${column.typeName}">VARCHAR</span>
+                            </td>
+                            <td class="field-required-cell" data-label="Obbligatorio">
+                                <span th:if="${column.nullable}" class="text-muted">No</span>
+                                <span th:unless="${column.nullable}" class="fw-semibold text-success">Sì</span>
+                            </td>
+                            <td class="field-relation-cell" data-label="Valore relazione">
+                                <div th:if="${column.relation != null}" class="relation-box">
+                                    <div class="d-flex align-items-start gap-2 mb-2">
+                                        <i class="bi bi-diagram-3 text-primary mt-1" aria-hidden="true"></i>
+                                        <div class="small relation-path">
+                                            Collegato a
+                                            <strong th:text="${column.relation.referencedTable.displayName}">
+                                                public.tabella
+                                            </strong>
+                                            tramite
+                                            <code th:text="${column.relation.referencedColumnName}">id</code>
+                                        </div>
+                                    </div>
+
+                                    <label class="visually-hidden"
+                                           th:for="${'relation-' + column.ordinalPosition}">
+                                        Campo correlato da visualizzare
+                                    </label>
+                                    <select class="form-select form-select-sm"
+                                            th:id="${'relation-' + column.ordinalPosition}"
+                                            th:name="${'relation_' + column.name}">
+                                        <option value=""
+                                                th:selected="${relationSelections[column.name] == null or #strings.isEmpty(relationSelections[column.name])}">
+                                            Mostra ID originale
+                                        </option>
+                                        <option th:each="relatedColumn : ${column.relation.displayColumns}"
+                                                th:value="${relatedColumn.name}"
+                                                th:text="|${relatedColumn.name} (${relatedColumn.typeName})|"
+                                                th:selected="${relatedColumn.name == relationSelections[column.name]}">
+                                            name (VARCHAR)
+                                        </option>
+                                    </select>
+
+                                    <div th:if="${column.relation.suggestedDisplayColumn != null and !#strings.isEmpty(column.relation.suggestedDisplayColumn)}"
+                                         class="small text-success mt-1">
+                                        <i class="bi bi-stars me-1" aria-hidden="true"></i>
+                                        Suggerito:
+                                        <strong th:text="${column.relation.suggestedDisplayColumn}">name</strong>
+                                    </div>
+                                </div>
+
+                                <span th:unless="${column.relation != null}" class="text-muted small">
+                                    Nessuna foreign key rilevata
+                                </span>
+                            </td>
+                            <td class="field-format-cell" data-label="Formato colonna">
+                                <div class="column-format-box">
+                                    <div class="column-format-grid">
+                                        <div>
+                                            <label class="column-format-label"
+                                                   th:for="${'width-' + column.ordinalPosition}">
+                                                Larghezza px
+                                            </label>
+                                            <input type="number"
+                                                   class="form-control form-control-sm"
+                                                   th:id="${'width-' + column.ordinalPosition}"
+                                                   th:name="${'width_' + column.name}"
+                                                   th:value="${columnWidths[column.name]}"
+                                                   min="60"
+                                                   max="900"
+                                                   step="10"
+                                                   inputmode="numeric"
+                                                   autocomplete="off">
+                                        </div>
+
+                                        <div>
+                                            <label class="column-format-label"
+                                                   th:for="${'gap-' + column.ordinalPosition}">
+                                                Spazio dopo px
+                                            </label>
+                                            <input type="number"
+                                                   class="form-control form-control-sm"
+                                                   th:id="${'gap-' + column.ordinalPosition}"
+                                                   th:name="${'gap_' + column.name}"
+                                                   th:value="${columnGaps[column.name]}"
+                                                   min="0"
+                                                   max="80"
+                                                   step="2"
+                                                   inputmode="numeric"
+                                                   autocomplete="off">
+                                        </div>
+
+                                        <div>
+                                            <label class="column-format-label"
+                                                   th:for="${'maxchars-' + column.ordinalPosition}">
+                                                Max caratteri
+                                            </label>
+                                            <input type="number"
+                                                   class="form-control form-control-sm"
+                                                   th:id="${'maxchars-' + column.ordinalPosition}"
+                                                   th:name="${'maxchars_' + column.name}"
+                                                   th:value="${maximumCharacters[column.name]}"
+                                                   min="1"
+                                                   max="1000"
+                                                   step="1"
+                                                   placeholder="Tutti"
+                                                   inputmode="numeric"
+                                                   autocomplete="off">
+                                        </div>
+
+                                        <div>
+                                            <label class="column-format-label"
+                                                   th:for="${'textmode-' + column.ordinalPosition}">
+                                                Testo
+                                            </label>
+                                            <select class="form-select form-select-sm"
+                                                    th:id="${'textmode-' + column.ordinalPosition}"
+                                                    th:name="${'textmode_' + column.name}">
+                                                <option value="ellipsis"
+                                                        th:selected="${textModes[column.name] == null or textModes[column.name] == 'ellipsis'}">
+                                                    Tronca con …
+                                                </option>
+                                                <option value="wrap"
+                                                        th:selected="${textModes[column.name] == 'wrap'}">
+                                                    A capo
+                                                </option>
+                                                <option value="clip"
+                                                        th:selected="${textModes[column.name] == 'clip'}">
+                                                    Taglio netto
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="column-format-help">
+                                        Larghezza 60–900 px; spazio 0–80 px. Lascia “Max caratteri” vuoto per mostrare tutto.
+                                        Il valore completo resta disponibile passando il mouse sulla cella.
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="field-alias-cell" data-label="Alias intestazione">
+                                <label class="visually-hidden"
+                                       th:for="${'alias-' + column.ordinalPosition}">
+                                    Alias dell'intestazione
+                                </label>
+                                <input type="text"
+                                       class="form-control form-control-sm"
+                                       th:id="${'alias-' + column.ordinalPosition}"
+                                       th:name="${'alias_' + column.name}"
+                                       th:value="${aliases[column.name]}"
+                                       th:placeholder="${column.name}"
+                                       maxlength="120"
+                                       autocomplete="off">
+                            </td>
+                        </tr>
+
+                        <tr class="field-empty-row" th:if="${#lists.isEmpty(databaseColumns)}">
+                            <td colspan="8" class="text-center text-muted py-4">
+                                La tabella selezionata non contiene campi leggibili.
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 p-3 p-lg-4 border-top">
+                    <div class="text-muted small">
+                        La lista mostra al massimo <strong th:text="${maximumRows}">200</strong> righe.
+                        Le relazioni vengono rilevate dalle foreign key reali del database; gli alias vuoti mantengono il nome originale.
+                        I campi selezionati sono mostrati in ordine numerico crescente; a parità di numero resta l'ordine originale della tabella.
+                        Le impostazioni modificano soltanto la visualizzazione e non i dati salvati nel database.
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-success px-4"
+                            th:disabled="${#lists.isEmpty(databaseColumns)}">
+                        <i class="bi bi-list-ul me-1" aria-hidden="true"></i>
+                        Costruisci lista
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section th:if="${listResult != null}" class="card step-card">
+        <div class="card-body p-0">
+            <div class="p-3 p-lg-4 border-bottom">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="step-number">3</span>
+                        <div>
+                            <h2 class="h5 mb-0">Lista costruita</h2>
+                            <div class="text-muted small"
+                                 th:text="|${listResult.table.displayName} · ${listResult.rowCount()} righe|">
+                                public.tabella · 0 righe
+                            </div>
+                        </div>
+                    </div>
+
+                    <span th:if="${listResult.truncated}" class="badge text-bg-warning">
+                        Risultato limitato a <span th:text="${listResult.maximumRows}">200</span> righe
+                    </span>
+                </div>
+            </div>
+
+            <div th:if="${#lists.isEmpty(listResult.rows)}" class="empty-state text-center p-5 m-3 m-lg-4">
+                <i class="bi bi-inbox fs-1 text-muted" aria-hidden="true"></i>
+                <h3 class="h6 mt-3 mb-1">Nessun dato trovato</h3>
+                <p class="text-muted mb-0">La tabella non contiene righe da mostrare per i campi selezionati.</p>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(listResult.rows)}" class="result-wrapper">
+                <table class="table table-striped table-hover result-table mb-0">
+                    <colgroup>
+                        <col th:each="column : ${listResult.columns}"
+                             th:style="${column.widthStyle}">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th th:each="column : ${listResult.columns}"
+                            th:style="${column.cellStyle}"
+                            th:title="${column.header}">
+                            <span class="list-cell-text list-cell-text--ellipsis"
+                                  th:text="${column.header}">Intestazione</span>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="row : ${listResult.rows}">
+                        <td th:each="cell : ${row}"
+                            th:style="${cell.column.cellStyle}">
+                            <a th:if="${cell.image}"
+                               class="list-image-link"
+                               th:href="${cell.imageUrl}"
+                               th:title="${cell.rawText}"
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                <img class="list-image-preview"
+                                     th:src="${cell.imageUrl}"
+                                     th:alt="${cell.rawText}">
+                            </a>
+
+                            <span th:if="${!cell.image and cell.displayText != null}"
+                                  class="list-cell-text"
+                                  th:classappend="${cell.column.textCssClass}"
+                                  th:text="${cell.displayText}"
+                                  th:title="${cell.rawText}">
+                                Valore
+                            </span>
+                            <span th:if="${!cell.image and cell.displayText == null}" class="text-muted">NULL</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

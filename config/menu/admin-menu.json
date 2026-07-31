@@ -401,6 +401,22 @@
     "url" : "/admin/site-notice"
   }, {
     "adminOnly" : true,
+    "description" : "Crea una lista scegliendo tabella, campi e alias delle intestazioni",
+    "enabled" : true,
+    "group" : false,
+    "icon" : "bi-list-columns-reverse",
+    "id" : "custom-list-builder",
+    "label" : "Lista personalizzata",
+    "link" : true,
+    "menu" : "Impostazioni",
+    "order" : 83,
+    "parentId" : "settings",
+    "placeholder" : false,
+    "quickLink" : false,
+    "type" : "LINK",
+    "url" : "/admin/list-builder"
+  }, {
+    "adminOnly" : true,
     "description" : "Strumenti e tabelle di sviluppo",
     "enabled" : true,
     "group" : true,

@@ -352,6 +352,20 @@
       "order": 82
     },
     {
+      "id": "custom-list-builder",
+      "type": "LINK",
+      "parentId": "settings",
+      "menu": "Impostazioni",
+      "label": "Lista personalizzata",
+      "url": "/admin/list-builder",
+      "icon": "bi-list-columns-reverse",
+      "description": "Crea una lista scegliendo tabella, campi e alias delle intestazioni",
+      "enabled": true,
+      "adminOnly": true,
+      "quickLink": false,
+      "order": 83
+    },
+    {
       "id": "development",
       "type": "GROUP",
       "parentId": "",
