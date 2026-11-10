@@ -51,6 +51,7 @@ public class SecurityConfig {
                     "/listcard.html/**",
                     "/listtable.html/**",
                     "/",
+                    "/login",
                     "/catalogo",
                     "/contatti",
                     "/shop",
@@ -122,18 +123,19 @@ public class SecurityConfig {
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
                 .defaultSuccessUrl("/", false)
-                .failureUrl("/login?error")
+                .failureUrl("/?login&invalidCredentials")
                 .permitAll()
             )
 
             // ================= LOGIN GOOGLE / OAUTH2 =================
             .oauth2Login(oauth2 -> oauth2
+                .loginPage("/login")
                 .userInfoEndpoint(userInfo -> userInfo
                     .userService(customOAuth2UserService)
                     .oidcUserService(customOidcUserService)
                 )
                 .defaultSuccessUrl("/", false)
-                .failureUrl("/?login&error")
+                .failureUrl("/login?error")
             )
 
             // ================= LOGOUT =================

@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="it" xmlns:th="http://www.thymeleaf.org">
-<body th:fragment="loginModal">
+<body th:fragment="loginModal" th:with="credentialsInvalid=${param.invalidCredentials != null}">
 
     <!-- Toggle condiviso con i pulsanti login della navbar. -->
     <input
         type="checkbox"
         id="login-modal-toggle"
         class="modal-toggle"
-        th:checked="${param.login != null or param.error != null}"
+        th:checked="${param.login != null or param.error != null or credentialsInvalid}"
         aria-hidden="true"
     />
 
@@ -53,8 +53,15 @@
                     Accedi al tuo account per gestire profilo, ordini e acquisti.
                 </p>
 
-                <!-- Errore login. -->
-                <div class="auth-alert login-alert" role="alert" th:if="${param.error}">
+                <div id="login-credentials-error" class="auth-alert login-alert" role="alert"
+                     th:if="${credentialsInvalid}">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    <span>Credenziali invalide</span>
+                </div>
+
+                <!-- Errore di accesso tramite provider. -->
+                <div class="auth-alert login-alert" role="alert"
+                     th:if="${param.error != null and !credentialsInvalid}">
                     <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
                     <span>Accesso non riuscito. Verifica le credenziali o le autorizzazioni richieste.</span>
                 </div>
@@ -111,6 +118,8 @@
                                 type="text"
                                 name="username"
                                 autocomplete="username"
+                                th:autofocus="${credentialsInvalid}"
+                                th:attr="aria-describedby=${credentialsInvalid ? 'login-credentials-error' : null}"
                                 placeholder="Inserisci email o username"
                                 required
                             />
@@ -151,17 +160,24 @@
 
                 <div class="auth-actions login-actions">
                     <a
-                        href="#"
+                        th:href="@{/password/forgot}"
                         class="auth-link"
-                        data-bs-toggle="modal"
-                        data-bs-target="#forgotPasswordModal"
-                        onclick="closeLoginModal()">
+                        data-open-password-recovery>
                         Password dimenticata?
                     </a>
 
                     <a th:href="@{/register}" class="auth-link login-register-link">
                         Crea un account
                         <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                    </a>
+                </div>
+
+                <div class="text-center mt-3">
+                    <div class="mb-2" th:if="${credentialsInvalid or param.error != null}">
+                        <a th:href="@{/login}" class="btn btn-outline-primary btn-sm">Torna al login</a>
+                    </div>
+                    <a th:href="@{/}" class="auth-link text-decoration-underline">
+                        Torna alla home
                     </a>
                 </div>
 
@@ -203,7 +219,7 @@
         }
 
         document.addEventListener("keydown", function (event) {
-            if (event.key !== "Escape") {
+            if (event.key !== "Escape" || document.getElementById("forgotPasswordModal")?.open) {
                 return;
             }
 

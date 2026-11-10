@@ -1,12 +1,13 @@
 package com.delta.store.security.password;
 
 import com.delta.store.user.model.User;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 
 public interface PasswordResetService {
 
     // invio email + creazione token
-    void createAndSendToken(String email, HttpServletRequest request);
+    boolean createAndSendToken(String email, HttpServletRequest request) throws MessagingException;
 
     // validazione token
     PasswordResetToken validatePasswordResetToken(String token);

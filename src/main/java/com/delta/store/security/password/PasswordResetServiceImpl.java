@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.UUID;
 
 @Service
@@ -40,14 +41,11 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     // CREATE TOKEN + SEND EMAIL
     // ==================================================
     @Override
-    @Transactional
-    public void createAndSendToken(String email, HttpServletRequest request) {
-
-        User user = userRepository.findByEmail(email).orElse(null);
-
-        // risposta neutra
+    @Transactional(rollbackFor = MessagingException.class)
+    public boolean createAndSendToken(String email, HttpServletRequest request) throws MessagingException {
+        User user = userRepository.findByEmail(email.trim().toLowerCase(Locale.ROOT)).orElse(null);
         if (user == null) {
-            return;
+            return false;
         }
 
         // 🔒 INVALIDA TOKEN PRECEDENTI (ORA FUNZIONA)
@@ -64,11 +62,8 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
         String resetUrl = buildResetUrl(request, token);
 
-        try {
-            emailService.sendPasswordResetEmail(user.getEmail(), resetUrl);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
+        emailService.sendPasswordResetEmail(user.getEmail(), resetUrl);
+        return true;
     }
 
 

@@ -95,7 +95,7 @@ public class PageController {
     }
 
     /**
-     * Login è in MODALE: /login serve solo a reindirizzare alla home con flag.
+     * /login apre il modale sulla home o mostra l’errore di accesso.
      */
     @GetMapping("/login")
     public String loginRedirect(
@@ -103,7 +103,7 @@ public class PageController {
             @RequestParam(value = "logout", required = false) String logout
     ) {
         if (error != null) {
-            return "redirect:/?login&error";
+            return "login-error";
         }
         if (logout != null) {
             return "redirect:/?logout";
