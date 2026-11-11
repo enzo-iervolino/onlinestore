@@ -29,6 +29,9 @@ public class MailConfig {
     @Value("${spring.mail.properties.mail.smtp.auth:true}")
     private String smtpAuth;
 
+    @Value("${MAIL_SSL_ENABLE:false}")
+    private String sslEnable;
+
     @Value("${spring.mail.properties.mail.smtp.starttls.enable:true}")
     private String startTlsEnable;
 
@@ -61,6 +64,8 @@ public class MailConfig {
 
         Properties props = sender.getJavaMailProperties();
         props.put("mail.smtp.auth", cleanValue(smtpAuth, "true"));
+        props.put("mail.smtp.ssl.enable", cleanValue(sslEnable, "false"));
+        props.put("mail.smtp.ssl.checkserveridentity", "true");
         props.put("mail.smtp.starttls.enable", cleanValue(startTlsEnable, "true"));
         props.put("mail.smtp.starttls.required", cleanValue(startTlsRequired, "true"));
         props.put("mail.smtp.connectiontimeout", cleanValue(connectionTimeout, "10000"));
