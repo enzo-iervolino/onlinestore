@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${pageTitle}">Costo di spedizione</title>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        body {
+            background: #f5f7fb;
+        }
+
+        .page-shell {
+            max-width: 940px;
+        }
+
+        .shipping-form-card {
+            border: 0;
+            border-radius: 1rem;
+            box-shadow: 0 0.45rem 1.4rem rgba(15, 23, 42, 0.08);
+        }
+
+        .form-section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-weight: 700;
+        }
+
+        .form-section-title i {
+            color: #4338ca;
+        }
+
+        .form-hint {
+            border-left: 4px solid #4338ca;
+            background: #eef2ff;
+            border-radius: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container page-shell py-4 py-lg-5">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="text-uppercase small fw-semibold text-primary mb-1">Amministrazione</div>
+            <h1 class="h2 mb-1" th:text="${pageTitle}">Costo di spedizione</h1>
+            <p class="text-muted mb-0">
+                Definisci l'intervallo di totale ordine e il relativo costo applicato al checkout.
+            </p>
+        </div>
+
+        <a class="btn btn-outline-secondary" th:href="@{/admin/shipping-costs}">
+            <i class="bi bi-arrow-left me-1"></i> Torna alla lista
+        </a>
+    </div>
+
+    <div class="form-hint p-3 mb-4">
+        <div class="fw-semibold mb-1"><i class="bi bi-info-circle me-1"></i> Come funzionano le fasce</div>
+        <div class="small text-muted">
+            I limiti minimo e massimo sono inclusivi. Lascia vuoto il massimo per creare una fascia senza limite superiore.
+            Le fasce attive non possono sovrapporsi.
+        </div>
+    </div>
+
+    <form class="card shipping-form-card"
+          method="post"
+          th:action="${formAction}"
+          th:object="${shippingCost}">
+        <div class="card-body p-4 p-lg-5">
+
+            <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger" role="alert">
+                <div class="d-flex gap-2">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <div>
+                        <div class="fw-semibold">Controlla i dati inseriti</div>
+                        <div th:each="error : ${#fields.globalErrors()}" th:text="${error}">
+                            Errore di validazione.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section-title mb-3">
+                <i class="bi bi-arrows-expand"></i>
+                <span>Intervallo totale ordine</span>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="minTotal">Totale minimo *</label>
+                    <div class="input-group">
+                        <span class="input-group-text">€</span>
+                        <input id="minTotal"
+                               type="number"
+                               min="0"
+                               step="0.01"
+                               inputmode="decimal"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('minTotal')} ? 'is-invalid'"
+                               th:field="*{minTotal}"
+                               placeholder="0,00"
+                               required>
+                        <div class="invalid-feedback" th:errors="*{minTotal}">Valore non valido.</div>
+                    </div>
+                    <div class="form-text">La fascia parte da questo importo, incluso.</div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="maxTotal">Totale massimo</label>
+                    <div class="input-group">
+                        <span class="input-group-text">€</span>
+                        <input id="maxTotal"
+                               type="number"
+                               min="0"
+                               step="0.01"
+                               inputmode="decimal"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('maxTotal')} ? 'is-invalid'"
+                               th:field="*{maxTotal}"
+                               placeholder="Nessun limite">
+                        <div class="invalid-feedback" th:errors="*{maxTotal}">Valore non valido.</div>
+                    </div>
+                    <div class="form-text">Lascia vuoto per non impostare un limite superiore.</div>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="form-section-title mb-3">
+                <i class="bi bi-truck"></i>
+                <span>Tariffa e stato</span>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-12 col-md-5">
+                    <label class="form-label" for="cost">Costo di spedizione *</label>
+                    <div class="input-group">
+                        <span class="input-group-text">€</span>
+                        <input id="cost"
+                               type="number"
+                               min="0"
+                               step="0.01"
+                               inputmode="decimal"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('cost')} ? 'is-invalid'"
+                               th:field="*{cost}"
+                               placeholder="5,90"
+                               required>
+                        <div class="invalid-feedback" th:errors="*{cost}">Valore non valido.</div>
+                    </div>
+                    <div class="form-text">Usa 0,00 per la spedizione gratuita.</div>
+                </div>
+
+                <div class="col-12 col-md-7">
+                    <label class="form-label" for="description">Descrizione</label>
+                    <input id="description"
+                           type="text"
+                           maxlength="100"
+                           class="form-control"
+                           th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
+                           th:field="*{description}"
+                           placeholder="Es. Spedizione standard Italia">
+                    <div class="invalid-feedback" th:errors="*{description}">Descrizione non valida.</div>
+                    <div class="form-text">Facoltativa, massimo 100 caratteri.</div>
+                </div>
+
+                <div class="col-12">
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               role="switch"
+                               id="active"
+                               th:field="*{active}">
+                        <label class="form-check-label fw-semibold" for="active">Fascia attiva</label>
+                    </div>
+                    <div class="form-text">
+                        Solo le fasce attive vengono considerate dal calcolo delle spese di spedizione.
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column-reverse flex-sm-row justify-content-end gap-2 mt-5">
+                <a class="btn btn-outline-secondary" th:href="@{/admin/shipping-costs}">Annulla</a>
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-floppy me-1"></i>
+                    <span th:text="${isEdit} ? 'Salva modifiche' : 'Crea fascia'">Salva</span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

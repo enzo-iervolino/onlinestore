@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Costi di spedizione</title>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        body {
+            background: #f5f7fb;
+        }
+
+        .page-shell {
+            max-width: 1280px;
+        }
+
+        .summary-card,
+        .shipping-table-card {
+            border: 0;
+            border-radius: 1rem;
+            box-shadow: 0 0.45rem 1.4rem rgba(15, 23, 42, 0.08);
+        }
+
+        .summary-icon {
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            background: #eef2ff;
+            color: #4338ca;
+        }
+
+        .range-value,
+        .price-value {
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        .description-cell {
+            min-width: 220px;
+            max-width: 360px;
+        }
+
+        .actions-cell {
+            min-width: 205px;
+        }
+
+        .empty-state {
+            padding: 3.5rem 1rem;
+        }
+
+        @media (max-width: 767.98px) {
+            .page-actions {
+                width: 100%;
+            }
+
+            .page-actions .btn {
+                flex: 1 1 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid page-shell py-4 py-lg-5">
+
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+        <div>
+            <div class="text-uppercase small fw-semibold text-primary mb-1">Amministrazione</div>
+            <h1 class="h2 mb-1">Costi di spedizione</h1>
+            <p class="text-muted mb-0">
+                Gestisci le fasce usate dal checkout per calcolare automaticamente le spese di consegna.
+            </p>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 page-actions">
+            <a class="btn btn-outline-secondary" th:href="@{/admin/dashboard}">
+                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+            </a>
+            <a class="btn btn-primary" th:href="@{/admin/shipping-costs/new}">
+                <i class="bi bi-plus-lg me-1"></i> Nuova fascia
+            </a>
+        </div>
+    </div>
+
+    <div th:if="${success != null}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>
+        <span th:text="${success}">Operazione completata.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Chiudi"></button>
+    </div>
+
+    <div th:if="${error != null}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <span th:text="${error}">Operazione non completata.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Chiudi"></button>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-4">
+            <div class="card summary-card h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <span class="summary-icon"><i class="bi bi-list-ul"></i></span>
+                    <div>
+                        <div class="text-muted small">Fasce totali</div>
+                        <div class="fs-3 fw-bold" th:text="${totalCount}">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="card summary-card h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <span class="summary-icon"><i class="bi bi-check2-circle"></i></span>
+                    <div>
+                        <div class="text-muted small">Attive</div>
+                        <div class="fs-3 fw-bold" th:text="${activeCount}">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="card summary-card h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <span class="summary-icon"><i class="bi bi-pause-circle"></i></span>
+                    <div>
+                        <div class="text-muted small">Disattivate</div>
+                        <div class="fs-3 fw-bold" th:text="${inactiveCount}">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shipping-table-card">
+        <div class="card-header bg-white border-0 px-3 px-lg-4 pt-4 pb-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <h2 class="h5 mb-1">Elenco fasce</h2>
+                    <div class="text-muted small">
+                        Gli estremi sono inclusivi. Le fasce attive non possono sovrapporsi.
+                    </div>
+                </div>
+
+                <div class="btn-group" role="group" aria-label="Filtra per stato">
+                    <a class="btn btn-sm"
+                       th:classappend="${selectedStatus == 'all'} ? 'btn-primary' : 'btn-outline-primary'"
+                       th:href="@{/admin/shipping-costs(status='all')}">Tutte</a>
+                    <a class="btn btn-sm"
+                       th:classappend="${selectedStatus == 'active'} ? 'btn-primary' : 'btn-outline-primary'"
+                       th:href="@{/admin/shipping-costs(status='active')}">Attive</a>
+                    <a class="btn btn-sm"
+                       th:classappend="${selectedStatus == 'inactive'} ? 'btn-primary' : 'btn-outline-primary'"
+                       th:href="@{/admin/shipping-costs(status='inactive')}">Disattivate</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th class="ps-3 ps-lg-4">ID</th>
+                        <th>Da totale</th>
+                        <th>Fino a totale</th>
+                        <th>Costo</th>
+                        <th>Descrizione</th>
+                        <th>Stato</th>
+                        <th>Creata il</th>
+                        <th class="text-end pe-3 pe-lg-4">Azioni</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${shippingCosts == null or #lists.isEmpty(shippingCosts)}">
+                        <td colspan="8" class="text-center empty-state">
+                            <i class="bi bi-truck fs-1 text-muted d-block mb-3"></i>
+                            <h3 class="h5">Nessuna fascia trovata</h3>
+                            <p class="text-muted mb-3">Crea la prima regola per il calcolo delle spese di spedizione.</p>
+                            <a class="btn btn-primary" th:href="@{/admin/shipping-costs/new}">
+                                <i class="bi bi-plus-lg me-1"></i> Nuova fascia
+                            </a>
+                        </td>
+                    </tr>
+
+                    <tr th:each="item : ${shippingCosts}">
+                        <td class="ps-3 ps-lg-4 fw-semibold" th:text="${item.id}">1</td>
+                        <td class="range-value">
+                            € <span th:text="${#numbers.formatDecimal(item.minTotal, 1, 'POINT', 2, 'COMMA')}">0,00</span>
+                        </td>
+                        <td class="range-value">
+                            <span th:if="${item.maxTotal != null}">
+                                € <span th:text="${#numbers.formatDecimal(item.maxTotal, 1, 'POINT', 2, 'COMMA')}">50,00</span>
+                            </span>
+                            <span th:if="${item.maxTotal == null}" class="text-muted">Nessun limite</span>
+                        </td>
+                        <td class="price-value fw-bold text-primary">
+                            € <span th:text="${#numbers.formatDecimal(item.cost, 1, 'POINT', 2, 'COMMA')}">5,90</span>
+                        </td>
+                        <td class="description-cell">
+                            <span th:if="${item.description != null and !#strings.isEmpty(item.description)}"
+                                  th:text="${item.description}">Spedizione standard</span>
+                            <span th:if="${item.description == null or #strings.isEmpty(item.description)}"
+                                  class="text-muted">—</span>
+                        </td>
+                        <td>
+                            <span th:if="${item.active}" class="badge text-bg-success">Attiva</span>
+                            <span th:unless="${item.active}" class="badge text-bg-secondary">Disattivata</span>
+                        </td>
+                        <td class="text-nowrap text-muted small"
+                            th:text="${item.createdAt != null ? #temporals.format(item.createdAt, 'dd/MM/yyyy HH:mm') : '—'}">
+                            07/07/2026 16:00
+                        </td>
+                        <td class="text-end pe-3 pe-lg-4 actions-cell">
+                            <a class="btn btn-sm btn-outline-primary"
+                               th:href="@{/admin/shipping-costs/{id}/edit(id=${item.id})}"
+                               title="Modifica">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+
+                            <form class="d-inline"
+                                  method="post"
+                                  th:action="@{/admin/shipping-costs/{id}/toggle(id=${item.id})}">
+                                <button type="submit"
+                                        class="btn btn-sm"
+                                        th:classappend="${item.active} ? 'btn-outline-warning' : 'btn-outline-success'"
+                                        th:title="${item.active} ? 'Disattiva' : 'Attiva'">
+                                    <i th:class="${item.active} ? 'bi bi-pause-circle' : 'bi bi-play-circle'"></i>
+                                </button>
+                            </form>
+
+                            <form class="d-inline"
+                                  method="post"
+                                  th:action="@{/admin/shipping-costs/{id}/delete(id=${item.id})}">
+                                <button type="submit"
+                                        class="btn btn-sm btn-outline-danger"
+                                        title="Elimina"
+                                        onclick="return confirm('Eliminare definitivamente questa fascia di spedizione?');">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

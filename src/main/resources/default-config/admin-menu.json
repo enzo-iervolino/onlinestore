@@ -420,6 +420,20 @@
       "adminOnly": true,
       "quickLink": false,
       "order": 93
+    },
+    {
+      "id": "shipping-costs",
+      "type": "LINK",
+      "parentId": "tables",
+      "menu": "Tabelle",
+      "label": "Costi spedizione",
+      "url": "/admin/shipping-costs",
+      "icon": "bi-truck",
+      "description": "Gestione fasce e costi di spedizione",
+      "enabled": true,
+      "adminOnly": true,
+      "quickLink": true,
+      "order": 79
     }
   ]
 }

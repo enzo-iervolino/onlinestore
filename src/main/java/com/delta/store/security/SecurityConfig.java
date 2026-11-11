@@ -115,6 +115,7 @@ public class SecurityConfig {
                     "/icons/**",
                     "/uploads/**"
                 ).permitAll()
+                .requestMatchers("/admin/shipping-costs", "/admin/shipping-costs/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
 
