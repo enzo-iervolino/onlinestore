@@ -90,6 +90,19 @@
                 </div>
             </div>
 
+            <div class="mb-3">
+                <label class="form-label">Codici alternativi di lettura</label>
+                <div class="ro-box">
+                    <div th:if="${additionalCodes == null or #lists.isEmpty(additionalCodes)}" class="text-muted">Nessun codice alternativo</div>
+                    <div class="d-flex flex-wrap gap-2" th:if="${additionalCodes != null and !#lists.isEmpty(additionalCodes)}">
+                        <span class="badge text-bg-light border" th:each="code : ${additionalCodes}">
+                            <strong th:text="${code.codeType.label}">EAN-13</strong>
+                            <span class="ms-1 font-monospace" th:text="${code.codeValue}">8001234567890</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
             <div class="row">
                 <div class="col-md-4 mb-3">
                     <label class="form-label">Categoria</label>

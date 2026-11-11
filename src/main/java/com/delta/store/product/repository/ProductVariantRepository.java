@@ -18,6 +18,8 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
 
     boolean existsByVariantCodeIgnoreCase(String variantCode);
 
+    Optional<ProductVariant> findByVariantCodeIgnoreCase(String variantCode);
+
     boolean existsByProductAndColorAndSize(Product product, ColorOption color, SizeOption size);
 
     boolean existsByColor_Id(Long colorId);
@@ -32,6 +34,9 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
 
     @EntityGraph(attributePaths = {"product", "color", "size", "images"})
     Optional<ProductVariant> findWithDetailsById(Long id);
+
+    @EntityGraph(attributePaths = {"product", "color", "size", "images"})
+    Optional<ProductVariant> findWithDetailsByVariantCodeIgnoreCase(String variantCode);
 
     @EntityGraph(attributePaths = {"product", "color", "size"})
     Optional<ProductVariant> findForCartById(Long id);

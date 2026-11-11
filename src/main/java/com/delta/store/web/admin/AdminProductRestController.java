@@ -1,10 +1,14 @@
 package com.delta.store.web.admin;
 
 import com.delta.store.product.model.Product;
+import com.delta.store.product.model.ProductCode;
+import com.delta.store.product.model.ProductVariant;
 import com.delta.store.product.repository.ProductRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
@@ -264,10 +268,34 @@ public class AdminProductRestController {
         return (root, query, cb) -> {
             Join<Object, Object> categoryJoin = root.join("category", JoinType.LEFT);
 
+            Subquery<Long> variantCodeQuery = query.subquery(Long.class);
+            Root<ProductVariant> variantRoot = variantCodeQuery.from(ProductVariant.class);
+            variantCodeQuery.select(variantRoot.get("id"));
+            variantCodeQuery.where(
+                    cb.equal(variantRoot.get("product").get("id"), root.get("id")),
+                    cb.like(cb.lower(variantRoot.get("variantCode")), like)
+            );
+
+            Subquery<Long> additionalCodeQuery = query.subquery(Long.class);
+            Root<ProductCode> codeRoot = additionalCodeQuery.from(ProductCode.class);
+            Join<ProductCode, Product> directProduct = codeRoot.join("product", JoinType.LEFT);
+            Join<ProductCode, ProductVariant> codeVariant = codeRoot.join("variant", JoinType.LEFT);
+            Join<ProductVariant, Product> variantProduct = codeVariant.join("product", JoinType.LEFT);
+            additionalCodeQuery.select(codeRoot.get("id"));
+            additionalCodeQuery.where(
+                    cb.or(
+                            cb.equal(directProduct.get("id"), root.get("id")),
+                            cb.equal(variantProduct.get("id"), root.get("id"))
+                    ),
+                    cb.like(cb.lower(codeRoot.get("codeValue")), like)
+            );
+
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.like(cb.lower(root.get("codpro")), like));
             predicates.add(cb.like(cb.lower(root.get("name")), like));
             predicates.add(cb.like(cb.lower(categoryJoin.get("name")), like));
+            predicates.add(cb.exists(variantCodeQuery));
+            predicates.add(cb.exists(additionalCodeQuery));
 
             return cb.or(predicates.toArray(new Predicate[0]));
         };

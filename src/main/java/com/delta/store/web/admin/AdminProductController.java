@@ -14,6 +14,7 @@ import com.delta.store.product.repository.ProductSubfamilyRepository;
 import com.delta.store.product.repository.ProductSubgroupRepository;
 import com.delta.store.product.repository.ProductVariantRepository;
 import com.delta.store.product.service.ColorOptionService;
+import com.delta.store.product.service.ProductCodeService;
 import com.delta.store.product.service.ProductService;
 import com.delta.store.product.service.ProductVariantService;
 import com.delta.store.product.service.SizeOptionService;
@@ -44,6 +45,7 @@ public class AdminProductController {
     private static final Logger log = LoggerFactory.getLogger(AdminProductController.class);
 
     private final ProductService productService;
+    private final ProductCodeService productCodeService;
     private final ColorOptionService colorOptionService;
     private final SizeOptionService sizeOptionService;
     private final ProductVariantService productVariantService;
@@ -59,6 +61,7 @@ public class AdminProductController {
     private String productsUploadDir;
 
     public AdminProductController(ProductService productService,
+                                  ProductCodeService productCodeService,
                                   ColorOptionService colorOptionService,
                                   SizeOptionService sizeOptionService,
                                   ProductVariantService productVariantService,
@@ -70,6 +73,7 @@ public class AdminProductController {
                                   ProductFamilyRepository familyRepository,
                                   ProductSubfamilyRepository subfamilyRepository) {
         this.productService = productService;
+        this.productCodeService = productCodeService;
         this.colorOptionService = colorOptionService;
         this.sizeOptionService = sizeOptionService;
         this.productVariantService = productVariantService;
@@ -118,7 +122,7 @@ public class AdminProductController {
                 return ResponseEntity.notFound().build();
             }
 
-            productVariantRepository.deleteById(variantId);
+            productVariantService.deleteVariant(variantId);
             return ResponseEntity.noContent().build();
 
         } catch (Exception ex) {
@@ -172,6 +176,79 @@ public class AdminProductController {
         return t.isEmpty() ? null : t;
     }
 
+    /**
+     * Prepara la tendina categorie mantenendo sempre visibile la categoria
+     * già associata al prodotto, anche quando è stata successivamente
+     * disabilitata. In questo modo la modifica non perde la selezione salvata.
+     */
+    private List<ProductCategory> categoriesForForm(ProductCategory currentCategory) {
+        List<ProductCategory> categories = new ArrayList<>(productService.findEnabledCategories());
+
+        if (currentCategory != null && currentCategory.getId() != null) {
+            boolean alreadyPresent = categories.stream()
+                    .anyMatch(category -> Objects.equals(category.getId(), currentCategory.getId()));
+
+            if (!alreadyPresent) {
+                categories.add(currentCategory);
+            }
+        }
+
+        categories.sort(
+                Comparator.comparing(
+                                ProductCategory::getSortOrder,
+                                Comparator.nullsLast(Integer::compareTo)
+                        )
+                        .thenComparing(
+                                category -> safe(category.getName()),
+                                Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)
+                        )
+                        .thenComparing(
+                                ProductCategory::getId,
+                                Comparator.nullsLast(Long::compareTo)
+                        )
+        );
+
+        return categories;
+    }
+
+    /**
+     * Inserisce nel model sia l'elenco categorie sia l'ID effettivamente
+     * selezionato. Se l'ID non arriva dal form, viene recuperato dal prodotto
+     * persistito: questo evita di obbligare l'utente a riselezionare la
+     * categoria durante una modifica.
+     */
+    private Long addCategoryFormAttributes(Model model,
+                                           Product product,
+                                           Long requestedCategoryId) {
+        ProductCategory currentCategory = product != null ? product.getCategory() : null;
+
+        if (currentCategory == null && product != null && product.getId() != null) {
+            currentCategory = productService.findWithImagesById(product.getId())
+                    .map(Product::getCategory)
+                    .orElse(null);
+
+            if (currentCategory != null) {
+                product.setCategory(currentCategory);
+            }
+        }
+
+        Long effectiveCategoryId = requestedCategoryId;
+        if (effectiveCategoryId == null && currentCategory != null) {
+            effectiveCategoryId = currentCategory.getId();
+        }
+
+        if (currentCategory == null && effectiveCategoryId != null) {
+            currentCategory = productService.findCategoryById(effectiveCategoryId).orElse(null);
+            if (currentCategory != null && product != null) {
+                product.setCategory(currentCategory);
+            }
+        }
+
+        model.addAttribute("categories", categoriesForForm(currentCategory));
+        model.addAttribute("selectedCategoryId", effectiveCategoryId);
+        return effectiveCategoryId;
+    }
+
     public record ProductVariantRow(
             Long id,
             String variantCode,
@@ -220,14 +297,13 @@ public class AdminProductController {
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         Product product = new Product();
-        List<ProductCategory> categories = productService.findEnabledCategories();
-
         model.addAttribute("product", product);
-        model.addAttribute("categories", categories);
+        addCategoryFormAttributes(model, product, null);
         model.addAttribute("pageTitle", "Nuovo prodotto");
 
         model.addAttribute("images", Collections.emptyList());
         model.addAttribute("variants", Collections.emptyList());
+        model.addAttribute("additionalCodesText", "");
 
         model.addAttribute("colors", colorOptionService.findAll());
         model.addAttribute("sizes", sizeOptionService.findAll());
@@ -243,14 +319,16 @@ public class AdminProductController {
 
         return productService.findWithImagesById(id)
                 .map(p -> {
-                    List<ProductCategory> categories = productService.findEnabledCategories();
-
                     model.addAttribute("product", p);
-                    model.addAttribute("categories", categories);
+                    addCategoryFormAttributes(model, p, null);
                     model.addAttribute("pageTitle", "Modifica prodotto (ID: " + id + ")");
 
                     model.addAttribute("images", p.getImages() != null ? p.getImages() : Collections.emptyList());
                     model.addAttribute("variants", productVariantService.findByProductId(id));
+                    if (!model.containsAttribute("additionalCodesText")) {
+                        model.addAttribute("additionalCodesText", productCodeService.formatProductCodes(id));
+                    }
+                    model.addAttribute("additionalCodesSaved", productCodeService.findProductCodes(id));
 
                     model.addAttribute("colors", colorOptionService.findAll());
                     model.addAttribute("sizes", sizeOptionService.findAll());
@@ -311,6 +389,7 @@ public class AdminProductController {
         model.addAttribute("product", product);
         model.addAttribute("pageTitle", "Dettaglio prodotto (ID: " + id + ")");
         model.addAttribute("images", product.getImages() != null ? product.getImages() : Collections.emptyList());
+        model.addAttribute("additionalCodes", productCodeService.findProductCodes(id));
         addProductLookupNames(model, product);
 
         model.addAttribute("prevId", prevId);
@@ -326,6 +405,7 @@ public class AdminProductController {
     public String saveProduct(@Valid @ModelAttribute("product") Product product,
                               BindingResult bindingResult,
                               @RequestParam(value = "categoryId", required = false) Long categoryId,
+                              @RequestParam(value = "additionalCodes", required = false) String additionalCodes,
 
                               @RequestParam(value = "mainImageFile", required = false) MultipartFile mainImageFile,
                               @RequestParam(value = "generateMainWebmFromImage", required = false, defaultValue = "false") boolean generateMainWebmFromImage,
@@ -350,9 +430,43 @@ public class AdminProductController {
                               Model model,
                               RedirectAttributes ra) {
 
+        Long effectiveCategoryId = categoryId;
+        ProductCategory selectedCategory = null;
+
+        // In modifica, se il browser non invia categoryId, conserva la categoria
+        // già presente sul prodotto invece di richiederne nuovamente la scelta.
+        if (effectiveCategoryId == null && product.getId() != null) {
+            Product persistedProduct = productService.findWithImagesById(product.getId()).orElse(null);
+            if (persistedProduct != null && persistedProduct.getCategory() != null) {
+                selectedCategory = persistedProduct.getCategory();
+                effectiveCategoryId = selectedCategory.getId();
+            }
+        }
+
+        if (effectiveCategoryId == null) {
+            bindingResult.rejectValue(
+                    "category",
+                    "product.category.required",
+                    "Seleziona una categoria."
+            );
+        } else {
+            if (selectedCategory == null) {
+                selectedCategory = productService.findCategoryById(effectiveCategoryId).orElse(null);
+            }
+
+            if (selectedCategory == null) {
+                bindingResult.rejectValue(
+                        "category",
+                        "product.category.invalid",
+                        "La categoria selezionata non esiste più. Selezionane un'altra."
+                );
+            } else {
+                product.setCategory(selectedCategory);
+            }
+        }
+
         if (bindingResult.hasErrors()) {
-            List<ProductCategory> categories = productService.findEnabledCategories();
-            model.addAttribute("categories", categories);
+            addCategoryFormAttributes(model, product, effectiveCategoryId);
             model.addAttribute("pageTitle",
                     product.getId() == null ? "Nuovo prodotto" : "Modifica prodotto (ID: " + product.getId() + ")");
 
@@ -366,6 +480,7 @@ public class AdminProductController {
                 model.addAttribute("variants", Collections.emptyList());
             }
 
+            model.addAttribute("additionalCodesText", additionalCodes != null ? additionalCodes : "");
             model.addAttribute("colors", colorOptionService.findAll());
             model.addAttribute("sizes", sizeOptionService.findAll());
             addLookupTables(model);
@@ -373,10 +488,37 @@ public class AdminProductController {
             return "admin/products/product-form";
         }
 
-        if (categoryId != null) {
-            productService.findCategoryById(categoryId).ifPresent(product::setCategory);
-        } else {
-            product.setCategory(null);
+        try {
+            productCodeService.validateProductCodes(product.getId(), product.getCodpro(), null);
+        } catch (IllegalArgumentException ex) {
+            bindingResult.rejectValue("codpro", "product.code.unavailable", ex.getMessage());
+
+            addCategoryFormAttributes(model, product, effectiveCategoryId);
+            model.addAttribute("pageTitle",
+                    product.getId() == null ? "Nuovo prodotto" : "Modifica prodotto (ID: " + product.getId() + ")");
+
+            if (product.getId() != null) {
+                productService.findWithImagesById(product.getId()).ifPresent(persisted -> {
+                    model.addAttribute("images", persisted.getImages() != null
+                            ? persisted.getImages()
+                            : Collections.emptyList());
+                    model.addAttribute("variants", productVariantService.findByProductId(product.getId()));
+                });
+            } else {
+                model.addAttribute("images", Collections.emptyList());
+                model.addAttribute("variants", Collections.emptyList());
+            }
+
+            model.addAttribute("additionalCodesText", additionalCodes != null ? additionalCodes : "");
+            model.addAttribute("colors", colorOptionService.findAll());
+            model.addAttribute("sizes", sizeOptionService.findAll());
+            addLookupTables(model);
+            return "admin/products/product-form";
+        } catch (RuntimeException infrastructureError) {
+            log.warn(
+                    "Verifica preventiva del codice prodotto non disponibile; procedo con il salvataggio standard: {}",
+                    rootCauseMessage(infrastructureError)
+            );
         }
 
         Product toSave;
@@ -537,7 +679,39 @@ public class AdminProductController {
             }
         }
 
-        Product saved = productService.save(toSave);
+        Product saved;
+        try {
+            saved = productService.save(toSave);
+        } catch (Exception ex) {
+            log.error("Salvataggio prodotto non riuscito", ex);
+            bindingResult.reject(
+                    "product.save.failed",
+                    "Prodotto non salvato: " + rootCauseMessage(ex)
+            );
+
+            addCategoryFormAttributes(model, product, effectiveCategoryId);
+            model.addAttribute("pageTitle",
+                    product.getId() == null ? "Nuovo prodotto" : "Modifica prodotto (ID: " + product.getId() + ")");
+            model.addAttribute("additionalCodesText", additionalCodes != null ? additionalCodes : "");
+            model.addAttribute("colors", colorOptionService.findAll());
+            model.addAttribute("sizes", sizeOptionService.findAll());
+            addLookupTables(model);
+
+            if (product.getId() != null) {
+                productService.findWithImagesById(product.getId()).ifPresent(persisted -> {
+                    model.addAttribute("images", persisted.getImages() != null
+                            ? persisted.getImages()
+                            : Collections.emptyList());
+                    model.addAttribute("variants", productVariantService.findByProductId(product.getId()));
+                    model.addAttribute("additionalCodesSaved", productCodeService.findProductCodes(product.getId()));
+                });
+            } else {
+                model.addAttribute("images", Collections.emptyList());
+                model.addAttribute("variants", Collections.emptyList());
+            }
+
+            return "admin/products/product-form";
+        }
 
         if (extraImageFiles != null) {
             int maxSort = saved.getImages() != null ? saved.getImages().size() : 0;
@@ -564,7 +738,26 @@ public class AdminProductController {
                 }
             }
 
-            saved = productService.save(saved);
+            try {
+                saved = productService.save(saved);
+            } catch (Exception ex) {
+                log.error("Salvataggio immagini extra del prodotto ID {} non riuscito", saved.getId(), ex);
+                ra.addFlashAttribute("error",
+                        "Il prodotto è stato creato, ma le immagini extra non sono state salvate: "
+                                + rootCauseMessage(ex));
+                return "redirect:/admin/products/edit/" + saved.getId();
+            }
+        }
+
+        int savedAdditionalCodes;
+        try {
+            savedAdditionalCodes = productCodeService.replaceProductCodes(saved, additionalCodes);
+        } catch (Exception ex) {
+            log.error("Prodotto ID {} salvato, ma salvataggio codici alternativi non riuscito", saved.getId(), ex);
+            ra.addFlashAttribute("error",
+                    "Il prodotto è stato salvato, ma i codici alternativi NON sono stati salvati: " + ex.getMessage());
+            ra.addFlashAttribute("additionalCodesText", additionalCodes != null ? additionalCodes : "");
+            return "redirect:/admin/products/edit/" + saved.getId();
         }
 
         List<String> codes = (variantCodes != null && !variantCodes.isEmpty()) ? variantCodes : variantCodesArr;
@@ -598,7 +791,8 @@ public class AdminProductController {
             log.debug("POST varianti: nessun parametro varianti ricevuto (non creo nulla).");
         }
 
-        String msg = "Prodotto salvato correttamente (ID: " + saved.getId() + ").";
+        String msg = "Prodotto salvato correttamente (ID: " + saved.getId() + "). "
+                + "Codici alternativi salvati: " + savedAdditionalCodes + ".";
         if (createdVariants > 0) {
             msg += " Varianti create: " + createdVariants + ".";
         } else if (wantsVariants) {
@@ -844,4 +1038,23 @@ public class AdminProductController {
             // best effort
         }
     }
+    private String rootCauseMessage(Throwable throwable) {
+        if (throwable == null) {
+            return "errore non specificato";
+        }
+
+        Throwable current = throwable;
+        while (current.getCause() != null && current.getCause() != current) {
+            current = current.getCause();
+        }
+
+        String message = current.getMessage();
+        if (message == null || message.isBlank()) {
+            message = throwable.getMessage();
+        }
+        return message == null || message.isBlank()
+                ? current.getClass().getSimpleName()
+                : message;
+    }
+
 }

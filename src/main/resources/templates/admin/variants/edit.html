@@ -66,6 +66,26 @@
                                th:value="${variant.variantCode}" required>
                     </div>
 
+                    <div class="col-12">
+                        <label for="additionalCodes" class="form-label">EAN / barcode / codici alternativi della variante</label>
+                        <textarea id="additionalCodes"
+                                  name="additionalCodes"
+                                  class="form-control font-monospace"
+                                  rows="3"
+                                  th:text="${additionalCodesText}"
+                                  placeholder="EAN13:8001234567890&#10;BARCODE:123456789"></textarea>
+                        <div class="helper-text mt-2">Un codice per riga. Il codice letto individua direttamente questa variante.</div>
+                        <div class="mt-2" th:if="${additionalCodesSaved != null and !#lists.isEmpty(additionalCodesSaved)}">
+                            <div class="small fw-semibold mb-1">Codici presenti nel database:</div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge text-bg-success" th:each="code : ${additionalCodesSaved}">
+                                    <span th:text="${code.codeType.label}">EAN-13</span>
+                                    <span class="ms-1 font-monospace" th:text="${code.codeValue}">8001234567890</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="col-md-3">
                         <label class="form-label">Prezzo</label>
                         <input type="number" step="0.01" name="price" class="form-control"

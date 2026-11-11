@@ -132,6 +132,17 @@
                                    required>
                         </div>
 
+                        <div class="col-12">
+                            <label for="additionalCodes" class="form-label">EAN / barcode / codici alternativi della variante</label>
+                            <textarea id="additionalCodes"
+                                      name="additionalCodes"
+                                      class="form-control font-monospace"
+                                      rows="3"
+                                      th:text="${additionalCodesText}"
+                                      placeholder="EAN13:8001234567890&#10;BARCODE:123456789"></textarea>
+                            <div class="form-text">Un codice per riga. Il codice letto aggiungerà direttamente questa variante al carrello.</div>
+                        </div>
+
                         <div class="col-md-2">
                             <label for="price" class="form-label">Prezzo</label>
                             <input type="number"

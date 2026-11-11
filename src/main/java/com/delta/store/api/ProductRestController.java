@@ -1,9 +1,11 @@
 package com.delta.store.api;
 
+import com.delta.store.product.dto.ProductCodeLookupDTO;
 import com.delta.store.product.dto.ProductDTO;
 import com.delta.store.product.mapper.ProductMapper;
 import com.delta.store.product.model.Product;
 import com.delta.store.product.model.ProductCategory;
+import com.delta.store.product.service.ProductCodeService;
 import com.delta.store.product.service.ProductService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,9 +17,12 @@ import java.util.List;
 public class ProductRestController {
 
     private final ProductService productService;
+    private final ProductCodeService productCodeService;
 
-    public ProductRestController(ProductService productService) {
+    public ProductRestController(ProductService productService,
+                                 ProductCodeService productCodeService) {
         this.productService = productService;
+        this.productCodeService = productCodeService;
     }
 
     @GetMapping
@@ -28,6 +33,17 @@ public class ProductRestController {
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> findById(@PathVariable Long id) {
         return productService.findWithImagesByIdDto(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/lookup")
+    public ResponseEntity<ProductCodeLookupDTO> lookupByCode(@RequestParam String code) {
+        if (code == null || code.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        return productCodeService.lookup(code)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

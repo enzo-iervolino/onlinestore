@@ -1,10 +1,12 @@
 package com.delta.store.cart.controller;
 
 import com.delta.store.cart.model.Cart;
+import com.delta.store.product.dto.ProductCodeLookupDTO;
 import com.delta.store.product.model.Product;
 import com.delta.store.product.model.ProductVariant;
 import com.delta.store.product.repository.ProductRepository;
 import com.delta.store.product.repository.ProductVariantRepository;
+import com.delta.store.product.service.ProductCodeService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,11 +25,14 @@ public class CartController {
 
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
+    private final ProductCodeService productCodeService;
 
     public CartController(ProductRepository productRepository,
-                          ProductVariantRepository productVariantRepository) {
+                          ProductVariantRepository productVariantRepository,
+                          ProductCodeService productCodeService) {
         this.productRepository = productRepository;
         this.productVariantRepository = productVariantRepository;
+        this.productCodeService = productCodeService;
     }
 
     @GetMapping("/view")
@@ -78,6 +83,38 @@ public class CartController {
         }
 
         throw new IllegalArgumentException("Parametro mancante: variantId o productId");
+    }
+
+    @PostMapping("/add-by-code")
+    public Map<String, Object> addByCode(
+            @RequestParam String code,
+            @RequestParam(name = "qty", required = false) Integer qty,
+            @RequestParam(name = "quantity", required = false) Integer quantity,
+            HttpSession session
+    ) {
+        ProductCodeLookupDTO lookup = productCodeService.lookup(code)
+                .orElseThrow(() -> new IllegalArgumentException("Nessun articolo trovato per il codice: " + code));
+
+        int finalQty = resolveQty(qty, quantity);
+        Cart cart = getCart(session);
+
+        if (lookup.variantId() != null) {
+            ProductVariant variant = productVariantRepository.findForCartById(lookup.variantId())
+                    .orElseThrow(() -> new IllegalArgumentException("Variante non trovata: " + lookup.variantId()));
+
+            if (!variant.isEnabled()) {
+                throw new IllegalArgumentException("La variante letta non è attiva: " + lookup.variantCode());
+            }
+
+            cart.add(variant, finalQty);
+            return response(cart);
+        }
+
+        Product product = productRepository.findById(lookup.productId())
+                .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato: " + lookup.productId()));
+
+        cart.add(product, finalQty);
+        return response(cart);
     }
 
     @PostMapping("/increase/{id}")

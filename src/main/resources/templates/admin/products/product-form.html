@@ -79,6 +79,7 @@
     <div th:if="${errorMessage != null}" class="alert alert-danger" th:text="${errorMessage}">Errore</div>
     <div th:if="${success != null}" class="alert alert-success" th:text="${success}">OK</div>
     <div th:if="${error != null}" class="alert alert-danger" th:text="${error}">Errore</div>
+    <div th:if="${warning != null}" class="alert alert-warning" th:text="${warning}">Attenzione</div>
 
     <form id="productForm"
           th:action="@{/admin/products/save}"
@@ -93,6 +94,13 @@
         <input type="hidden" th:field="*{mainMediaType}"/>
         <input type="hidden" th:field="*{mainVideoPoster}"/>
 
+        <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger">
+            <div class="fw-semibold mb-1">Il prodotto non è stato salvato. Controlla i campi indicati:</div>
+            <ul class="mb-0">
+                <li th:each="err : ${#fields.errors('*')}" th:text="${err}">Errore di validazione</li>
+            </ul>
+        </div>
+
         <div class="row g-3">
 
             <!-- SINISTRA -->
@@ -100,9 +108,10 @@
 
                 <div class="row">
                     <div class="col-md-4 mb-3">
-                        <label class="form-label">Codice prodotto</label>
+                        <label class="form-label">Codice prodotto interno</label>
                         <input type="text" class="form-control" th:field="*{codpro}" placeholder="Es. ART-001" required>
                         <div class="invalid-feedback">Inserisci il codice prodotto.</div>
+                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('codpro')}" th:errors="*{codpro}">Codice non valido</div>
                     </div>
                     <div class="col-md-8 mb-3">
                         <label class="form-label">Nome prodotto</label>
@@ -111,21 +120,62 @@
                     </div>
                 </div>
 
+                <div class="mb-3">
+                    <label for="additionalCodes" class="form-label d-flex align-items-center gap-2">
+                        <i class="bi bi-upc-scan"></i>
+                        <span>Codici alternativi di lettura</span>
+                    </label>
+                    <textarea id="additionalCodes"
+                              name="additionalCodes"
+                              class="form-control font-monospace"
+                              rows="4"
+                              th:text="${additionalCodesText}"
+                              placeholder="EAN13:8001234567890&#10;BARCODE:123456789&#10;FORNITORE:SUP-001"></textarea>
+                    <div class="form-text">
+                        Inserisci un codice per riga. Formati accettati: <code>EAN13:codice</code>,
+                        <code>EAN8:codice</code>, <code>UPC:codice</code>, <code>BARCODE:codice</code>,
+                        <code>FORNITORE:codice</code> oppure il solo codice. I codici devono essere univoci in tutta l'applicazione.
+                    </div>
+                    <div class="mt-2" th:if="${additionalCodesSaved != null and !#lists.isEmpty(additionalCodesSaved)}">
+                        <div class="small fw-semibold mb-1">Codici attualmente presenti nel database:</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge text-bg-success" th:each="code : ${additionalCodesSaved}">
+                                <span th:text="${code.codeType.label}">EAN-13</span>
+                                <span class="ms-1 font-monospace" th:text="${code.codeValue}">8001234567890</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row">
-                    <div class="col md-4 mb-3">
-                        <label class="form-label">Categoria</label>
-                        <select class="form-select" name="categoryId" required>
-                            <option value="" th:selected="${product == null or product.category == null}">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label" for="categoryId">Categoria</label>
+                        <select id="categoryId"
+                                class="form-select"
+                                th:classappend="${#fields.hasErrors('category')} ? ' is-invalid'"
+                                name="categoryId"
+                                th:with="effectiveCategoryId=${selectedCategoryId != null
+                                        ? selectedCategoryId
+                                        : (product.category != null ? product.category.id : null)}"
+                                required>
+                            <option value="" th:selected="${effectiveCategoryId == null}">
                                 Seleziona categoria...
                             </option>
                             <option th:each="cat : ${categories}"
                                     th:value="${cat.id}"
-                                    th:selected="${product != null and product.category != null and product.category.id == cat.id}"
-                                    th:text="${cat.name}">
+                                    th:selected="${effectiveCategoryId != null and cat.id == effectiveCategoryId}"
+                                    th:text="${cat.name + (!cat.enabled ? ' (non attiva)' : '')}">
                                 Categoria
                             </option>
                         </select>
-                        <div class="invalid-feedback">Seleziona una categoria.</div>
+                        <div class="invalid-feedback"
+                             th:if="${#fields.hasErrors('category')}"
+                             th:errors="*{category}">
+                            Seleziona una categoria valida.
+                        </div>
+                        <div class="invalid-feedback" th:unless="${#fields.hasErrors('category')}">
+                            Seleziona una categoria.
+                        </div>
                     </div>
 
                     <div class="col-md-4 mb-3">

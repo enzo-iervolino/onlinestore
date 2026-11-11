@@ -23,7 +23,28 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
            select p
            from Product p
            where (:category is null or p.category = :category)
-             and lower(p.name) like lower(concat('%', :text, '%'))
+             and (
+                    lower(p.name) like lower(concat('%', :text, '%'))
+                 or lower(p.codpro) like lower(concat('%', :text, '%'))
+                 or exists (
+                        select v.id
+                        from ProductVariant v
+                        where v.product = p
+                          and lower(v.variantCode) like lower(concat('%', :text, '%'))
+                    )
+                 or exists (
+                        select c.id
+                        from ProductCode c
+                        where c.product = p
+                          and lower(c.codeValue) like lower(concat('%', :text, '%'))
+                    )
+                 or exists (
+                        select c.id
+                        from ProductCode c
+                        where c.variant.product = p
+                          and lower(c.codeValue) like lower(concat('%', :text, '%'))
+                    )
+             )
            order by p.id desc
            """)
     List<Product> search(@Param("category") ProductCategory category,
@@ -52,6 +73,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     Optional<Product> findByPublicId(UUID publicId);
 
     Optional<Product> findByCodpro(String codpro);
+
+    Optional<Product> findByCodproIgnoreCase(String codpro);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Product p where p.id = :id")
