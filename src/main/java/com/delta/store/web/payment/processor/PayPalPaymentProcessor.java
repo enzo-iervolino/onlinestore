@@ -21,11 +21,12 @@ public class PayPalPaymentProcessor implements PaymentProcessor {
     private static final Logger log = LoggerFactory.getLogger(PayPalPaymentProcessor.class);
 
     private final PayPalApiService payPalApiService;
+    private final com.delta.store.web.payment.service.CheckoutAttemptService attempts;
     private final CheckoutSnapshotService snapshotService;
 
     public PayPalPaymentProcessor(PayPalApiService payPalApiService,
-                                  CheckoutSnapshotService snapshotService) {
-        this.payPalApiService = payPalApiService;
+                                  CheckoutSnapshotService snapshotService, com.delta.store.web.payment.service.CheckoutAttemptService attempts) {
+        this.payPalApiService = payPalApiService; this.attempts=attempts;
         this.snapshotService = snapshotService;
     }
 
@@ -38,7 +39,7 @@ public class PayPalPaymentProcessor implements PaymentProcessor {
     public String start(CheckoutPaymentContext ctx, RedirectAttributes ra) {
         log.debug("Avvio pagamento PayPal");
 
-        if (!payPalApiService.isConfigured()) {
+        if (!payPalApiService.isShopConfigured()) {
             log.warn("PayPal non configurato: client id o secret mancanti");
             ra.addFlashAttribute(
                     "error",
@@ -72,21 +73,21 @@ public class PayPalPaymentProcessor implements PaymentProcessor {
         }
 
         try {
-            PayPalApiService.CreateOrderResult result = payPalApiService.createOrder(total);
+            PayPalApiService.CreateOrderResult result = payPalApiService.createOrder(total,null,null,"Acquisto online",data.getCheckoutAttemptId());
 
             data.setSessionId(result.orderId());
             data.setPaymentMethod("PAYPAL");
 
             ctx.session().setAttribute(CheckoutSession.TEMP_DATA, data);
-            snapshotService.savePayPal(result.orderId(), data);
+            attempts.bind(data.getCheckoutAttemptId(),result.orderId(),result.approveUrl());
 
             log.debug("Redirect cliente verso PayPal - orderId={}", result.orderId());
 
             return "redirect:" + result.approveUrl();
         } catch (Exception e) {
             log.error("Errore durante creazione ordine PayPal", e);
-            ra.addFlashAttribute("error", "Errore PayPal: " + e.getMessage());
-            return "redirect:/checkout";
+            ra.addFlashAttribute("error", "Tentativo PayPal in verifica. Consulta lo stato prima di riprovare.");
+            return "redirect:/checkout/in-attesa";
         }
     }
 }

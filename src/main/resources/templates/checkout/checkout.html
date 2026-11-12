@@ -919,6 +919,7 @@
 </head>
 
 <body>
+<div class="container pt-3"><a th:href="@{/checkout/in-attesa}">Hai un pagamento in corso? Controlla lo stato</a></div>
 
 <header class="checkout-topbar">
     <div class="container">
@@ -1569,6 +1570,7 @@
                       th:action="@{/checkout/salva-spedizione}"
                       id="shippingForm"
                       novalidate>
+                    <input type="hidden" name="quoteToken" th:value="${quoteToken}"/>
 
                     <input type="hidden"
                            th:name="${_csrf.parameterName}"
@@ -1797,21 +1799,7 @@
                             <div class="pm-right"><i class="bi bi-check2-circle"></i></div>
                         </label>
 
-                        <label class="pm-option"
-                               data-pm="CASH"
-                               th:if="${finalTotal == null or finalTotal.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
-                            <input type="radio"
-                                   name="paymentMethod"
-                                   value="CASH"
-                                   required
-                                   th:checked="${paymentMethod != null and paymentMethod.toString() == 'CASH'}">
-                            <div class="pm-icon"><i class="bi bi-cash-coin"></i></div>
-                            <div class="flex-grow-1">
-                                <div class="pm-title">Contante</div>
-                                <div class="pm-sub">Pagamento alla consegna o ritiro</div>
-                            </div>
-                            <div class="pm-right"><i class="bi bi-check2-circle"></i></div>
-                        </label>
+
 
                     </div>
 
@@ -1992,7 +1980,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 return false;
             }
 
-            return true;
+            return (await res.text()).trim() === "OK";
         } catch (e) {
             if (pmSaveError) pmSaveError.classList.remove('d-none');
             return false;
@@ -2017,7 +2005,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function updateBtn() {
         const validShipping = updateShippingStatus();
         const selectedPm = getSelectedPm();
-        const ok = validShipping && !!selectedPm;
+        const ok = validShipping && !!selectedPm && pmSavedOk;
 
         if (btn) btn.disabled = !ok;
         if (hint) hint.style.display = ok ? 'none' : 'block';

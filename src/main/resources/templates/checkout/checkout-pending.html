@@ -1,49 +1,14 @@
-<!DOCTYPE html>
-<html lang="it" xmlns:th="http://www.thymeleaf.org">
-	
-<head th:replace="~{fragments/head :: head('checkout-success')}"></head>
-
-<body>
-
-    <!-- ================= NAV ================= -->
-    <div th:replace="~{fragments/nav :: nav}"></div>
-
- 
-	
-	<div class="container py-5">
-	    <div class="row justify-content-center">
-	        <div class="col-md-8 col-lg-6">
-
-	            <div class="card shadow-sm border-0">
-	                <div class="card-body text-center p-5">
-
-	                    <h1 class="h3 mb-3">Pagamento in elaborazione</h1>
-
-	                    <p class="text-muted mb-4">
-	                        Stiamo verificando il pagamento. Può richiedere qualche istante.
-	                    </p>
-
-	                    <div class="alert alert-info">
-	                        Se il pagamento è stato completato, riceverai la conferma dell’ordine.
-	                    </div>
-
-	                    <div class="d-grid gap-2 mt-4">
-	                        <a th:href="@{/}" class="btn btn-primary">
-	                            Torna alla home
-	                        </a>
-
-	                        <a th:href="@{/shop}" class="btn btn-outline-secondary">
-	                            Continua lo shopping
-	                        </a>
-	                    </div>
-
-	                </div>
-	            </div>
-
-	        </div>
-	    </div>
-	</div>
-
-	<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
-	</body>
-	</html>
+<!doctype html><html lang="it" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{fragments/head :: head('Pagamento in verifica')}"></head><body>
+<div th:replace="~{fragments/nav :: nav}"></div><main class="container py-5" style="max-width:760px">
+<h1>Stato del pagamento</h1><p>Controlla questo tentativo prima di iniziare un altro pagamento. La verifica prosegue anche se chiudi la pagina.</p>
+<div class="alert alert-warning" th:if="${error}" th:text="${error}"></div>
+<section th:if="${attempt != null}"><p>Riferimento: <strong th:text="${attempt.id}"></strong></p><p>Metodo: <span th:text="${attempt.provider}"></span></p>
+<p th:if="${attempt.state == 'CANCELLED'}">Tentativo annullato: merce e credito prenotati sono stati liberati.</p>
+<p th:if="${attempt.state == 'PAID_REVIEW'}">Pagamento da verificare con l'assistenza. Non ripagare.</p>
+<table class="table"><tbody><tr th:each="item : ${quote.cartItems}"><td th:text="${item.productName}"></td><td th:text="${item.quantity}"></td><td th:text="${item.unitPrice}"></td></tr></tbody></table>
+<p>Gift card: € <span th:text="${quote.giftCardAmount}"></span> · Pagamento esterno: € <span th:text="${quote.totalAmount}"></span></p>
+<a class="btn btn-primary mb-3" th:if="${attempt.redirectUrl != null and attempt.state == 'PENDING'}" th:href="${attempt.redirectUrl}">Riprendi lo stesso pagamento</a>
+<form method="post" th:action="@{/checkout/verifica-pagamento}" class="mb-3"><button class="btn btn-outline-primary">Verifica stato</button></form>
+<form method="post" th:action="@{/checkout/annulla-tentativo}" th:if="${attempt.state == 'PENDING'}" class="mb-3"><button class="btn btn-outline-secondary">Annulla questo tentativo</button></form>
+</section><p th:if="${attempt == null}">Nessun tentativo disponibile in questa sessione. Se hai già pagato, contatta l'assistenza con il riferimento ricevuto dal gestore del pagamento.</p>
+<a th:href="@{/checkout}">Torna al checkout</a> · <a th:href="@{/shop}">Torna allo shop</a></main></body></html>

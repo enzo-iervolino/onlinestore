@@ -41,6 +41,8 @@ public class CheckoutController {
     private static final String VIEW_CHECKOUT_SUCCESS = "checkout/checkout-success";
     private static final String VIEW_CHECKOUT_CANCEL = "checkout/checkout-cancel";
 
+    private final com.delta.store.web.payment.service.CheckoutQuoteService quotes;
+    private final com.delta.store.web.payment.service.CheckoutAttemptService attempts;
     private final ShippingService shippingService;
     private final DiscountService discountService;
     private final GiftCardService giftCardService;
@@ -53,8 +55,11 @@ public class CheckoutController {
                               GiftCardService giftCardService,
                               OrderRepository orderRepository,
                               UserService userService,
-                              CheckoutPaymentService checkoutPaymentService) {
+                              CheckoutPaymentService checkoutPaymentService,
+                              com.delta.store.web.payment.service.CheckoutQuoteService quotes,
+                              com.delta.store.web.payment.service.CheckoutAttemptService attempts) {
 
+        this.quotes = quotes; this.attempts = attempts;
         this.shippingService = shippingService;
         this.discountService = discountService;
         this.giftCardService = giftCardService;
@@ -67,9 +72,13 @@ public class CheckoutController {
     public String showCheckout(Model model,
                                HttpSession session,
                                Authentication authentication) {
+        synchronized(session) {
 
         Cart cart = (Cart) session.getAttribute(CheckoutSession.CART);
+        try { cart = quotes.refresh(cart); session.setAttribute(CheckoutSession.CART, cart); }
+        catch (IllegalArgumentException ex) { model.addAttribute("error", ex.getMessage()); }
         CheckoutTotals totals = calculateTotals(cart, session);
+        model.addAttribute("quoteToken", quoteToken(cart, totals));
 
         model.addAttribute("cart", cart);
         model.addAttribute("shippingCost", totals.shipping);
@@ -118,11 +127,13 @@ public class CheckoutController {
         model.addAttribute("shippingLocked", shippingLocked);
 
         return VIEW_CHECKOUT;
+            }
     }
 
     @PostMapping("/salva-spedizione")
     public String saveShipping(@ModelAttribute CheckoutShippingForm form,
                                @RequestParam(name = "paymentMethod", required = false) String paymentMethod,
+                               @RequestParam(name = "quoteToken", required = false) String quoteToken,
                                HttpSession session,
                                RedirectAttributes ra,
                                Authentication authentication) {
@@ -142,37 +153,46 @@ public class CheckoutController {
             session.setAttribute(CheckoutSession.SHIPPING, form);
         }
 
-        normalizeAndSavePaymentMethod(paymentMethod, session);
-
-        return "forward:/checkout/paga";
+        if (paymentMethod != null && !paymentMethod.isBlank() && !normalizeAndSavePaymentMethod(paymentMethod, session)) {
+            ra.addFlashAttribute("error", "Metodo di pagamento non valido"); return "redirect:/checkout";
+        }
+        return pay(session, ra, authentication, quoteToken);
     }
 
     @PostMapping("/paga")
-    public String pay(HttpSession session,
-                      RedirectAttributes ra,
-                      Authentication authentication) {
-
-        Cart cart = (Cart) session.getAttribute(CheckoutSession.CART);
-
-        if (cart == null || cart.isEmpty()) {
-            ra.addFlashAttribute("error", "Carrello vuoto");
-            return "redirect:/checkout";
+    public String pay(HttpSession session, RedirectAttributes ra, Authentication authentication,
+                      @RequestParam(name="quoteToken",required=false) String quoteToken) {
+        synchronized (session) {
+            try {
+                if (session.getAttribute(CheckoutSession.OWNER_TOKEN) == null) session.setAttribute(CheckoutSession.OWNER_TOKEN, java.util.UUID.randomUUID().toString());
+                var active = attempts.active((String)session.getAttribute(CheckoutSession.OWNER_TOKEN));
+                if (active.isPresent()) return "redirect:/checkout/in-attesa";
+                Cart cart = (Cart)session.getAttribute(CheckoutSession.CART);
+                if (cart == null || cart.isEmpty()) throw new IllegalArgumentException("Carrello vuoto");
+                Cart fresh = quotes.refresh(cart);
+                session.setAttribute(CheckoutSession.CART, fresh);
+                CheckoutTotals totals = calculateTotals(fresh, session);
+                if (quoteToken == null || !quoteToken.equals(quoteToken(fresh, totals))) throw new IllegalArgumentException("Il riepilogo è cambiato: controlla prezzi, sconti e importi e conferma nuovamente");
+                PaymentMethod method = PaymentMethod.fromSessionValue((String)session.getAttribute(CheckoutSession.PAYMENT_METHOD));
+                if (totals.finalTotal.signum()==0) method=PaymentMethod.GIFTCARD;
+                session.setAttribute(CheckoutSession.PAYMENT_METHOD,method.name());
+                OrderTempData data=buildOrderTempData(fresh,totals,session,authentication);
+                data.setCartFingerprint(com.delta.store.web.payment.service.CheckoutQuoteService.fingerprint(fresh));
+                com.delta.store.web.payment.service.CheckoutQuoteService.validate(data);
+                return checkoutPaymentService.startPayment(method,new CheckoutPaymentContext(data,session,authentication),ra);
+            } catch (IllegalArgumentException ex) {
+                ra.addFlashAttribute("error",ex.getMessage()); return "redirect:/checkout";
+            } catch (Exception ex) {
+                org.slf4j.LoggerFactory.getLogger(getClass()).error("Checkout non completato",ex);
+                ra.addFlashAttribute("error","Operazione da verificare. Non ripetere il pagamento: consulta lo stato del tentativo.");
+                return "redirect:/checkout/in-attesa";
+            }
         }
+    }
 
-        CheckoutTotals totals = calculateTotals(cart, session);
-
-        if (totals.finalTotal.compareTo(BigDecimal.ZERO) == 0) {
-            session.setAttribute(CheckoutSession.PAYMENT_METHOD, "GIFTCARD");
-        }
-
-        String rawMethod = (String) session.getAttribute(CheckoutSession.PAYMENT_METHOD);
-        PaymentMethod method = PaymentMethod.fromSessionValue(rawMethod);
-
-        OrderTempData data = buildOrderTempData(cart, totals, session, authentication);
-
-        CheckoutPaymentContext ctx = new CheckoutPaymentContext(data, session, authentication);
-
-        return checkoutPaymentService.startPayment(method, ctx, ra);
+    private String quoteToken(Cart cart, CheckoutTotals t) {
+        return com.delta.store.web.payment.service.CheckoutQuoteService.hash(
+            com.delta.store.web.payment.service.CheckoutQuoteService.fingerprint(cart)+"|"+t.discount+"|"+t.shipping+"|"+t.gift+"|"+t.finalTotal);
     }
 
     @PostMapping("/applica-sconto")
@@ -196,6 +216,8 @@ public class CheckoutController {
                 int pct = opt.get().getPercentage();
                 BigDecimal discount = discountService.calculateDiscount(subtotal, pct);
 
+                if (pct < 0 || pct > 100) throw new IllegalArgumentException("Sconto non valido");
+                session.setAttribute(CheckoutSession.COUPON_CODE, couponCode.trim());
                 session.setAttribute(CheckoutSession.DISCOUNT_AMOUNT, discount);
                 session.setAttribute(CheckoutSession.DISCOUNT_PERCENT, BigDecimal.valueOf(pct));
 
@@ -219,6 +241,7 @@ public class CheckoutController {
     public String removeCoupon(HttpSession session,
                                RedirectAttributes ra) {
 
+        session.removeAttribute(CheckoutSession.COUPON_CODE);
         session.removeAttribute(CheckoutSession.DISCOUNT_AMOUNT);
         session.removeAttribute(CheckoutSession.DISCOUNT_PERCENT);
         recalcGiftProposal(session);
@@ -316,6 +339,7 @@ public class CheckoutController {
                 amount = proposal;
             }
 
+            amount = amount.setScale(2, java.math.RoundingMode.UNNECESSARY);
             session.setAttribute(CheckoutSession.GIFT_AMOUNT, amount);
             ra.addFlashAttribute("giftSuccess", "Gift card applicata all'ordine.");
 
@@ -347,7 +371,12 @@ public class CheckoutController {
     }
 
     @GetMapping("/success")
-    public String success(@RequestParam Long orderId, Model model) {
+    public String success(@RequestParam Long orderId, Model model, HttpSession session, Authentication authentication) {
+        Long userId=null;
+        if (authentication!=null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getName())) {
+            User user=userService.findByEmail(authentication.getName()); if (user!=null) userId=user.getId();
+        }
+        if (!attempts.ownsOrder(orderId,(String)session.getAttribute(CheckoutSession.OWNER_TOKEN),userId)) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND,"Ordine non disponibile");
 
         Order order = orderRepository.findByIdWithItems(orderId).orElseThrow();
         model.addAttribute("order", order);
@@ -434,11 +463,10 @@ public class CheckoutController {
             netSubtotal = BigDecimal.ZERO;
         }
 
-        netSubtotal = netSubtotal.add(totals.shipping);
         data.setNetSubtotal(netSubtotal);
         data.setTotalAmount(totals.finalTotal);
 
-        data.setGiftCardCode((String) session.getAttribute(CheckoutSession.GIFT_CODE));
+        data.setGiftCardCode(totals.gift.signum()>0?(String) session.getAttribute(CheckoutSession.GIFT_CODE):null);
         data.setGiftCardAmount((BigDecimal) session.getAttribute(CheckoutSession.GIFT_AMOUNT));
 
         data.setPaymentMethod((String) session.getAttribute(CheckoutSession.PAYMENT_METHOD));
@@ -476,20 +504,26 @@ public class CheckoutController {
         BigDecimal subtotal = cart == null ? BigDecimal.ZERO : cart.getTotal();
         BigDecimal shipping = shippingService.calculateShipping(subtotal);
 
-        BigDecimal discount = (BigDecimal) session.getAttribute(CheckoutSession.DISCOUNT_AMOUNT);
-        if (discount == null) {
-            discount = BigDecimal.ZERO;
+        BigDecimal discount = BigDecimal.ZERO.setScale(2);
+        String code=(String)session.getAttribute(CheckoutSession.COUPON_CODE);
+        var coupon=code==null?java.util.Optional.<com.delta.store.discount.model.DiscountCode>empty():discountService.validateCode(code);
+        if (coupon.isPresent() && coupon.get().getPercentage()!=null && coupon.get().getPercentage()>=0 && coupon.get().getPercentage()<=100) {
+            discount=discountService.calculateDiscount(subtotal,coupon.get().getPercentage()).min(subtotal);
+            session.setAttribute(CheckoutSession.DISCOUNT_PERCENT,BigDecimal.valueOf(coupon.get().getPercentage()));
+        } else { session.removeAttribute(CheckoutSession.DISCOUNT_PERCENT); }
+        session.setAttribute(CheckoutSession.DISCOUNT_AMOUNT,discount);
+        BigDecimal beforeGift=subtotal.subtract(discount).add(shipping).max(BigDecimal.ZERO);
+        BigDecimal gift=(BigDecimal)session.getAttribute(CheckoutSession.GIFT_AMOUNT);
+        if (gift==null) gift=BigDecimal.ZERO;
+        if (gift.signum()>0) {
+            try {
+                GiftCard card=giftCardService.validateGiftCard((String)session.getAttribute(CheckoutSession.GIFT_CODE));
+                gift=gift.min(card.getRemainingAmount()).min(beforeGift).max(BigDecimal.ZERO);
+            } catch (Exception ex) { gift=BigDecimal.ZERO; }
         }
-
-        BigDecimal gift = (BigDecimal) session.getAttribute(CheckoutSession.GIFT_AMOUNT);
-        if (gift == null) {
-            gift = BigDecimal.ZERO;
-        }
-
-        BigDecimal total = subtotal.subtract(discount).add(shipping).subtract(gift);
-        if (total.compareTo(BigDecimal.ZERO) < 0) {
-            total = BigDecimal.ZERO;
-        }
+        gift=gift.setScale(2,java.math.RoundingMode.HALF_UP);
+        session.setAttribute(CheckoutSession.GIFT_AMOUNT,gift);
+        BigDecimal total=beforeGift.subtract(gift).setScale(2,java.math.RoundingMode.HALF_UP);
 
         return new CheckoutTotals(subtotal, shipping, discount, gift, total);
     }
@@ -505,7 +539,7 @@ public class CheckoutController {
             return;
         }
 
-        BigDecimal proposal = totals.finalTotal.min(remaining);
+        BigDecimal proposal = totals.subtotal.subtract(totals.discount).add(totals.shipping).max(BigDecimal.ZERO).min(remaining);
         if (proposal.compareTo(BigDecimal.ZERO) < 0) {
             proposal = BigDecimal.ZERO;
         }

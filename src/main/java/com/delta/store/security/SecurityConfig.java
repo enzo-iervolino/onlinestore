@@ -3,6 +3,7 @@ package com.delta.store.security;
 import com.delta.store.security.oauth2.CustomOAuth2UserService;
 import com.delta.store.security.oauth2.CustomOidcUserService;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -34,18 +35,17 @@ public class SecurityConfig {
             // ================= CSRF =================
             .csrf(csrf -> csrf
                 .ignoringRequestMatchers(
-                    "/cart/**",
-                    "/checkout/**",
                     "/stripe/webhook",
                     "/stripe/webhook/**",
-                    "/paypal/**",
-                    "/api/products/**",
+                    "/paypal/webhook",
                     "/api/**"
                 )
             )
 
             // ================= AUTORIZZAZIONI =================
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/**").permitAll()
+                .requestMatchers("/api/products", "/api/products/**").hasRole("ADMIN")
                 .requestMatchers(
                     "/index.html/**",
                     "/listcard.html/**",
@@ -100,7 +100,6 @@ public class SecurityConfig {
 
                     // API PRODOTTI
                     "/api/products",
-                    "/api/products/**",
 
                     "/error",
                     "/favicon.ico",
@@ -115,7 +114,7 @@ public class SecurityConfig {
                     "/icons/**",
                     "/uploads/**"
                 ).permitAll()
-                .requestMatchers("/admin/shipping-costs", "/admin/shipping-costs/**").hasRole("ADMIN")
+                .requestMatchers("/admin", "/admin/**", "/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
 

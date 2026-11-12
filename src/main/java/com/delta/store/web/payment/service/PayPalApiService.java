@@ -54,6 +54,9 @@ public class PayPalApiService {
     @Value("${paypal.currency:EUR}")
     private String currency;
 
+    @Value("${paypal.webhook.id:}")
+    private String webhookId;
+    public boolean isShopConfigured() { return isConfigured() && "EUR".equalsIgnoreCase(currency); }
     private volatile String cachedToken;
     private volatile Instant cachedTokenExpiresAt;
 
@@ -70,6 +73,17 @@ public class PayPalApiService {
                 && apiBaseUrl != null && !apiBaseUrl.isBlank();
     }
 
+    public boolean verifyWebhook(Map<String,String> inbound, Map<String,Object> event) {
+        if(webhookId==null || webhookId.isBlank()) return false;
+        Map<String,Object> body=new LinkedHashMap<>();
+        String[][] fields={{"auth_algo","paypal-auth-algo"},{"cert_url","paypal-cert-url"},{"transmission_id","paypal-transmission-id"},{"transmission_sig","paypal-transmission-sig"},{"transmission_time","paypal-transmission-time"}};
+        for(var field:fields){String value=inbound.get(field[1]);if(value==null||value.isBlank())return false;body.put(field[0],value);}
+        body.put("webhook_id",webhookId);body.put("webhook_event",event);
+        String base=normalizedApiBaseUrl();HttpHeaders headers=new HttpHeaders();headers.setBearerAuth(getAccessToken(base));headers.setContentType(MediaType.APPLICATION_JSON);
+        Map<?,?> response=restTemplate.exchange(join(base,"/v1/notifications/verify-webhook-signature"),HttpMethod.POST,new HttpEntity<>(body,headers),Map.class).getBody();
+        return response!=null && "SUCCESS".equals(response.get("verification_status"));
+    }
+
     public record CreateOrderResult(String orderId, String approveUrl) {
     }
 
@@ -77,7 +91,9 @@ public class PayPalApiService {
                             BigDecimal capturedAmount,
                             String capturedCurrency,
                             String payerEmail,
-                            String approveUrl) {
+                            String approveUrl,
+                            BigDecimal orderAmount, String orderCurrency) {
+        public OrderInfo(String status, BigDecimal capturedAmount, String capturedCurrency, String payerEmail, String approveUrl) { this(status,capturedAmount,capturedCurrency,payerEmail,approveUrl,null,null); }
     }
 
     public CreateOrderResult createOrder(BigDecimal amount) {
@@ -136,6 +152,7 @@ public class PayPalApiService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(token);
+        if (customId != null && !customId.isBlank()) headers.set("PayPal-Request-Id", "create-"+customId);
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
         String url = join(normalizedApiBaseUrl, "/v2/checkout/orders");
@@ -196,6 +213,7 @@ public class PayPalApiService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(token);
 
+        headers.set("PayPal-Request-Id", "capture-"+java.util.UUID.nameUUIDFromBytes(orderId.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
         HttpEntity<String> request = new HttpEntity<>("{}", headers);
         String url = join(normalizedApiBaseUrl, "/v2/checkout/orders/" + orderId + "/capture");
 
@@ -205,6 +223,7 @@ public class PayPalApiService {
         } catch (HttpClientErrorException.UnprocessableEntity e) {
             String body = shortBody(e);
 
+            if (body.contains("ORDER_ALREADY_CAPTURED")) return getOrder(orderId);
             if (body.contains("ORDER_NOT_APPROVED")) {
                 throw new IllegalStateException("PayPal: ordine non ancora approvato dal cliente. Completa prima l'approvazione su PayPal e poi rientra sull'applicazione.", e);
             }
@@ -303,6 +322,7 @@ public class PayPalApiService {
 
         String status = asString(map.get("status"));
         String payerEmail = null;
+        BigDecimal orderAmount=null; String orderCurrency=null;
         BigDecimal capturedAmount = null;
         String capturedCurrency = null;
         String approveUrl = extractApproveUrl(map);
@@ -319,6 +339,10 @@ public class PayPalApiService {
             Object firstPurchaseUnitObject = purchaseUnits.get(0);
 
             if (firstPurchaseUnitObject instanceof Map<?, ?> firstPurchaseUnit) {
+                if(firstPurchaseUnit.get("amount") instanceof Map<?,?> amount) {
+                    orderCurrency=asString(amount.get("currency_code"));
+                    if(amount.get("value")!=null) orderAmount=new BigDecimal(String.valueOf(amount.get("value"))).setScale(2,RoundingMode.UNNECESSARY);
+                }
                 Object paymentsObject = firstPurchaseUnit.get("payments");
 
                 if (paymentsObject instanceof Map<?, ?> payments) {
@@ -328,6 +352,7 @@ public class PayPalApiService {
                         Object firstCaptureObject = captures.get(0);
 
                         if (firstCaptureObject instanceof Map<?, ?> firstCapture) {
+                            if (!"COMPLETED".equalsIgnoreCase(asString(firstCapture.get("status")))) status="CAPTURE_PENDING";
                             Object amountObject = firstCapture.get("amount");
 
                             if (amountObject instanceof Map<?, ?> amount) {
@@ -348,7 +373,7 @@ public class PayPalApiService {
             }
         }
 
-        return new OrderInfo(status, capturedAmount, capturedCurrency, payerEmail, approveUrl);
+        return new OrderInfo(status, capturedAmount, capturedCurrency, payerEmail, approveUrl, orderAmount, orderCurrency);
     }
 
     private String extractApproveUrl(Map<?, ?> map) {

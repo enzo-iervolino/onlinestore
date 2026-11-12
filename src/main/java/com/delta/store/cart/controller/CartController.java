@@ -37,8 +37,10 @@ public class CartController {
 
     @GetMapping("/view")
     public Map<String, Object> view(HttpSession session) {
+        synchronized (session) {
         Cart cart = getCart(session);
         return response(cart);
+            }
     }
 
     @PostMapping("/add/{id}")
@@ -47,12 +49,15 @@ public class CartController {
             @RequestParam(name = "qty", defaultValue = "1") int qty,
             HttpSession session
     ) {
+        synchronized (session) {
         Cart cart = getCart(session);
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato: " + id));
 
-        cart.add(product, Math.max(qty, 1));
+        requireBaseProduct(product);
+        cart.add(product, resolveQty(qty, null));
         return response(cart);
+            }
     }
 
     @PostMapping("/add")
@@ -63,6 +68,7 @@ public class CartController {
             @RequestParam(name = "quantity", required = false) Integer quantity,
             HttpSession session
     ) {
+        synchronized (session) {
         int finalQty = resolveQty(qty, quantity);
         Cart cart = getCart(session);
 
@@ -70,6 +76,7 @@ public class CartController {
             ProductVariant variant = productVariantRepository.findForCartById(variantId)
                     .orElseThrow(() -> new IllegalArgumentException("Variante non trovata: " + variantId));
 
+            if (!variant.isEnabled()) throw new IllegalArgumentException("Variante non disponibile");
             cart.add(variant, finalQty);
             return response(cart);
         }
@@ -78,11 +85,13 @@ public class CartController {
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato: " + productId));
 
-            cart.add(product, finalQty);
+            requireBaseProduct(product);
+        cart.add(product, finalQty);
             return response(cart);
         }
 
         throw new IllegalArgumentException("Parametro mancante: variantId o productId");
+            }
     }
 
     @PostMapping("/add-by-code")
@@ -92,6 +101,7 @@ public class CartController {
             @RequestParam(name = "quantity", required = false) Integer quantity,
             HttpSession session
     ) {
+        synchronized (session) {
         ProductCodeLookupDTO lookup = productCodeService.lookup(code)
                 .orElseThrow(() -> new IllegalArgumentException("Nessun articolo trovato per il codice: " + code));
 
@@ -106,6 +116,7 @@ public class CartController {
                 throw new IllegalArgumentException("La variante letta non è attiva: " + lookup.variantCode());
             }
 
+            if (!variant.isEnabled()) throw new IllegalArgumentException("Variante non disponibile");
             cart.add(variant, finalQty);
             return response(cart);
         }
@@ -113,38 +124,52 @@ public class CartController {
         Product product = productRepository.findById(lookup.productId())
                 .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato: " + lookup.productId()));
 
+        requireBaseProduct(product);
         cart.add(product, finalQty);
         return response(cart);
+            }
     }
 
     @PostMapping("/increase/{id}")
     public Map<String, Object> increase(@PathVariable Long id, HttpSession session) {
+        synchronized (session) {
         Cart cart = getCart(session);
         cart.increase(id);
         return response(cart);
+            }
     }
 
     @PostMapping("/decrease/{id}")
     public Map<String, Object> decrease(@PathVariable Long id, HttpSession session) {
+        synchronized (session) {
         Cart cart = getCart(session);
         cart.decrease(id);
         return response(cart);
+            }
     }
 
     @PostMapping("/remove/{id}")
     public Map<String, Object> remove(@PathVariable Long id, HttpSession session) {
+        synchronized (session) {
         Cart cart = getCart(session);
         cart.remove(id);
         return response(cart);
+            }
     }
 
     @PostMapping("/clear")
     public Map<String, Object> clear(HttpSession session) {
+        synchronized (session) {
         Cart cart = getCart(session);
         cart.clear();
         return response(cart);
+            }
     }
 
+    private void requireBaseProduct(Product product) {
+        if (product.getPrice()==null || product.getPrice().signum()<0) throw new IllegalArgumentException("Prezzo non disponibile");
+        if (!productVariantRepository.findByProductIdOrderByVariantCodeAsc(product.getId()).isEmpty()) throw new IllegalArgumentException("Scegli una variante del prodotto");
+    }
     private Cart getCart(HttpSession session) {
         Cart cart = (Cart) session.getAttribute(CART_SESSION_KEY);
         if (cart == null) {
@@ -156,7 +181,8 @@ public class CartController {
 
     private int resolveQty(Integer qty, Integer quantity) {
         int value = qty != null ? qty : (quantity != null ? quantity : 1);
-        return Math.max(value, 1);
+        if (value < 1 || value > 999) throw new IllegalArgumentException("Quantità non valida (1–999)");
+        return value;
     }
 
     private Map<String, Object> response(Cart cart) {

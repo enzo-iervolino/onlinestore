@@ -25,12 +25,10 @@ public class ProductRestController {
         this.productCodeService = productCodeService;
     }
 
-    @GetMapping
     public ResponseEntity<List<ProductDTO>> findAll() {
         return ResponseEntity.ok(productService.findAllDto());
     }
 
-    @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> findById(@PathVariable Long id) {
         return productService.findWithImagesByIdDto(id)
                 .map(ResponseEntity::ok)

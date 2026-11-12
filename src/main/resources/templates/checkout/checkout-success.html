@@ -15,6 +15,7 @@
 	      <div class="card shadow-sm">
 	        <div class="card-body text-center p-4">
 				<h2>Ordine completato con successo 🎉</h2>
+				<p>Ordine n. <strong th:text="${order.id}"></strong></p><p th:text="${order.status}"></p><p>La conferma verrà inviata all’indirizzo email indicato.</p>
 				<a th:href="@{/shop}">Torna a shopping</a>
 	        </div> 
 		  </div>

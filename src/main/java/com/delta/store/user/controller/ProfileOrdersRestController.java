@@ -229,8 +229,8 @@ public class ProfileOrdersRestController {
     private static String detectPaymentMethod(Order o) {
         if (o == null) return "—";
         if (o.getStripeSessionId() != null && !o.getStripeSessionId().isBlank()) return "STRIPE";
-        if (o.getGiftcardCode() != null && !o.getGiftcardCode().isBlank()) return "GIFTCARD";
         if (o.getSessionId() != null && !o.getSessionId().isBlank()) return "PAYPAL";
+        if (o.getGiftcardCode() != null && !o.getGiftcardCode().isBlank()) return "GIFTCARD";
         return "—";
     }
 }

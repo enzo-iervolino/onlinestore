@@ -97,7 +97,9 @@ public class OrderPdfServiceImpl implements OrderPdfService {
             addTotalRow(totals, "Sconto", safeNeg(order.getDiscountValue()));
             addTotalRow(totals, "Spedizione", order.getShippingCost());
 
-            PdfPCell sepL = new PdfPCell(new Phrase("Totale", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11)));
+            addTotalRow(totals, "Totale ordine", safeBD(order.getTotalAmount()).add(safeBD(order.getGiftcardAmount())));
+            addTotalRow(totals, "Gift card", safeNeg(order.getGiftcardAmount()));
+            PdfPCell sepL = new PdfPCell(new Phrase("Quota altro pagamento", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11)));
             PdfPCell sepR = new PdfPCell(new Phrase(EUR.format(safeBD(order.getTotalAmount())), FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11)));
             sepL.setBorderWidthTop(1);
             sepR.setBorderWidthTop(1);

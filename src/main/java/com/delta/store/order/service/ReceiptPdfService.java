@@ -81,11 +81,12 @@ public class ReceiptPdfService {
             addAmountLine(document, "Valore Sconto:", order.getDiscountValue());
             addAmountLine(document, "Subtotale Netto:", order.getNetSubtotal());
             addAmountLine(document, "Spedizione:", order.getShippingCost());
+            addAmountLine(document, "Totale ordine:", (order.getTotalAmount()==null?BigDecimal.ZERO:order.getTotalAmount()).add(order.getGiftcardAmount()==null?BigDecimal.ZERO:order.getGiftcardAmount()));
             addAmountLine(document, "GiftCard Utilizzata:", order.getGiftcardAmount());
 
             document.add(new Paragraph(" "));
             document.add(new Paragraph(
-                    "TOTALE FINALE: € " + formatCurrency(order.getTotalAmount()),
+                    "QUOTA ALTRO PAGAMENTO: € " + formatCurrency(order.getTotalAmount()),
                     boldFont
             ));
 

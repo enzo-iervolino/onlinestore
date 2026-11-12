@@ -15,7 +15,7 @@ public enum PaymentMethod {
         try {
             return PaymentMethod.valueOf(v);
         } catch (Exception ex) {
-            return STRIPE;
+            throw new IllegalArgumentException("Metodo di pagamento non valido");
         }
     }
 }

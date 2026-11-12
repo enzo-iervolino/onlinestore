@@ -26,6 +26,7 @@ public class StripePaymentProcessor implements PaymentProcessor {
     private static final Logger log = LoggerFactory.getLogger(StripePaymentProcessor.class);
 
     private final CheckoutSnapshotService snapshotService;
+    private final com.delta.store.web.payment.service.CheckoutAttemptService attempts;
 
     @Value("${stripe.secret-key:${stripe.secret.key:}}")
     private String stripeSecretKey;
@@ -39,8 +40,8 @@ public class StripePaymentProcessor implements PaymentProcessor {
     @Value("${app.payment.cancel-url:http://localhost:8081/checkout/stripe/cancel}")
     private String cancelUrl;
 
-    public StripePaymentProcessor(CheckoutSnapshotService snapshotService) {
-        this.snapshotService = snapshotService;
+    public StripePaymentProcessor(CheckoutSnapshotService snapshotService, com.delta.store.web.payment.service.CheckoutAttemptService attempts) {
+        this.snapshotService = snapshotService; this.attempts=attempts;
     }
 
     @Override
@@ -90,6 +91,9 @@ public class StripePaymentProcessor implements PaymentProcessor {
 
             SessionCreateParams.Builder paramsBuilder = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.PAYMENT)
+                    .setClientReferenceId(data.getCheckoutAttemptId())
+                    .putMetadata("checkoutAttemptId",data.getCheckoutAttemptId())
+                    .setExpiresAt(attempts.find(data.getCheckoutAttemptId()).orElseThrow().gatewayExpiresAt)
                     .setSuccessUrl(normalizedSuccessUrl)
                     .setCancelUrl(normalizedCancelUrl)
                     .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
@@ -116,19 +120,23 @@ public class StripePaymentProcessor implements PaymentProcessor {
 
             SessionCreateParams params = paramsBuilder.build();
 
-            Session stripeSession = Session.create(params);
+            Session stripeSession = Session.create(params,com.stripe.net.RequestOptions.builder().setIdempotencyKey("shop-create-"+data.getCheckoutAttemptId()).build());
+            attempts.bind(data.getCheckoutAttemptId(),stripeSession.getId(),stripeSession.getUrl());
+            data.setSessionId(stripeSession.getId());
 
             // snapshot DB: il webhook userà questo per creare l’ordine “vero”
-            snapshotService.save(stripeSession.getId(), data);
+            // The durable checkout attempt already contains the immutable quote.
 
             return "redirect:" + stripeSession.getUrl();
 
         } catch (StripeException e) {
-            ra.addFlashAttribute("error", "Errore Stripe: " + e.getMessage());
-            return "redirect:/checkout";
+            log.error("Avvio Stripe da recuperare: {}",data.getCheckoutAttemptId(),e);
+            ra.addFlashAttribute("error", "Tentativo Stripe in verifica. Consulta lo stato prima di riprovare.");
+            return "redirect:/checkout/in-attesa";
         } catch (Exception e) {
-            ra.addFlashAttribute("error", "Errore imprevisto Stripe: " + e.getMessage());
-            return "redirect:/checkout";
+            log.error("Avvio Stripe da recuperare: {}",data.getCheckoutAttemptId(),e);
+            ra.addFlashAttribute("error", "Tentativo Stripe in verifica. Consulta lo stato prima di riprovare.");
+            return "redirect:/checkout/in-attesa";
         }
     }
 
@@ -137,7 +145,7 @@ public class StripePaymentProcessor implements PaymentProcessor {
                 .setScale(2, RoundingMode.HALF_UP)
                 .multiply(BigDecimal.valueOf(100))
                 .setScale(0, RoundingMode.HALF_UP)
-                .longValue();
+                .longValueExact();
     }
 
     private String normalizeStripeSuccessUrl(String configuredValue) {

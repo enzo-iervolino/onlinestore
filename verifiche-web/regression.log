@@ -1,0 +1,37 @@
+PASS valid mixed payment 95 = 20 gift + 75 gateway
+PASS partial gift cannot mark order paid
+PASS fully covered gift accepted
+PASS cent mismatch rejected
+PASS fractional cents rejected
+PASS invalid email blocked server side
+PASS missing shipping blocked server side
+PASS control characters rejected
+PASS unknown payment rejected instead of defaulting to Stripe
+PASS cart revision changes when quantity changes
+PASS cart response cannot mutate internal items
+PASS quantity cap prevents overflow
+PASS stock and gift reserved before gateway
+PASS second start reuses active checkout
+PASS foreign payment reference rejected
+PASS foreign currency rejected
+PASS settlement skips already reserved stock
+PASS repeated settlement creates one order, usage and notification
+PASS settlement does not debit reservations twice
+PASS completed order never released as cancelled
+PASS cancel releases resources exactly once
+PASS released attempt cannot be fulfilled
+PASS late gateway response cannot expose a cancelled checkout
+PASS guest order visibility bound to owner token
+PASS durable JSON quote roundtrip preserves amount
+PASS new cart revision survives an old payment return
+PASS unchanged paid cart is cleared
+PASS PayPal mismatch rejected before capture
+PASS no external capture for invalid expected amount
+PASS settlement skips already reserved stock
+PASS approved PayPal recovered without browser
+PASS completed PayPal retry never captures again
+PASS settlement skips already reserved stock
+PASS interrupted pure gift checkout completed by recovery worker
+PASS new attempt survives old callback even with identical cart items
+PASS unavailable stock rejected before payment
+SUCCESS: 36 regression checks

@@ -39,6 +39,15 @@ public class OrderTempData {
 
     // ===== Pagamento =====
     private String paymentMethod;
+    private String checkoutAttemptId;
+    private String cartFingerprint;
+    private boolean stockReserved;
+    public String getCheckoutAttemptId() { return checkoutAttemptId; }
+    public void setCheckoutAttemptId(String value) { checkoutAttemptId = value; }
+    public String getCartFingerprint() { return cartFingerprint; }
+    public void setCartFingerprint(String value) { cartFingerprint = value; }
+    public boolean isStockReserved() { return stockReserved; }
+    public void setStockReserved(boolean value) { stockReserved = value; }
 
     // ===== Tipo ordine =====
     private String type = "WEB";

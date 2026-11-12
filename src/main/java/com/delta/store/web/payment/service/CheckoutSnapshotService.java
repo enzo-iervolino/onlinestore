@@ -84,11 +84,6 @@ public class CheckoutSnapshotService {
             }
 
             CheckoutSnapshot s = opt.get();
-            if (s.getExpiresAt() != null && s.getExpiresAt().isBefore(LocalDateTime.now())) {
-                repo.deleteByStripeSessionId(stripeSessionId);
-                log.warn("Snapshot checkout Stripe scaduto e cancellato - stripeSessionId={}", stripeSessionId);
-                return Optional.empty();
-            }
 
             OrderTempData data = objectMapper.readValue(s.getPayloadJson(), OrderTempData.class);
             return Optional.ofNullable(data);
@@ -152,11 +147,6 @@ public class CheckoutSnapshotService {
             }
 
             CheckoutSnapshot s = opt.get();
-            if (s.getExpiresAt() != null && s.getExpiresAt().isBefore(LocalDateTime.now())) {
-                repo.deleteByPaypalOrderId(paypalOrderId);
-                log.warn("Snapshot checkout PayPal scaduto e cancellato - paypalOrderId={}", paypalOrderId);
-                return Optional.empty();
-            }
 
             OrderTempData data = objectMapper.readValue(s.getPayloadJson(), OrderTempData.class);
             return Optional.ofNullable(data);

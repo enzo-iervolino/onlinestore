@@ -1,0 +1,14 @@
+2026-11-12T18:21:11.426+01:00  INFO 29 --- [online-store] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name details
+2026-11-12T18:21:12.289+01:00  INFO 29 --- [online-store] [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-11-12T18:21:12.291+01:00  INFO 29 --- [online-store] [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+PASS anonymous product reads allowed
+PASS anonymous product writes blocked
+PASS cart POST without CSRF denied
+PASS checkout POST without CSRF denied
+PASS guest cart POST with CSRF allowed
+PASS authenticated customer cannot write catalog
+PASS customer cannot enter admin area
+PASS existing admin API write still allowed
+PASS admin area still accessible to administrator
+PASS valid checkout POST still passes filters
+SUCCESS: 10 HTTP security checks against real SecurityConfig

@@ -101,7 +101,7 @@ public class OrderEmailServiceImpl implements OrderEmailService {
                 <h2>Grazie per il tuo ordine!</h2>
                 <p>Abbiamo ricevuto l’ordine <b>#%s</b>.</p>
                 <p>Email cliente: <b>%s</b></p>
-                <p>Totale ordine: <b>€ %s</b></p>
+                <p>Totale ordine: <b>€ %s</b></p><p>Gift card: € %s · Quota altro pagamento: € %s</p>
                 <p style="color:#666;font-size:13px;margin-top:20px">
                     %s
                 </p>
@@ -109,12 +109,14 @@ public class OrderEmailServiceImpl implements OrderEmailService {
         """.formatted(
                 safe(order.getId()),
                 safe(order.getCustomerEmail()),
+                safe((order.getTotalAmount()==null?java.math.BigDecimal.ZERO:order.getTotalAmount()).add(order.getGiftcardAmount()==null?java.math.BigDecimal.ZERO:order.getGiftcardAmount())),
+                safe(order.getGiftcardAmount()),
                 safe(order.getTotalAmount()),
                 "In allegato trovi lo scontrino PDF."
         );
     }
 
     private String safe(Object value) {
-        return value == null ? "" : String.valueOf(value);
+        return value == null ? "" : org.springframework.web.util.HtmlUtils.htmlEscape(String.valueOf(value));
     }
 }

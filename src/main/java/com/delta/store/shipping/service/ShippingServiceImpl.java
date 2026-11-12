@@ -13,6 +13,8 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class ShippingServiceImpl implements ShippingService {
 
+    @org.springframework.beans.factory.annotation.Value("${checkout.require-shipping-rate:false}")
+    private boolean requireShippingRate;
     private final ShippingCostRepository shippingCostRepository;
 
     public ShippingServiceImpl(ShippingCostRepository shippingCostRepository) {
@@ -28,7 +30,7 @@ public class ShippingServiceImpl implements ShippingService {
         return shippingCostRepository
                 .findBestMatch(subtotal)
                 .map(ShippingCost::getCost)
-                .orElse(BigDecimal.ZERO);
+                .orElseGet(() -> { if (requireShippingRate) throw new IllegalArgumentException("Spedizione non disponibile per questo importo: contatta il negozio"); return BigDecimal.ZERO; });
     }
 
     @Override

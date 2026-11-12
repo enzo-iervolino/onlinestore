@@ -24,6 +24,12 @@ public class CartItem implements Serializable {
 
     private int quantity;
 
+    public CartItem(CartItem source) {
+        this.id=source.id; this.productId=source.productId; this.variantId=source.variantId;
+        this.productCode=source.productCode; this.variantCode=source.variantCode;
+        this.name=source.name; this.image=source.image; this.color=source.color; this.size=source.size;
+        this.price=source.price; this.quantity=source.quantity;
+    }
     public CartItem(Product product, int quantity) {
         this.id = product.getId();
         this.productId = product.getId();

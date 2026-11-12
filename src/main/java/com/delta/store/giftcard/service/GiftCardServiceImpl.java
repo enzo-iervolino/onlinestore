@@ -163,10 +163,12 @@ public class GiftCardServiceImpl implements GiftCardService {
                                 Long orderId) {
 
         GiftCard managed = giftCardRepository
-                .findById(giftCard.getId())
+                .lockByCode(giftCard.getCode())
                 .orElseThrow(() ->
                         new IllegalStateException("GiftCard non trovata"));
 
+        if (amount == null || amount.signum() <= 0 || amount.scale() > 2) throw new IllegalArgumentException("Importo gift card non valido");
+        if (!managed.isActive() || (managed.getExpirationDate() != null && managed.getExpirationDate().isBefore(LocalDate.now()))) throw new IllegalStateException("Gift card non disponibile");
         BigDecimal remaining = managed.getRemainingAmount();
 
         if (amount.compareTo(remaining) > 0) {
@@ -255,7 +257,9 @@ public class GiftCardServiceImpl implements GiftCardService {
 
     private String generateUniqueCode(BigDecimal amount) {
         for (int attempt = 0; attempt < 10; attempt++) {
-            String code = "GIFT-" + formatAmountForCode(amount) + "-" + uniqueNumber();
+            byte[] bytes = new byte[15];
+            secureRandom.nextBytes(bytes);
+            String code = "GIFT-" + java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
             if (giftCardRepository.findByCodeIgnoreCase(code).isEmpty()) {
                 return code;
             }

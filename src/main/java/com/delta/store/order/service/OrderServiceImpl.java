@@ -73,7 +73,7 @@ public class OrderServiceImpl implements OrderService {
         order.setSessionId(data.getSessionId() != null ? data.getSessionId() : stripeSessionId);
 
         Order savedOrder = orderRepository.save(order);
-        stockService.decrementStockForPaidOrder(savedOrder);
+        if (!data.isStockReserved()) stockService.decrementStockForPaidOrder(savedOrder);
         return savedOrder;
     }
 
@@ -83,7 +83,7 @@ public class OrderServiceImpl implements OrderService {
         order.setSessionId(payPalOrderId);
 
         Order savedOrder = orderRepository.save(order);
-        stockService.decrementStockForPaidOrder(savedOrder);
+        if (!data.isStockReserved()) stockService.decrementStockForPaidOrder(savedOrder);
         return savedOrder;
     }
 
@@ -92,7 +92,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = buildPaidOrder(data, "PAGATO CON GIFTCARD");
 
         Order savedOrder = orderRepository.save(order);
-        stockService.decrementStockForPaidOrder(savedOrder);
+        if (!data.isStockReserved()) stockService.decrementStockForPaidOrder(savedOrder);
         return savedOrder;
     }
 

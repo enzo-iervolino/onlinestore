@@ -40,6 +40,7 @@ public class StripeWebhookController {
     private static final String METADATA_PURCHASE_ID = "giftCardPurchaseId";
     private static final String METADATA_VALUE_GIFT_CARD = "GIFT_CARD";
 
+    private final com.delta.store.web.payment.service.CheckoutRecoveryService recovery;
     private final OrderService orderService;
     private final OrderNotificationService orderNotificationService;
     private final CheckoutSnapshotService snapshotService;
@@ -58,8 +59,8 @@ public class StripeWebhookController {
                                    CheckoutSnapshotService snapshotService,
                                    GiftCardService giftCardService,
                                    GiftCardPurchaseService giftCardPurchaseService,
-                                   GiftCardNotificationService giftCardNotificationService) {
-        this.orderService = orderService;
+                                   GiftCardNotificationService giftCardNotificationService, com.delta.store.web.payment.service.CheckoutRecoveryService recovery) {
+        this.orderService = orderService; this.recovery=recovery;
         this.orderNotificationService = orderNotificationService;
         this.snapshotService = snapshotService;
         this.giftCardService = giftCardService;
@@ -68,7 +69,6 @@ public class StripeWebhookController {
     }
 
     @PostMapping("/webhook")
-    @Transactional(rollbackOn = Exception.class)
     public ResponseEntity<String> handleWebhook(
             @RequestBody String payload,
             @RequestHeader(name = "Stripe-Signature", required = false) String sigHeader
@@ -85,7 +85,7 @@ public class StripeWebhookController {
         try {
             Event event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
 
-            if (!"checkout.session.completed".equals(event.getType())) {
+            if (!java.util.Set.of("checkout.session.completed","checkout.session.async_payment_succeeded","checkout.session.expired").contains(event.getType())) {
                 return ResponseEntity.ok("ok");
             }
 
@@ -110,6 +110,7 @@ public class StripeWebhookController {
             String paymentStatus = fullSession.getPaymentStatus();
             if (paymentStatus == null || !"paid".equalsIgnoreCase(paymentStatus)) {
                 log.warn("Session {} non paid (status={}) => non creo ordine/gift card.", sessionId, paymentStatus);
+                if (!isGiftCardSession(fullSession)) recovery.stripe(sessionId);
                 return ResponseEntity.ok("ok");
             }
 
@@ -137,56 +138,7 @@ public class StripeWebhookController {
                 return ResponseEntity.ok("ok");
             }
 
-            // ✅ recupero snapshot (dettagli completi).
-            // In produzione non dobbiamo creare ordini vuoti se lo snapshot non esiste:
-            // meglio far ritentare il webhook e mostrare pending dal success fallback.
-            Optional<OrderTempData> snapshot = snapshotService.load(sessionId);
-            if (snapshot.isEmpty()) {
-                log.error("Webhook Stripe: pagamento paid ma snapshot checkout mancante. Non creo ordine vuoto. sessionId={}", sessionId);
-                return ResponseEntity.internalServerError().body("checkout snapshot missing");
-            }
-
-            OrderTempData data = snapshot.get();
-
-            // sicurezza: imposto sempre questi
-            data.setSessionId(sessionId);
-            data.setPaymentMethod("STRIPE");
-
-            // fallback email/nome se mancanti nello snapshot
-            if ((data.getCustomerEmail() == null || data.getCustomerEmail().isBlank())) {
-                if (fullSession.getCustomerDetails() != null) {
-                    data.setCustomerEmail(fullSession.getCustomerDetails().getEmail());
-                    data.setCustomerName(data.getCustomerName() != null ? data.getCustomerName() : fullSession.getCustomerDetails().getName());
-                    data.setCustomerPhone(data.getCustomerPhone() != null ? data.getCustomerPhone() : fullSession.getCustomerDetails().getPhone());
-                } else {
-                    data.setCustomerEmail(fullSession.getCustomerEmail());
-                }
-            }
-
-            // totale incassato da Stripe
-            if (fullSession.getAmountTotal() != null) {
-                data.setTotalAmount(centsToEur(fullSession.getAmountTotal()));
-            }
-
-            // creo ordine “vero”
-            Order order = orderService.createOrderPaidByStripe(data, sessionId);
-
-            // consumo giftcard se usata parzialmente + Stripe
-            if (data.getGiftCardCode() != null && !data.getGiftCardCode().isBlank()
-                    && data.getGiftCardAmount() != null
-                    && data.getGiftCardAmount().compareTo(BigDecimal.ZERO) > 0) {
-
-                GiftCard card = giftCardService.validateGiftCard(data.getGiftCardCode());
-                giftCardService.consumeGiftCard(card, data.getGiftCardAmount(), order.getId());
-            }
-
-            // email + pdf (afterCommit)
-            orderNotificationService.sendOrderConfirmationAfterCommit(order);
-
-            // pulisco snapshot
-            snapshotService.delete(sessionId);
-
-            log.info("Ordine creato da webhook: orderId={} stripeSessionId={}", order.getId(), sessionId);
+            recovery.stripe(sessionId);
             return ResponseEntity.ok("ok");
 
         } catch (SignatureVerificationException e) {
