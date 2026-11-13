@@ -43,17 +43,16 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     @Override
     @Transactional(rollbackFor = MessagingException.class)
     public boolean createAndSendToken(String email, HttpServletRequest request) throws MessagingException {
-        User user = userRepository.findByEmail(email.trim().toLowerCase(Locale.ROOT)).orElse(null);
+        User user = userRepository.findByEmailForPasswordReset(email.trim().toLowerCase(Locale.ROOT)).orElse(null);
         if (user == null) {
             return false;
         }
 
-        // 🔒 INVALIDA TOKEN PRECEDENTI (ORA FUNZIONA)
-        tokenRepository.deleteByUserId(user.getId());
-
         String token = UUID.randomUUID().toString();
 
-        PasswordResetToken resetToken = new PasswordResetToken();
+        // Riutilizza la stessa riga: evita conflitti sul vincolo univoco user_id.
+        PasswordResetToken resetToken = tokenRepository.findByUserId(user.getId())
+                .orElseGet(PasswordResetToken::new);
         resetToken.setToken(token);
         resetToken.setUser(user);
         resetToken.setExpiryDate(LocalDateTime.now().plusMinutes(30));

@@ -11,6 +11,8 @@ public interface PasswordResetTokenRepository
 
     Optional<PasswordResetToken> findByToken(String token);
 
+    Optional<PasswordResetToken> findByUserId(Long userId);
+
     @Modifying
     @Transactional
     void deleteByUserId(Long userId);
