@@ -35,6 +35,15 @@ public final class CheckoutSession {
             if (data.getCartFingerprint()!=null && data.getCartFingerprint().equals(com.delta.store.web.payment.service.CheckoutQuoteService.fingerprint(cart))) clearAll(session);
         }
     }
+    /** Clear checkout selections when no cart remains. Keep payment ownership and
+     * pending attempts: provider callbacks still need their original snapshot. */
+    public static void clearIfCartEmpty(HttpSession session) {
+        synchronized (session) {
+            var cart = (com.delta.store.cart.model.Cart) session.getAttribute(CART);
+            if (cart == null || cart.isEmpty()) clearAll(session);
+        }
+    }
+
     public static void clearAll(HttpSession session) {
         session.removeAttribute(CART);
         session.removeAttribute(SHIPPING);

@@ -1,6 +1,7 @@
 package com.delta.store.cart.controller;
 
 import com.delta.store.cart.model.Cart;
+import com.delta.store.web.payment.CheckoutSession;
 import com.delta.store.product.dto.ProductCodeLookupDTO;
 import com.delta.store.product.model.Product;
 import com.delta.store.product.model.ProductVariant;
@@ -144,6 +145,7 @@ public class CartController {
         synchronized (session) {
         Cart cart = getCart(session);
         cart.decrease(id);
+        CheckoutSession.clearIfCartEmpty(session);
         return response(cart);
             }
     }
@@ -153,6 +155,7 @@ public class CartController {
         synchronized (session) {
         Cart cart = getCart(session);
         cart.remove(id);
+        CheckoutSession.clearIfCartEmpty(session);
         return response(cart);
             }
     }
@@ -162,6 +165,7 @@ public class CartController {
         synchronized (session) {
         Cart cart = getCart(session);
         cart.clear();
+        CheckoutSession.clearIfCartEmpty(session);
         return response(cart);
             }
     }
@@ -171,6 +175,7 @@ public class CartController {
         if (!productVariantRepository.findByProductIdOrderByVariantCodeAsc(product.getId()).isEmpty()) throw new IllegalArgumentException("Scegli una variante del prodotto");
     }
     private Cart getCart(HttpSession session) {
+        CheckoutSession.clearIfCartEmpty(session);
         Cart cart = (Cart) session.getAttribute(CART_SESSION_KEY);
         if (cart == null) {
             cart = new Cart();
