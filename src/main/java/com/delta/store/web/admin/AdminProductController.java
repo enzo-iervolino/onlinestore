@@ -804,7 +804,7 @@ public class AdminProductController {
     }
 
     /**
-     * ✅ Imposta prezzo e stockQty del prodotto padre SOLO sulle varianti appena create,
+     * ✅ Imposta il prezzo del padre sulle varianti appena create, con stock iniziale zero,
      * senza sovrascrivere eventuali varianti già esistenti.
      */
     private void initializeNewVariantsFromParent(Product savedProduct, Set<String> existingVariantCodesBefore) {
@@ -815,7 +815,6 @@ public class AdminProductController {
             }
 
             BigDecimal parentPrice = savedProduct.getPrice();
-            Integer parentStockQty = savedProduct.getStockQty();
 
             int updated = 0;
 
@@ -828,7 +827,7 @@ public class AdminProductController {
                 }
 
                 variant.setPrice(parentPrice);
-                variant.setStockQty(parentStockQty);
+                variant.setStockQty(0);
 
                 productVariantRepository.save(variant);
                 updated++;

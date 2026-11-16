@@ -17,6 +17,7 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.Formula;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -68,6 +69,13 @@ public class Product {
     /** Stock opzionale. */
     @Column(name = "stock_qty")
     private Integer stockQty;
+
+    /** Totale letto insieme al prodotto, senza dipendere dalla copia nel padre.
+     * SUM restituisce null solo quando non ci sono varianti; uno stock nullo
+     * di una variante vale invece zero. Non richiede sessioni lazy aperte.
+     */
+    @Formula("(select sum(coalesce(stock_variant.stock_qty, 0)) from product_variants stock_variant where stock_variant.product_id = id)")
+    private Long variantStockQty;
 
     /**
      * Identificativi lookup mantenuti come campi scrivibili per non modificare
@@ -293,7 +301,7 @@ public class Product {
     }
 
     public Integer getStockQty() {
-        return stockQty;
+        return variantStockQty != null ? Math.toIntExact(variantStockQty) : stockQty;
     }
 
     public void setStockQty(Integer stockQty) {
